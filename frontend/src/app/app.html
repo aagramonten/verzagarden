@@ -1,0 +1,86 @@
+<nav class="navbar">
+  <div class="logo">verza<span>plants</span></div>
+  <ul class="nav-links">
+    <li><a href="#catalogo">Catálogo</a></li>
+    <li><a href="#admin">Admin</a></li>
+    <li><button (click)="adminMode = !adminMode" class="lang-btn">{{ adminMode ? 'WEB' : 'ADM' }}</button></li>
+    <li><button (click)="toggleLanguage()" class="lang-btn">{{ isEnglish ? 'ES' : 'EN' }}</button></li>
+  </ul>
+</nav>
+
+<header class="hero garden-hero">
+  <div>
+    <p class="eyebrow">Catálogo con stock para viveros</p>
+    <h1>{{ client?.business_name || 'Garden Center' }}</h1>
+    <p>Explora plantas disponibles, precios y ordena directo por WhatsApp.</p>
+    <a class="cta-button" href="#catalogo">Ver plantas</a>
+  </div>
+</header>
+
+<section *ngIf="adminMode" id="admin" class="admin-section">
+  <div class="admin-card">
+    <div class="section-header-left">
+      <p class="eyebrow">Panel del vivero</p>
+      <h2>{{ editingId ? 'Editar planta' : 'Añadir planta' }}</h2>
+    </div>
+
+    <form class="plant-form" (ngSubmit)="savePlant()">
+      <input [(ngModel)]="plantForm.name" name="name" placeholder="Nombre de la planta" required>
+      <input [(ngModel)]="plantForm.category" name="category" placeholder="Categoría">
+      <input [(ngModel)]="plantForm.price" name="price" type="number" placeholder="Precio">
+      <input [(ngModel)]="plantForm.stock" name="stock" type="number" placeholder="Stock">
+      <input [(ngModel)]="plantForm.image_url" name="image_url" placeholder="URL de imagen">
+      <input [(ngModel)]="plantForm.light" name="light" placeholder="Luz: sol, sombra, indirecta">
+      <input [(ngModel)]="plantForm.water" name="water" placeholder="Riego: poco, moderado, frecuente">
+      <textarea [(ngModel)]="plantForm.description" name="description" placeholder="Descripción"></textarea>
+      <label class="check-row"><input [(ngModel)]="plantForm.is_featured" name="is_featured" type="checkbox"> Destacada</label>
+      <div class="form-actions">
+        <button class="cta-button" type="submit">{{ editingId ? 'Guardar cambios' : 'Añadir planta' }}</button>
+        <button class="secondary-btn" type="button" (click)="resetForm()">Limpiar</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section id="catalogo" class="services-section catalog-section">
+  <div class="section-header-left catalog-top">
+    <div>
+      <p class="eyebrow">Inventario disponible</p>
+      <h2 class="section-title-left">Catálogo de plantas</h2>
+    </div>
+    <div class="filters">
+      <input [(ngModel)]="search" placeholder="Buscar planta...">
+      <select [(ngModel)]="selectedCategory">
+        <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+      </select>
+    </div>
+  </div>
+
+  <p *ngIf="loading">Cargando plantas...</p>
+
+  <div class="plant-grid" *ngIf="!loading">
+    <article class="plant-card" *ngFor="let plant of filteredPlants">
+      <div class="plant-img-wrap">
+        <img [src]="plant.image_url || 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=900'" [alt]="plant.name">
+        <span class="stock-badge" [class.out]="plant.stock <= 0">{{ plant.stock > 0 ? plant.stock + ' disponibles' : 'Agotada' }}</span>
+      </div>
+      <div class="plant-body">
+        <p class="plant-category">{{ plant.category }}</p>
+        <h3>{{ plant.name }}</h3>
+        <p class="description">{{ plant.description }}</p>
+        <div class="plant-meta">
+          <span>{{ plant.light || 'Luz variable' }}</span>
+          <span>{{ plant.water || 'Riego regular' }}</span>
+        </div>
+        <div class="plant-footer">
+          <strong>${{ plant.price }}</strong>
+          <a class="whatsapp-btn" [class.disabled]="plant.stock <= 0" [href]="plant.stock > 0 ? whatsappLink(plant) : null" target="_blank">Ordenar</a>
+        </div>
+        <div class="admin-actions" *ngIf="adminMode">
+          <button (click)="editPlant(plant)">Editar</button>
+          <button (click)="removePlant(plant)">Ocultar</button>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>

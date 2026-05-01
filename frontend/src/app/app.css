@@ -1,0 +1,49 @@
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; scroll-behavior: smooth; }
+body { background-color: #ffffff; color: #1a1a1a; line-height: 1.6; }
+.navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 80px; background-color: rgba(255,255,255,.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(0,0,0,.05); }
+.logo { font-size: 1.6rem; font-weight: 800; letter-spacing: -1px; color: #1a1a1a; text-transform: lowercase; }
+.logo span { color: #1f7a4d; font-weight: 900; }
+.nav-links { list-style: none; display: flex; gap: 34px; align-items: center; }
+.nav-links a { color: #444; text-decoration: none; font-weight: 600; font-size: .85rem; text-transform: uppercase; letter-spacing: 1px; }
+.lang-btn { background: #f0f0f0; color: #1a1a1a; border: none; min-width: 44px; height: 42px; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: .75rem; }
+.hero { min-height: 74vh; display: flex; justify-content: center; align-items: center; text-align: center; padding: 40px 20px; }
+.garden-hero { background: radial-gradient(circle at top right, #dff5e6, transparent 34%), radial-gradient(circle at bottom left, #eef9df, transparent 36%), #fbfdf9; }
+.eyebrow { text-transform: uppercase; letter-spacing: 2px; color: #1f7a4d; font-size: .78rem; font-weight: 900; margin-bottom: 14px; }
+.hero h1 { font-size: 4.4rem; font-weight: 900; color: #102319; line-height: 1.05; margin-bottom: 22px; max-width: 900px; letter-spacing: -3px; }
+.hero p { font-size: 1.25rem; color: #516052; margin-bottom: 42px; max-width: 650px; }
+.cta-button { display: inline-flex; justify-content: center; align-items: center; padding: 17px 34px; font-size: .95rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; background-color: #1f7a4d; color: white; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 14px 28px rgba(31,122,77,.22); transition: .25s ease; text-decoration: none; }
+.cta-button:hover { background-color: #155b39; transform: translateY(-2px); }
+.services-section, .admin-section { padding: 90px 80px; }
+.catalog-section { background: #fff; }
+.section-header-left { max-width: 1200px; margin: 0 auto 32px; }
+.catalog-top { display: flex; justify-content: space-between; gap: 22px; align-items: end; }
+.section-title-left { font-size: 2.7rem; font-weight: 900; letter-spacing: -1px; color: #102319; }
+.filters { display: flex; gap: 12px; }
+.filters input, .filters select, .plant-form input, .plant-form textarea { padding: 15px 16px; border: 1px solid #dfe7dd; border-radius: 14px; font-size: .95rem; background: white; }
+.filters input:focus, .filters select:focus, .plant-form input:focus, .plant-form textarea:focus { outline: none; border-color: #1f7a4d; box-shadow: 0 0 0 4px rgba(31,122,77,.10); }
+.plant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; max-width: 1200px; margin: 0 auto; }
+.plant-card { overflow: hidden; border: 1px solid #eef1ec; border-radius: 26px; background: #fff; box-shadow: 0 18px 50px rgba(16,35,25,.06); transition: .25s ease; }
+.plant-card:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(16,35,25,.10); }
+.plant-img-wrap { position: relative; height: 235px; background: #f2f6ef; overflow: hidden; }
+.plant-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.stock-badge { position: absolute; top: 14px; right: 14px; background: #ecfff3; color: #17613d; font-weight: 900; padding: 8px 12px; border-radius: 999px; font-size: .78rem; }
+.stock-badge.out { background: #fff0f0; color: #9b1c1c; }
+.plant-body { padding: 24px; }
+.plant-category { color: #1f7a4d; font-size: .78rem; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; margin-bottom: 6px; }
+.plant-body h3 { font-size: 1.35rem; color: #102319; margin-bottom: 8px; }
+.description { color: #5f6b61; font-size: .95rem; min-height: 48px; }
+.plant-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+.plant-meta span { background: #f4f8f1; border: 1px solid #e7efe2; border-radius: 999px; padding: 7px 10px; color: #435044; font-size: .78rem; font-weight: 700; }
+.plant-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.plant-footer strong { font-size: 1.5rem; color: #102319; }
+.whatsapp-btn { background: #25d366; color: white; text-decoration: none; padding: 12px 16px; border-radius: 12px; font-weight: 900; }
+.whatsapp-btn.disabled { background: #b9b9b9; pointer-events: none; }
+.admin-section { background: #f7faf4; }
+.admin-card { max-width: 1200px; margin: 0 auto; background: white; border: 1px solid #eef1ec; border-radius: 28px; padding: 34px; box-shadow: 0 18px 55px rgba(16,35,25,.06); }
+.plant-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.plant-form textarea { grid-column: span 4; min-height: 120px; }
+.check-row { display: flex; align-items: center; gap: 10px; font-weight: 800; color: #334; }
+.form-actions { grid-column: span 4; display: flex; gap: 12px; align-items: center; }
+.secondary-btn, .admin-actions button { border: 1px solid #dfe7dd; background: white; border-radius: 12px; padding: 12px 16px; cursor: pointer; font-weight: 800; }
+.admin-actions { display: flex; gap: 10px; margin-top: 16px; }
+@media (max-width: 768px) { .navbar { padding: 18px 24px; } .nav-links { gap: 8px; } .nav-links a { display: none; } .hero h1 { font-size: 2.7rem; } .services-section, .admin-section { padding: 60px 22px; } .catalog-top { display: block; } .filters { margin-top: 20px; flex-direction: column; } .plant-form { grid-template-columns: 1fr; } .plant-form textarea, .form-actions { grid-column: span 1; } }
