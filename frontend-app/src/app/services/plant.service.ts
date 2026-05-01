@@ -3,25 +3,29 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Client {
-  id?: number;
-  name?: string;
-  slug?: string;
-  business_name?: string;
+  id: number;
+  slug: string;
+  business_name: string;
+  phone?: string;
   whatsapp_number?: string;
+  logo_url?: string;
+  primary_color?: string;
 }
 
 export interface Plant {
   id?: number;
+  client_id?: number;
   name: string;
   category?: string;
   description?: string;
   price: number;
-  stock: number; // Required field to prevent 'undefined' errors
+  stock: number;
   image_url?: string;
   light?: string;
   water?: string;
   is_featured?: boolean;
   is_active?: boolean;
+  created_at?: string;
 }
 
 export interface InvoiceItem {
@@ -32,14 +36,11 @@ export interface InvoiceItem {
 
 export interface InvoiceResult {
   items: InvoiceItem[];
-  total?: number;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class PlantService {
-  private apiUrl = 'http://localhost:8000/api'; 
+  private apiUrl = 'https://api.verzagarden.com/api';
 
   constructor(private http: HttpClient) {}
 
@@ -65,14 +66,18 @@ export class PlantService {
 
   analyzeInvoice(slug: string, file: File): Observable<{ result: InvoiceResult }> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('invoice', file);
+
     return this.http.post<{ result: InvoiceResult }>(
-      `${this.apiUrl}/clients/${slug}/analyze-invoice`,
+      `${this.apiUrl}/clients/${slug}/invoices/analyze`,
       formData
     );
   }
 
   confirmRestock(slug: string, items: InvoiceItem[]): Observable<any> {
-    return this.http.post(`${this.apiUrl}/clients/${slug}/restock`, { items });
+    return this.http.post(
+      `${this.apiUrl}/clients/${slug}/invoices/confirm-restock`,
+      { items }
+    );
   }
 }

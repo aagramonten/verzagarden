@@ -24,11 +24,9 @@ export class AppComponent implements OnInit {
   adminMode = false;
   loading = true;
 
-  // Formulario de Planta
   plantForm: Plant = this.emptyPlant();
   editingId?: number;
 
-  // Estado de IA / factura
   selectedInvoice?: File;
   invoiceLoading = false;
   invoiceResult?: { items: InvoiceItem[] };
@@ -69,10 +67,6 @@ export class AppComponent implements OnInit {
       }
     });
   }
-
-  // ======================
-  // 🤖 FUNCIONES DE IA
-  // ======================
 
   onInvoiceSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -142,10 +136,6 @@ export class AppComponent implements OnInit {
       }
     });
   }
-
-  // ======================
-  // 🌿 OTROS MÉTODOS
-  // ======================
 
   toggleLanguage(): void {
     this.isEnglish = !this.isEnglish;
@@ -219,6 +209,21 @@ export class AppComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  whatsappLink(plant: Plant): string {
+    const phone = this.client?.whatsapp_number || this.client?.phone || '';
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    const message = `Hola, estoy interesado en esta planta:
+
+Planta: ${plant.name}
+Precio: $${plant.price}
+Stock disponible: ${plant.stock}
+
+¿Sigue disponible?`;
+
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
   }
 
   resetForm(): void {

@@ -6,23 +6,41 @@
       <span>Catálogo inteligente para viveros</span>
     </div>
   </div>
+
   <div class="nav-actions">
-    <button class="ghost-btn" (click)="adminMode = !adminMode">{{ adminMode ? 'Ver catálogo' : 'Admin' }}</button>
-    <button class="lang-btn" (click)="toggleLanguage()">{{ isEnglish ? 'ES' : 'EN' }}</button>
+    <button class="ghost-btn" (click)="adminMode = !adminMode">
+      {{ adminMode ? 'Ver catálogo' : 'Admin' }}
+    </button>
+    <button class="lang-btn" (click)="toggleLanguage()">
+      {{ isEnglish ? 'ES' : 'EN' }}
+    </button>
   </div>
 </nav>
 
 <header class="hero">
   <div class="hero-content">
     <p class="eyebrow">Inventario disponible</p>
-    <h1>{{ client?.business_name || 'Vivero Demo PR' }}</h1>
-    <p>Explora plantas disponibles, precios actualizados y ordena directo por WhatsApp.</p>
+    <h1>{{ client?.business_name || 'Jardín Morales' }}</h1>
+    <p>
+      Explora plantas disponibles, precios actualizados y ordena directo por WhatsApp.
+    </p>
+
     <div class="hero-stats">
-      <div><strong>{{ plants.length }}</strong><span>Plantas</span></div>
-      <div><strong>{{ categories.length - 1 }}</strong><span>Categorías</span></div>
-      <div><strong>{{ filteredPlants.length }}</strong><span>Disponibles</span></div>
+      <div>
+        <strong>{{ plants.length }}</strong>
+        <span>Plantas</span>
+      </div>
+      <div>
+        <strong>{{ categories.length - 1 }}</strong>
+        <span>Categorías</span>
+      </div>
+      <div>
+        <strong>{{ filteredPlants.length }}</strong>
+        <span>Disponibles</span>
+      </div>
     </div>
   </div>
+
   <div class="hero-card">
     <span>Orden rápido</span>
     <h2>Compra por WhatsApp</h2>
@@ -44,10 +62,18 @@
     <input [(ngModel)]="plantForm.image_url" name="image_url" placeholder="URL de imagen" />
     <input [(ngModel)]="plantForm.light" name="light" placeholder="Luz" />
     <input [(ngModel)]="plantForm.water" name="water" placeholder="Agua" />
+
     <textarea [(ngModel)]="plantForm.description" name="description" placeholder="Descripción"></textarea>
-    <label class="check"><input [(ngModel)]="plantForm.is_featured" name="is_featured" type="checkbox" /> Destacar planta</label>
+
+    <label class="check">
+      <input [(ngModel)]="plantForm.is_featured" name="is_featured" type="checkbox" />
+      Destacar planta
+    </label>
+
     <div class="form-actions">
-      <button class="primary-btn" type="submit">{{ editingId ? 'Guardar cambios' : 'Crear planta' }}</button>
+      <button class="primary-btn" type="submit">
+        {{ editingId ? 'Guardar cambios' : 'Crear planta' }}
+      </button>
       <button class="secondary-btn" type="button" (click)="resetForm()">Limpiar</button>
     </div>
   </form>
@@ -59,35 +85,58 @@
       <p>Sube una factura y el sistema detecta plantas automáticamente.</p>
     </div>
 
-   <div class="invoice-upload">
+    <div class="invoice-upload">
       <label class="custom-file-btn">
-        <input type="file" accept="image/*,.pdf" (change)="onInvoiceSelected($event)" />
+        <input
+          type="file"
+          accept="image/*,.pdf"
+          (change)="onInvoiceSelected($event)"
+        />
         <span>📁 Elegir documento</span>
       </label>
 
-      <button class="primary-btn" type="button" (click)="analyzeInvoice()" [disabled]="!selectedInvoice || invoiceLoading">
+      <button
+        class="primary-btn"
+        type="button"
+        (click)="analyzeInvoice()"
+        [disabled]="!selectedInvoice || invoiceLoading"
+      >
         {{ invoiceLoading ? 'Analizando...' : 'Analizar factura' }}
       </button>
     </div>
 
     <div *ngIf="invoiceLoading" class="ai-loading-container">
       <div class="spinner"></div>
-      <p><strong>La IA está procesando la factura.</strong><br>Esto toma unos 10 segundos...</p>
+      <p>
+        <strong>La IA está procesando la factura.</strong><br />
+        Esto toma unos 10 segundos...
+      </p>
     </div>
 
     <div *ngIf="selectedInvoice && !invoiceLoading" class="selected-file">
       Archivo: <strong>{{ selectedInvoice.name }}</strong>
     </div>
 
-    <div *ngIf="invoiceResult && invoiceResult.items.length > 0" class="invoice-results">
+    <div *ngIf="invoiceResult?.items?.length" class="invoice-results">
       <h3>Plantas detectadas</h3>
-      <div class="invoice-item" *ngFor="let item of invoiceResult.items; let i = index">
-        
+
+      <div class="invoice-item" *ngFor="let item of invoiceResult?.items; let i = index">
         <div class="invoice-left">
-          <input class="ai-edit-input" [(ngModel)]="item.plant_name" name="plant_{{i}}" />
+          <input
+            class="ai-edit-input"
+            [(ngModel)]="item.plant_name"
+            name="plant_{{ i }}"
+            placeholder="Nombre de planta"
+          />
+
           <div class="quantity-edit">
             <span>Cant:</span>
-            <input class="ai-small-input" type="number" [(ngModel)]="item.quantity" name="qty_{{i}}" />
+            <input
+              class="ai-small-input"
+              type="number"
+              [(ngModel)]="item.quantity"
+              name="qty_{{ i }}"
+            />
           </div>
         </div>
 
@@ -95,47 +144,121 @@
           <span>Costo unitario</span>
           <div class="cost-input-group">
             <strong>$</strong>
-            <input class="ai-small-input" type="number" step="0.01" [(ngModel)]="item.unit_cost" name="cost_{{i}}" />
+            <input
+              class="ai-small-input"
+              type="number"
+              step="0.01"
+              [(ngModel)]="item.unit_cost"
+              name="cost_{{ i }}"
+            />
           </div>
         </div>
-        
-        <button class="delete-item-btn" (click)="removeItemFromInvoice(i)" title="Eliminar ítem">×</button>
-        
+
+        <button
+          class="delete-item-btn"
+          type="button"
+          (click)="removeItemFromInvoice(i)"
+          title="Eliminar ítem"
+        >
+          ×
+        </button>
       </div>
 
       <div class="invoice-actions">
-        <button class="primary-btn" type="button" (click)="confirmRestock()">Confirmar Restock</button>
-        <button class="secondary-btn danger-text" type="button" (click)="cancelInvoice()">Cancelar todo</button>
+        <button class="primary-btn" type="button" (click)="confirmRestock()">
+          Confirmar Restock
+        </button>
+        <button class="secondary-btn danger-text" type="button" (click)="cancelInvoice()">
+          Cancelar todo
+        </button>
       </div>
     </div>
 
     <div *ngIf="restockResult?.updates?.length" class="restock-results">
       <h3>Resultado del restock</h3>
+
       <div class="invoice-item" *ngFor="let update of restockResult.updates">
-        <div *ngIf="update.matched"><strong>{{ update.matched }}</strong><span>+{{ update.added }} unidades</span></div>
-        <div *ngIf="update.unmatched"><strong>{{ update.unmatched }}</strong><span>No encontrada</span></div>
+        <div *ngIf="update.matched">
+          <strong>{{ update.matched }}</strong>
+          <span>+{{ update.added }} unidades</span>
+        </div>
+
+        <div *ngIf="update.unmatched">
+          <strong>{{ update.unmatched }}</strong>
+          <span>No encontrada</span>
+        </div>
       </div>
-      <button class="secondary-btn" (click)="restockResult = null">Cerrar</button>
+
+      <button class="secondary-btn" type="button" (click)="restockResult = null">
+        Cerrar
+      </button>
     </div>
   </div>
 </section>
 
 <section class="catalog-section" id="catalogo">
   <div class="section-top">
-    <div><p class="eyebrow">Catálogo</p><h2>Plantas disponibles</h2></div>
+    <div>
+      <p class="eyebrow">Catálogo</p>
+      <h2>Plantas disponibles</h2>
+    </div>
+
     <div class="filters">
       <input [(ngModel)]="search" placeholder="Buscar planta..." />
+
       <select [(ngModel)]="selectedCategory">
-        <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+        <option *ngFor="let category of categories" [value]="category">
+          {{ category }}
+        </option>
       </select>
     </div>
   </div>
+
   <div *ngIf="loading" class="loading">Cargando plantas...</div>
+
   <div class="plant-grid" *ngIf="!loading">
-    <app-plant-card 
-      *ngFor="let plant of filteredPlants" 
-      [plant]="plant" [adminMode]="adminMode" [client]="client"
-      (onEdit)="editPlant($event)" (onRemove)="removePlant($event)">
-    </app-plant-card>
+    <article class="plant-card" *ngFor="let plant of filteredPlants">
+      <div class="image-wrap">
+        <img
+          *ngIf="plant.image_url; else noImage"
+          [src]="plant.image_url"
+          [alt]="plant.name"
+        />
+
+        <ng-template #noImage>
+          <div class="no-image">
+            <span>{{ plant.name.charAt(0) }}</span>
+          </div>
+        </ng-template>
+
+        <span class="stock-badge">{{ plant.stock }} disponibles</span>
+        <span *ngIf="plant.is_featured" class="featured-badge">Premium</span>
+      </div>
+
+      <div class="plant-body">
+        <p class="category">{{ plant.category || 'Sin categoría' }}</p>
+        <h3>{{ plant.name }}</h3>
+        <p class="description">{{ plant.description }}</p>
+
+        <div class="tags">
+          <span>{{ plant.light || 'Luz moderada' }}</span>
+          <span>{{ plant.water || 'Riego moderado' }}</span>
+        </div>
+
+        <div class="card-footer">
+          <strong>${{ plant.price }}</strong>
+          <a class="order-btn" [href]="whatsappLink(plant)" target="_blank">
+            Ordenar
+          </a>
+        </div>
+
+        <div *ngIf="adminMode" class="admin-card-actions">
+          <button type="button" (click)="editPlant(plant)">Editar</button>
+          <button type="button" class="danger" (click)="removePlant(plant)">
+            Ocultar
+          </button>
+        </div>
+      </div>
+    </article>
   </div>
 </section>
