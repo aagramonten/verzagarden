@@ -18,7 +18,7 @@
   padding: 14px 18px;
   border: 1px solid rgba(16, 33, 23, 0.08);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(18px);
   display: flex;
   justify-content: space-between;
@@ -59,6 +59,7 @@
 .nav-actions {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
 button,
@@ -68,6 +69,7 @@ button,
   font-weight: 800;
   text-decoration: none;
   transition: 0.2s ease;
+  font-family: inherit;
 }
 
 .ghost-btn,
@@ -86,6 +88,25 @@ button,
   background: #dff0e3;
 }
 
+.primary-btn {
+  background: linear-gradient(135deg, #0f7c3f, #27d66f);
+  color: white;
+  padding: 14px 22px;
+  border-radius: 999px;
+  box-shadow: 0 14px 30px rgba(39, 214, 111, 0.28);
+}
+
+.primary-btn:hover,
+.order-btn:hover {
+  transform: translateY(-2px);
+}
+
+.secondary-btn.danger-text,
+.danger-text {
+  background: #fff0f0;
+  color: #c72626;
+}
+
 .hero {
   width: min(1180px, calc(100% - 32px));
   margin: 34px auto;
@@ -100,7 +121,7 @@ button,
 .admin-panel,
 .catalog-section {
   border-radius: 32px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.86);
   border: 1px solid rgba(16, 33, 23, 0.08);
   box-shadow: 0 24px 70px rgba(16, 33, 23, 0.08);
 }
@@ -171,7 +192,7 @@ button,
   width: fit-content;
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.16);
+  background: rgba(255, 255, 255, 0.16);
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -185,7 +206,7 @@ button,
 }
 
 .hero-card p {
-  color: rgba(255,255,255,0.82);
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .admin-panel,
@@ -202,24 +223,48 @@ button,
   letter-spacing: -0.04em;
 }
 
+.section-header p:not(.eyebrow) {
+  color: #637064;
+  margin-top: 8px;
+}
+
+/* ADMIN FORM */
 .admin-form {
   margin-top: 24px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
+  padding: 22px;
+  border-radius: 28px;
+  background: #f5faf5;
+  border: 1px solid rgba(16, 33, 23, 0.08);
 }
 
 .admin-form input,
 .admin-form textarea,
 .filters input,
-.filters select {
+.filters select,
+.ai-edit-input,
+.ai-small-input {
   width: 100%;
   border: 1px solid rgba(16, 33, 23, 0.12);
   border-radius: 18px;
   padding: 15px 16px;
   outline: none;
   background: white;
+  color: #102117;
   font: inherit;
+  font-weight: 650;
+}
+
+.admin-form input:focus,
+.admin-form textarea:focus,
+.filters input:focus,
+.filters select:focus,
+.ai-edit-input:focus,
+.ai-small-input:focus {
+  border-color: rgba(39, 214, 111, 0.65);
+  box-shadow: 0 0 0 4px rgba(39, 214, 111, 0.12);
 }
 
 .admin-form textarea {
@@ -232,61 +277,22 @@ button,
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 700;
+  font-weight: 800;
+  padding: 12px 4px;
+}
+
+.check input {
+  width: auto;
 }
 
 .form-actions {
   grid-column: span 4;
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
-.primary-btn {
-  background: linear-gradient(135deg, #0f7c3f, #27d66f);
-  color: white;
-  padding: 14px 22px;
-  border-radius: 999px;
-  box-shadow: 0 14px 30px rgba(39, 214, 111, 0.28);
-}
-
-.primary-btn:hover,
-.order-btn:hover {
-  transform: translateY(-2px);
-}
-
-.section-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  align-items: end;
-  margin-bottom: 24px;
-}
-
-.filters {
-  display: flex;
-  gap: 12px;
-}
-
-.filters input {
-  min-width: 240px;
-}
-
-.plant-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-}
-
-.loading {
-  padding: 30px;
-  text-align: center;
-  color: #667166;
-  font-weight: 700;
-}
-
-/* =========================
-   AI RESTOCK Y FACTURAS
-   ========================= */
+/* AI RESTOCK */
 .ai-restock-card {
   margin-top: 34px;
   padding: 34px;
@@ -296,11 +302,6 @@ button,
     linear-gradient(180deg, #fbfffc, #ffffff);
   border: 1px solid rgba(16, 33, 23, 0.08);
   box-shadow: 0 28px 70px rgba(16, 33, 23, 0.1);
-}
-
-.ai-restock-card .section-header p:not(.eyebrow) {
-  margin: 10px 0 0;
-  color: #637064;
 }
 
 .invoice-upload {
@@ -315,35 +316,23 @@ button,
   flex-wrap: wrap;
 }
 
-/* 👇 NUEVO BOTÓN DE SUBIR ARCHIVO Y PRECIO EDITABLE 👇 */
-
-/* Ocultamos el botón feo por defecto del navegador */
-.custom-file-btn input[type="file"] {
-  display: none;
-}
-
-/* Diseñamos nuestro propio botón */
 .custom-file-btn {
-  flex: 1;
-  min-width: 260px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 14px 20px;
+  min-height: 52px;
+  padding: 14px 18px;
+  border-radius: 999px;
   background: white;
-  border: 1px dashed rgba(31, 122, 77, 0.4);
-  color: #1f7a4d;
-  border-radius: 16px;
-  font-weight: 800;
+  border: 1px solid rgba(16, 33, 23, 0.12);
+  font-weight: 900;
   cursor: pointer;
-  transition: 0.2s ease;
+  color: #123821;
+  box-shadow: 0 10px 24px rgba(16, 33, 23, 0.06);
 }
 
-.custom-file-btn:hover {
-  background: #f4f8f1;
-  border-color: #1f7a4d;
-  transform: translateY(-1px);
+.custom-file-btn input {
+  display: none;
 }
 
 .selected-file {
@@ -352,7 +341,33 @@ button,
   border-radius: 16px;
   background: #eaf9ef;
   border: 1px solid rgba(37, 211, 102, 0.2);
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.ai-loading-container {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 20px;
+  background: #f3f8f3;
+  border: 1px solid rgba(16, 33, 23, 0.08);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 4px solid #d8eadc;
+  border-top-color: #16a34a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .invoice-results,
@@ -379,6 +394,7 @@ button,
   justify-content: space-between;
   gap: 18px;
   align-items: center;
+  position: relative;
 }
 
 .invoice-left {
@@ -388,93 +404,223 @@ button,
   flex: 1;
 }
 
-/* 👇 ACTUALIZADO PARA ACOMODAR EL PRECIO EDITABLE 👇 */
 .invoice-right {
-  min-width: 130px;
+  min-width: 160px;
   text-align: right;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
 }
 
-.invoice-right span {
-  display: block;
-  color: #637064;
-  font-size: 13px;
-  margin-right: 10px;
-}
-
+.quantity-edit,
 .cost-input-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.cost-input-group strong {
-  font-size: 1.2rem;
-  color: #102319;
-}
-/* 👆 FIN DE PRECIO EDITABLE 👆 */
-
-.ai-edit-input,
-.ai-small-input {
-  border: 1px solid rgba(16, 33, 23, 0.12);
-  background: white;
-  border-radius: 14px;
-  padding: 12px;
-  font-weight: 900;
-}
-
-.ai-small-input {
-  width: 80px;
-}
-
-.quantity-edit {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* =========================
-   NUEVOS BOTONES (ELIMINAR / CANCELAR)
-   ========================= */
-.delete-item-btn {
-  background: #fff0f0;
-  color: #c72626;
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-left: 15px;
-  transition: 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.delete-item-btn:hover {
-  background: #ffd6d6;
-  transform: scale(1.1);
+.ai-small-input {
+  width: 95px;
 }
 
 .invoice-actions {
   display: flex;
-  gap: 15px;
-  margin-top: 25px;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
 }
 
-.danger-text {
-  color: #c72626 !important;
-  border: 1px solid #ffdbdb;
-  background: transparent;
+.delete-item-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #fff0f0;
+  color: #c72626;
+  font-size: 22px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
 }
 
-.danger-text:hover {
-  background: #fff0f0 !important;
+/* CATALOG */
+.section-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+}
+
+.filters input {
+  min-width: 240px;
+}
+
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.plant-card {
+  overflow: hidden;
+  border-radius: 28px;
+  background: white;
+  border: 1px solid rgba(16, 33, 23, 0.08);
+  box-shadow: 0 20px 45px rgba(16, 33, 23, 0.08);
+  transition: 0.24s ease;
+}
+
+.plant-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 28px 70px rgba(16, 33, 23, 0.14);
+}
+
+.image-wrap {
+  height: 250px;
+  position: relative;
+  background: #eef4ee;
+  overflow: hidden;
+}
+
+.image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* fallback when image_url is empty */
+.no-image {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at top left, rgba(39, 214, 111, 0.24), transparent 34%),
+    linear-gradient(135deg, #eaf5ea, #f9fff9);
+}
+
+.no-image span {
+  width: 78px;
+  height: 78px;
+  border-radius: 26px;
+  background: #0c3b25;
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 38px;
+  font-weight: 900;
+}
+
+.stock-badge,
+.featured-badge {
+  position: absolute;
+  top: 16px;
+  padding: 9px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.stock-badge {
+  right: 16px;
+  color: #0d6c39;
+  background: #dff8e8;
+}
+
+.featured-badge {
+  left: 16px;
+  color: white;
+  background: rgba(14, 85, 43, 0.92);
+}
+
+.plant-body {
+  padding: 24px;
+}
+
+.category {
+  margin: 0 0 6px;
+  color: #0b7e3e;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.plant-body h3 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.description {
+  min-height: 44px;
+  color: #5f6a62;
+  font-size: 14px;
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.tags span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: #f1f6f0;
+  border: 1px solid rgba(16, 33, 23, 0.07);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-footer strong {
+  font-size: 26px;
+  letter-spacing: -0.04em;
+}
+
+.order-btn {
+  background: linear-gradient(135deg, #16a34a, #25d366);
+  color: white;
+  padding: 13px 18px;
+  border-radius: 16px;
+  box-shadow: 0 14px 28px rgba(37, 211, 102, 0.26);
+}
+
+.admin-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.admin-card-actions button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 14px;
+  background: #edf4ed;
+  color: #123821;
+}
+
+.admin-card-actions .danger {
+  background: #fff0f0;
+  color: #c72626;
+}
+
+.loading {
+  padding: 30px;
+  text-align: center;
+  color: #667166;
+  font-weight: 700;
 }
 
 button:disabled {
@@ -483,59 +629,14 @@ button:disabled {
   transform: none !important;
 }
 
-/* =========================
-   ANIMACIÓN SPINNER IA
-   ========================= */
-.ai-loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 24px;
-  padding: 30px;
-  background: #f4f8f1;
-  border-radius: 18px;
-  border: 1px dashed #cde0d2;
-  text-align: center;
-  animation: fadeIn 0.3s ease;
-}
-
-.ai-loading-container p {
-  color: #1a4229;
-  font-size: 0.95rem;
-  margin-top: 16px;
-  line-height: 1.5;
-}
-
-.spinner {
-  width: 44px;
-  height: 44px;
-  border: 4px solid #eef1ec;
-  border-top: 4px solid #25d366;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* =========================
-   MEDIA QUERIES (RESPONSIVE)
-   ========================= */
+/* RESPONSIVE */
 @media (max-width: 900px) {
   .hero {
     grid-template-columns: 1fr;
   }
 
   .plant-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .admin-form {
@@ -554,6 +655,10 @@ button:disabled {
   .filters {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .navbar {
+    position: static;
   }
 
   .hero-content {
@@ -578,20 +683,12 @@ button:disabled {
     align-items: stretch;
   }
 
-  .invoice-upload input {
-    min-width: 100%;
-  }
-
   .invoice-item {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .invoice-right {
-    width: 100%;
-    justify-content: space-between;
-    margin-top: 10px;
-    flex-direction: row;
-    align-items: center;
+    text-align: left;
   }
 }
