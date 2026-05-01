@@ -1,44 +1,6 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
-export interface Client {
-  id: number;
-  slug: string;
-  business_name: string;
-  whatsapp_number: string;
-  logo_url?: string;
-  primary_color?: string;
-}
-
-export interface Plant {
-  id?: number;
-  name: string;
-  category?: string;
-  description?: string;
-  price: number;
-  stock: number;
-  image_url?: string;
-  light?: string;
-  water?: string;
-  is_featured?: boolean;
-  is_active?: boolean;
-}
-
-// 👉 NUEVO: tipos para AI
-export interface InvoiceItem {
-  plant_name: string;
-  quantity: number;
-  unit_cost: number;
-}
-
-export interface InvoiceResult {
-  items: InvoiceItem[];
-}
-
 @Injectable({ providedIn: 'root' })
 export class PlantService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'https://api.verzagarden.com/api';
 
   constructor(private http: HttpClient) {}
 
@@ -65,10 +27,6 @@ export class PlantService {
   deletePlant(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/plants/${id}`);
   }
-
-  // ======================
-  // 🤖 AI INVOICE
-  // ======================
 
   analyzeInvoice(slug: string, file: File): Observable<{ result: InvoiceResult }> {
     const formData = new FormData();
