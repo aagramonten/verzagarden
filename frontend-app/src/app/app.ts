@@ -13,7 +13,10 @@ import { PlantCardComponent } from './plant-card.component';
 })
 export class AppComponent implements OnInit {
   isEnglish = false;
-  clientSlug = 'demo-garden';
+
+  // Cliente real creado en MySQL
+  clientSlug = 'jardin-morales';
+
   client?: Client;
   plants: Plant[] = [];
   search = '';
@@ -25,7 +28,7 @@ export class AppComponent implements OnInit {
   plantForm: Plant = this.emptyPlant();
   editingId?: number;
 
-  // Estado de IA
+  // Estado de IA / factura
   selectedInvoice?: File;
   invoiceLoading = false;
   invoiceResult?: { items: InvoiceItem[] };
@@ -36,27 +39,30 @@ export class AppComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadData();
   }
 
-  loadData() {
+  loadData(): void {
     this.loading = true;
+
     this.plantService.getClient(this.clientSlug).subscribe({
-      next: client => {
+      next: (client: Client) => {
         this.client = client;
         this.cdr.detectChanges();
       },
-      error: err => console.error(err)
+      error: (err: any) => {
+        console.error(err);
+      }
     });
 
     this.plantService.getPlants(this.clientSlug).subscribe({
-      next: plants => {
+      next: (plants: Plant[]) => {
         this.plants = plants;
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: err => {
+      error: (err: any) => {
         console.error(err);
         this.loading = false;
         this.cdr.detectChanges();
@@ -68,9 +74,12 @@ export class AppComponent implements OnInit {
   // 🤖 FUNCIONES DE IA
   // ======================
 
-  onInvoiceSelected(event: Event) {
+  onInvoiceSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
+
+    if (!input.files?.length) {
+      return;
+    }
 
     this.selectedInvoice = input.files[0];
     this.invoiceResult = undefined;
@@ -78,17 +87,20 @@ export class AppComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  analyzeInvoice() {
-    if (!this.selectedInvoice) return;
+  analyzeInvoice(): void {
+    if (!this.selectedInvoice) {
+      return;
+    }
+
     this.invoiceLoading = true;
 
     this.plantService.analyzeInvoice(this.clientSlug, this.selectedInvoice).subscribe({
-      next: (response) => {
+      next: (response: { result: { items: InvoiceItem[] } }) => {
         this.invoiceResult = response.result;
         this.invoiceLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error(err);
         alert('Error analizando factura');
         this.invoiceLoading = false;
@@ -97,31 +109,34 @@ export class AppComponent implements OnInit {
     });
   }
 
-  // Eliminar un ítem específico de la lista detectada
-  removeItemFromInvoice(index: number) {
-    if (this.invoiceResult?.items) {
-      this.invoiceResult.items.splice(index, 1);
-      this.cdr.detectChanges();
+  removeItemFromInvoice(index: number): void {
+    if (!this.invoiceResult?.items) {
+      return;
     }
+
+    this.invoiceResult.items.splice(index, 1);
+    this.cdr.detectChanges();
   }
 
-  // Cancelar todo el proceso de la factura
-  cancelInvoice() {
+  cancelInvoice(): void {
     this.selectedInvoice = undefined;
     this.invoiceResult = undefined;
     this.restockResult = null;
     this.cdr.detectChanges();
   }
 
-  confirmRestock() {
-    if (!this.invoiceResult?.items?.length) return;
+  confirmRestock(): void {
+    if (!this.invoiceResult?.items?.length) {
+      return;
+    }
+
     this.plantService.confirmRestock(this.clientSlug, this.invoiceResult.items).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.restockResult = response;
-        this.invoiceResult = undefined; // Limpia la lista tras éxito
+        this.invoiceResult = undefined;
         this.loadData();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error(err);
         alert('Error actualizando inventario');
       }
@@ -131,39 +146,98 @@ export class AppComponent implements OnInit {
   // ======================
   // 🌿 OTROS MÉTODOS
   // ======================
-  toggleLanguage() { this.isEnglish = !this.isEnglish; }
 
-  get categories() {
-    return ['Todas', ...new Set(this.plants.map(p => p.category || 'Sin categoría'))];
+  toggleLanguage(): void {
+    this.isEnglish = !this.isEnglish;
   }
 
-  get filteredPlants() {
+  get categories(): string[] {
+    return [
+      'Todas',
+      ...new Set(this.plants.map((plant: Plant) => plant.category || 'Sin categoría'))
+    ];
+  }
+
+  get filteredPlants(): Plant[] {
     const term = this.search.toLowerCase().trim();
-    return this.plants.filter(plant => {
-      const matchSearch = !term || plant.name.toLowerCase().includes(term) || (plant.description || '').toLowerCase().includes(term);
-      const matchCategory = this.selectedCategory === 'Todas' || plant.category === this.selectedCategory;
+
+    return this.plants.filter((plant: Plant) => {
+      const matchSearch =
+        !term ||
+        plant.name.toLowerCase().includes(term) ||
+        (plant.description || '').toLowerCase().includes(term);
+
+      const matchCategory =
+        this.selectedCategory === 'Todas' ||
+        plant.category === this.selectedCategory;
+
       return matchSearch && matchCategory;
     });
   }
 
-  savePlant() {
-    if (!this.plantForm.name || this.plantForm.price < 0) return;
-    const request = this.editingId ? this.plantService.updatePlant(this.editingId, this.plantForm) : this.plantService.createPlant(this.clientSlug, this.plantForm);
-    request.subscribe({ next: () => { this.resetForm(); this.loadData(); }, error: err => console.error(err) });
+  savePlant(): void {
+    if (!this.plantForm.name || this.plantForm.price < 0) {
+      return;
+    }
+
+    const request = this.editingId
+      ? this.plantService.updatePlant(this.editingId, this.plantForm)
+      : this.plantService.createPlant(this.clientSlug, this.plantForm);
+
+    request.subscribe({
+      next: () => {
+        this.resetForm();
+        this.loadData();
+      },
+      error: (err: any) => {
+        console.error(err);
+      }
+    });
   }
 
-  editPlant(plant: Plant) {
+  editPlant(plant: Plant): void {
     this.editingId = plant.id;
     this.plantForm = { ...plant };
     this.adminMode = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 
-  removePlant(plant: Plant) {
-    if (!plant.id) return;
-    this.plantService.deletePlant(plant.id).subscribe({ next: () => this.loadData(), error: err => console.error(err) });
+  removePlant(plant: Plant): void {
+    if (!plant.id) {
+      return;
+    }
+
+    this.plantService.deletePlant(plant.id).subscribe({
+      next: () => {
+        this.loadData();
+      },
+      error: (err: any) => {
+        console.error(err);
+      }
+    });
   }
 
-  resetForm() { this.editingId = undefined; this.plantForm = this.emptyPlant(); }
-  emptyPlant(): Plant { return { name: '', category: 'Exterior', description: '', price: 0, stock: 0, image_url: '', light: '', water: '', is_featured: false, is_active: true }; }
+  resetForm(): void {
+    this.editingId = undefined;
+    this.plantForm = this.emptyPlant();
+  }
+
+  emptyPlant(): Plant {
+    return {
+      name: '',
+      category: 'Exterior',
+      description: '',
+      price: 0,
+      stock: 0,
+      image_url: '',
+      light: '',
+      water: '',
+      is_featured: false,
+      is_active: true
+    };
+  }
 }
