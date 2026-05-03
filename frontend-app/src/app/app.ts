@@ -2,11 +2,12 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlantService, Client, Plant } from './services/plant.service';
+import { PlantCardComponent } from './plant-card.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PlantCardComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -153,7 +154,6 @@ export class AppComponent implements OnInit {
   }
 
   whatsappLink(plant: Plant) {
-    // Número actualizado
     const number = this.client?.whatsapp_number || '19392360534';
     const message = `Hola, me interesa esta planta del catálogo:\n\n🪴 Nombre: ${plant.name}\n💰 Precio: $${plant.price}\n\n¿Tienen disponibilidad?`;
     return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
@@ -265,7 +265,6 @@ export class AppComponent implements OnInit {
   cancelInvoice() {
     this.selectedInvoice = null;
     this.invoiceResult = null;
-    // Resetear el input file si es necesario
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
   }
