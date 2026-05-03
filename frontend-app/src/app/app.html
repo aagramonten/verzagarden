@@ -5,7 +5,7 @@
   </div>
   <ul class="nav-links" style="display: flex; list-style: none; gap: 16px; margin: 0; padding: 0;">
     <li>
-<button class="lang-btn" style="padding: 10px 20px; border-radius: 99px; border: 1px solid #dfe7dd; background: white; cursor: pointer;" (click)="adminMode ? logout() : openAdminModal()">        {{ adminMode ? 'Ver catálogo' : 'Admin' }}
+<button class="lang-btn" style="padding: 10px 20px; border-radius: 99px; border: 1px solid #dfe7dd; background: white; cursor: pointer;" (click)="adminMode ? (adminMode = false) : openAdminModal()">        {{ adminMode ? 'Ver catálogo' : 'Admin' }}
       </button>
     </li>
     <li>
