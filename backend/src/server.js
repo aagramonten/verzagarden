@@ -4,6 +4,13 @@ import dotenv from 'dotenv';
 import { pool } from './db.js';
 import OpenAI from 'openai';
 import multer from 'multer';
+import { v2 as cloudinary } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 dotenv.config();
 
@@ -25,6 +32,28 @@ const openai = new OpenAI({
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, app: 'VerzaPlants API' });
+});
+
+app.post('/api/upload', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No se subió ninguna imagen' });
+
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'verzaplants' },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      stream.end(req.file.buffer);
+    });
+
+    res.json({ url: result.secure_url });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Error subiendo imagen', error: error.message });
+  }
 });
 
 app.post('/api/clients/:slug/login', async (req, res) => {
