@@ -27,8 +27,7 @@ export interface Plant {
 
 @Injectable({ providedIn: 'root' })
 export class PlantService {
-  private apiUrl = 'http://localhost:3000/api';
-
+private apiUrl = 'https://verzagarden-production.up.railway.app/api';
   constructor(private http: HttpClient) {}
 
   getClient(slug: string): Observable<Client> {
