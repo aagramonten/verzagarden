@@ -40,11 +40,12 @@ loadData() {
 
   this.plantService.getPlants(this.clientSlug).subscribe({
     next: plants => {
-      this.plants = [...plants]; // ← fuerza detección de cambios
+      console.log('✅ Plantas recibidas:', plants.length); // ← línea 42
+      this.plants = [...plants];
       this.loading = false;
     },
     error: err => {
-      console.error('Error cargando plantas:', err);
+      console.log('❌ Error plantas:', err); // ← línea 47
       this.loading = false;
     }
   });
