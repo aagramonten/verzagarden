@@ -8,165 +8,172 @@ import { Plant, Client } from './services/plant.service';
   imports: [CommonModule],
   styles: [`
     .plant-card {
+      background: #FFFFFF;
+      border-radius: 20px;
       overflow: hidden;
-      border: 1px solid #eef1ec;
-      border-radius: 26px;
-      background: #fff;
-      box-shadow: 0 18px 50px rgba(16, 35, 25, 0.06);
-      transition: 0.25s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border: 1px solid #F0F2F0;
       display: flex;
       flex-direction: column;
       height: 100%;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .plant-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 24px 60px rgba(16, 35, 25, 0.1);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.06);
     }
-    .plant-img-wrap {
+    .card-image-container {
+      width: 100%;
+      height: 220px;
+      background: #F4F8F1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
-      height: 235px;
-      background: #f2f6ef;
-      overflow: hidden;
     }
-    .plant-img-wrap img {
+    .card-image-container img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
+    }
+    .no-image {
+      color: #2B7A3E;
+      font-weight: 600;
     }
     .stock-badge {
       position: absolute;
-      top: 14px;
-      right: 14px;
+      top: 12px;
+      right: 12px;
       background: #ecfff3;
       color: #17613d;
-      font-weight: 900;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .stock-badge.out {
       background: #fff0f0;
       color: #9b1c1c;
     }
-    .plant-body {
-      padding: 24px;
+    .card-content {
+      padding: 20px;
       display: flex;
       flex-direction: column;
       flex: 1;
     }
-    .plant-category {
-      color: #1f7a4d;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      font-weight: 900;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-    }
-    h3 {
-      font-size: 1.35rem;
+    .plant-title {
+      margin: 0 0 5px 0;
+      font-size: 1.3rem;
       color: #102319;
-      margin: 0 0 8px;
     }
-    .description {
-      color: #5f6b61;
-      font-size: 0.95rem;
-      min-height: 48px;
-      margin: 0;
-    }
-    .plant-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 18px 0;
-    }
-    .plant-meta span {
-      background: #f4f8f1;
-      border: 1px solid #e7efe2;
-      border-radius: 999px;
-      padding: 7px 10px;
-      color: #435044;
-      font-size: 0.78rem;
+    .plant-price {
+      font-size: 1.2rem;
       font-weight: 700;
+      color: #2B7A3E;
+      margin-bottom: 10px;
     }
-    .plant-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: auto;
+    .plant-description {
+      font-size: 0.9rem;
+      color: #516052;
+      margin: 0 0 15px 0;
+      line-height: 1.4;
     }
-    .plant-footer strong {
-      font-size: 1.5rem;
-      color: #102319;
-    }
-    .whatsapp-btn {
-      background: #25d366;
-      color: white;
-      text-decoration: none;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-weight: 900;
-      transition: 0.2s ease;
-      cursor: pointer;
-      border: 0;
-    }
-    .whatsapp-btn:hover {
-      transform: translateY(-2px);
-    }
-    .whatsapp-btn.disabled {
-      background: #b9b9b9;
-      pointer-events: none;
-    }
-    .admin-actions {
+    .care-badges {
       display: flex;
       gap: 10px;
-      margin-top: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
-    .admin-actions button {
-      flex: 1;
-      border: 1px solid #dfe7dd;
-      background: white;
+    .badge {
+      background: #F0F2F0;
+      padding: 6px 12px;
       border-radius: 12px;
-      padding: 12px 16px;
-      cursor: pointer;
-      font-weight: 800;
-      transition: 0.2s ease;
+      font-size: 0.8rem;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
-    .admin-actions button:hover {
-      background: #f4f8f1;
+    .whatsapp-card-btn {
+      background: #2B7A3E;
+      color: white;
+      padding: 14px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: auto;
+      text-decoration: none;
+      transition: background 0.2s;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+    }
+    .whatsapp-card-btn:hover {
+      background: #226131;
+    }
+    .disabled-btn {
+      background: #E0E0E0;
+      color: #888;
+      cursor: not-allowed;
+    }
+    .admin-card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+    .btn-edit, .btn-delete {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid;
+      background: white;
+    }
+    .btn-edit {
+      background: #f4f8f1; border-color: #dfe7dd; color: #102319;
+    }
+    .btn-delete {
+      background: #fff0f0; border-color: #fad5d5; color: #9b1c1c;
     }
   `],
   template: `
     <article class="plant-card">
-      <div class="plant-img-wrap">
-        <img [src]="plant.image_url || 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=900'" [alt]="plant.name">
-        <span class="stock-badge" [class.out]="plant.stock <= 0">{{ plant.stock > 0 ? plant.stock + ' disponibles' : 'Agotada' }}</span>
+      <div class="card-image-container">
+        <img *ngIf="plant.image_url" [src]="plant.image_url" [alt]="plant.name">
+        <div *ngIf="!plant.image_url" class="no-image">🪴 Sin imagen</div>
+        <span class="stock-badge" [class.out]="plant.stock <= 0">
+          {{ plant.stock > 0 ? plant.stock + ' en stock' : 'Agotada' }}
+        </span>
       </div>
       
-      <div class="plant-body">
-        <p class="plant-category">{{ plant.category }}</p>
-        <h3>{{ plant.name }}</h3>
-        <p class="description">{{ plant.description }}</p>
+      <div class="card-content">
+        <h3 class="plant-title">{{ plant.name }}</h3>
+        <div class="plant-price">\${{ plant.price }}</div>
+        <p class="plant-description">{{ plant.description || 'Planta muy resistente y fácil de cuidar.' }}</p>
         
-        <div class="plant-meta">
-          <span>{{ plant.light || 'Luz variable' }}</span>
-          <span>{{ plant.water || 'Riego regular' }}</span>
+        <div class="care-badges">
+          <span class="badge">☀️ {{ plant.light || 'Luz indirecta' }}</span>
+          <span class="badge">💧 {{ plant.water || 'Riego moderado' }}</span>
         </div>
-        
-        <div class="plant-footer">
-          <strong>\${{ plant.price }}</strong>
-          <a class="whatsapp-btn" 
-             [class.disabled]="plant.stock <= 0" 
-             [href]="plant.stock > 0 ? getWhatsappLink() : null" 
-             target="_blank">
-            Ordenar
+
+        <ng-container *ngIf="!adminMode">
+          <a *ngIf="plant.stock > 0" class="whatsapp-card-btn" [href]="getWhatsappLink()" target="_blank">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" style="margin-right: 8px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            Ordenar por WhatsApp
           </a>
-        </div>
-        
-        <div class="admin-actions" *ngIf="adminMode">
-          <button (click)="onEdit.emit(plant)">Editar</button>
-          <button (click)="onRemove.emit(plant)">Ocultar</button>
+          <button *ngIf="plant.stock <= 0" disabled class="whatsapp-card-btn disabled-btn">
+            No disponible
+          </button>
+        </ng-container>
+
+        <div class="admin-card-actions" *ngIf="adminMode">
+          <button class="btn-edit" (click)="onEdit.emit(plant)">Editar</button>
+          <button class="btn-delete" (click)="onRemove.emit(plant)">Borrar</button>
         </div>
       </div>
     </article>
@@ -181,8 +188,12 @@ export class PlantCardComponent {
   @Output() onRemove = new EventEmitter<Plant>();
 
   getWhatsappLink(): string {
-    const number = this.client?.whatsapp_number || '17876195211';
-    const message = `Hola, me interesa esta planta:\n\nNombre: ${this.plant.name}\nPrecio: $${this.plant.price}\nStock: ${this.plant.stock}\n\n¿Está disponible?`;
+    // Número actualizado como solicitaste
+    const number = this.client?.whatsapp_number || '19392360534';
+    
+    // Mensaje pre-configurado profesional y persuasivo
+    const message = `¡Hola! Me interesa la planta *${this.plant.name}* que vi en el catálogo de Verde Vida.\n\n*Precio:* $${this.plant.price}\n\n¿Podrían darme más información?`;
+    
     return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   }
 }
