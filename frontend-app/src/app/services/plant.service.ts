@@ -6,15 +6,13 @@ export interface Client {
   id: number;
   slug: string;
   business_name: string;
-  phone?: string;
-  whatsapp_number?: string;
+  whatsapp_number: string;
   logo_url?: string;
   primary_color?: string;
 }
 
 export interface Plant {
   id?: number;
-  client_id?: number;
   name: string;
   category?: string;
   description?: string;
@@ -25,22 +23,11 @@ export interface Plant {
   water?: string;
   is_featured?: boolean;
   is_active?: boolean;
-  created_at?: string;
-}
-
-export interface InvoiceItem {
-  plant_name: string;
-  quantity: number;
-  unit_cost: number;
-}
-
-export interface InvoiceResult {
-  items: InvoiceItem[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class PlantService {
-  private apiUrl = 'https://api.verzagarden.com/api';
+  private apiUrl = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) {}
 
@@ -64,20 +51,17 @@ export class PlantService {
     return this.http.delete(`${this.apiUrl}/plants/${id}`);
   }
 
-  analyzeInvoice(slug: string, file: File): Observable<{ result: InvoiceResult }> {
+  // --- NUEVOS ENDPOINTS PARA AI RESTOCK ---
+
+  analyzeInvoice(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('invoice', file);
-
-    return this.http.post<{ result: InvoiceResult }>(
-      `${this.apiUrl}/clients/${slug}/invoices/analyze`,
-      formData
-    );
+    // Asumiendo que tu backend tiene un endpoint de análisis OCR / IA
+    return this.http.post(`${this.apiUrl}/inventory/analyze-invoice`, formData);
   }
 
-  confirmRestock(slug: string, items: InvoiceItem[]): Observable<any> {
-    return this.http.post(
-      `${this.apiUrl}/clients/${slug}/invoices/confirm-restock`,
-      { items }
-    );
+  restockPlants(slug: string, items: any[]): Observable<any> {
+    // Endpoint para subir las nuevas cantidades extraídas de la factura
+    return this.http.post(`${this.apiUrl}/clients/${slug}/inventory/restock`, { items });
   }
 }
