@@ -34,6 +34,10 @@ private apiUrl = 'https://verzagarden-production.up.railway.app/api';
     return this.http.get<Client>(`${this.apiUrl}/clients/${slug}`);
   }
 
+  login(slug: string, username: string, password: string): Observable<any> {
+  return this.http.post(`${this.apiUrl}/clients/${slug}/login`, { username, password });
+}
+
   getPlants(slug: string): Observable<Plant[]> {
     return this.http.get<Plant[]>(`${this.apiUrl}/clients/${slug}/plants`);
   }
@@ -56,11 +60,11 @@ private apiUrl = 'https://verzagarden-production.up.railway.app/api';
     const formData = new FormData();
     formData.append('invoice', file);
     // Asumiendo que tu backend tiene un endpoint de análisis OCR / IA
-    return this.http.post(`${this.apiUrl}/inventory/analyze-invoice`, formData);
+  return this.http.post(`${this.apiUrl}/clients/demo-garden/invoices/analyze`, formData);
   }
 
   restockPlants(slug: string, items: any[]): Observable<any> {
     // Endpoint para subir las nuevas cantidades extraídas de la factura
-    return this.http.post(`${this.apiUrl}/clients/${slug}/inventory/restock`, { items });
+return this.http.post(`${this.apiUrl}/clients/${slug}/invoices/confirm-restock`, { items });
   }
 }

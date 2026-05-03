@@ -18,6 +18,11 @@ export class AppComponent implements OnInit {
   search = '';
   selectedCategory = 'Todas';
   adminMode = false;
+  showLoginModal = false;
+  loginUsername = '';
+  loginPassword = '';
+  loginError = '';
+  loginLoading = false;
   loading = true;
 
   // Variables para el formulario de plantas
@@ -59,6 +64,52 @@ loadData() {
   toggleLanguage() {
     this.isEnglish = !this.isEnglish;
   }
+
+  openAdminModal() {
+  if (this.isAdminAuthenticated()) {
+    this.adminMode = true;
+  } else {
+    this.showLoginModal = true;
+    this.loginError = '';
+  }
+}
+
+isAdminAuthenticated(): boolean {
+  return sessionStorage.getItem('admin_slug') === this.clientSlug;
+}
+
+submitLogin() {
+  if (!this.loginUsername || !this.loginPassword) return;
+  this.loginLoading = true;
+  this.loginError = '';
+
+  this.plantService.login(this.clientSlug, this.loginUsername, this.loginPassword).subscribe({
+    next: () => {
+      sessionStorage.setItem('admin_slug', this.clientSlug);
+      this.showLoginModal = false;
+      this.adminMode = true;
+      this.loginLoading = false;
+      this.loginUsername = '';
+      this.loginPassword = '';
+    },
+    error: () => {
+      this.loginError = 'Usuario o contraseña incorrectos';
+      this.loginLoading = false;
+    }
+  });
+}
+
+closeModal() {
+  this.showLoginModal = false;
+  this.loginError = '';
+  this.loginUsername = '';
+  this.loginPassword = '';
+}
+
+logout() {
+  sessionStorage.removeItem('admin_slug');
+  this.adminMode = false;
+}
 
   get categories() {
     return ['Todas', ...new Set(this.plants.map(p => p.category || 'Sin categoría'))];

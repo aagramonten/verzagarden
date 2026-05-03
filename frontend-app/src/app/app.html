@@ -5,8 +5,7 @@
   </div>
   <ul class="nav-links" style="display: flex; list-style: none; gap: 16px; margin: 0; padding: 0;">
     <li>
-      <button class="lang-btn" style="padding: 10px 20px; border-radius: 99px; border: 1px solid #dfe7dd; background: white; cursor: pointer;" (click)="adminMode = !adminMode">
-        {{ adminMode ? 'Ver catálogo' : 'Admin' }}
+<button class="lang-btn" style="padding: 10px 20px; border-radius: 99px; border: 1px solid #dfe7dd; background: white; cursor: pointer;" (click)="adminMode ? logout() : openAdminModal()">        {{ adminMode ? 'Ver catálogo' : 'Admin' }}
       </button>
     </li>
     <li>
@@ -161,4 +160,41 @@
       No se encontraron plantas que coincidan con la búsqueda.
     </div>
   </div>
+  <!-- MODAL LOGIN -->
+<div *ngIf="showLoginModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: white; border-radius: 28px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 24px 70px rgba(0,0,0,0.2);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;">
+      <h2 style="margin: 0; color: #102319; font-size: 1.6rem;">Acceso Admin</h2>
+      <button (click)="closeModal()" style="border: none; background: #f4f8f1; border-radius: 99px; width: 36px; height: 36px; cursor: pointer; font-size: 1rem;">✕</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <input 
+        type="text" 
+        placeholder="Usuario" 
+        [(ngModel)]="loginUsername"
+        style="padding: 14px 16px; border-radius: 14px; border: 1px solid #dfe7dd; font-size: 1rem; outline: none;">
+      
+      <input 
+        type="password" 
+        placeholder="Contraseña" 
+        [(ngModel)]="loginPassword"
+        (keyup.enter)="submitLogin()"
+        style="padding: 14px 16px; border-radius: 14px; border: 1px solid #dfe7dd; font-size: 1rem; outline: none;">
+
+      <div *ngIf="loginError" style="color: #c5221f; font-size: 0.9rem; font-weight: 600;">
+        {{ loginError }}
+      </div>
+
+      <button 
+        (click)="submitLogin()" 
+        [disabled]="loginLoading"
+        style="background: #1f7a4d; color: white; padding: 14px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 6px;">
+        {{ loginLoading ? 'Verificando...' : 'Entrar' }}
+      </button>
+    </div>
+
+  </div>
+</div>
 </section>
