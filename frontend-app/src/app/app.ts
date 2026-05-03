@@ -36,23 +36,24 @@ export class AppComponent implements OnInit {
   }
 
   loadData() {
-    this.loading = true;
-    this.plantService.getClient(this.clientSlug).subscribe({
-      next: client => this.client = client,
-      error: err => console.error('Error cargando cliente:', err)
-    });
+  if (!this.plants.length) this.loading = true; // ← solo muestra spinner la primera vez
 
-    this.plantService.getPlants(this.clientSlug).subscribe({
-      next: plants => {
-        this.plants = plants;
-        this.loading = false;
-      },
-      error: err => {
-        console.error('Error cargando plantas:', err);
-        this.loading = false;
-      }
-    });
-  }
+  this.plantService.getClient(this.clientSlug).subscribe({
+    next: client => this.client = client,
+    error: err => console.error('Error cargando cliente:', err)
+  });
+
+  this.plantService.getPlants(this.clientSlug).subscribe({
+    next: plants => {
+      this.plants = plants;
+      this.loading = false;
+    },
+    error: err => {
+      console.error('Error cargando plantas:', err);
+      this.loading = false;
+    }
+  });
+}
 
   toggleLanguage() {
     this.isEnglish = !this.isEnglish;
