@@ -91,13 +91,16 @@ submitLogin() {
       this.loginLoading = false;
       this.loginUsername = '';
       this.loginPassword = '';
+      this.cdr.detectChanges(); // ← agrega esta línea
     },
     error: () => {
       this.loginError = 'Usuario o contraseña incorrectos';
       this.loginLoading = false;
+      this.cdr.detectChanges(); // ← y esta
     }
   });
 }
+
 
 closeModal() {
   this.showLoginModal = false;
