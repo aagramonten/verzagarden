@@ -8,25 +8,20 @@
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-button,
-a {
-  font-family: inherit;
-}
+button, a { font-family: inherit; }
 
 /* NAVBAR */
 .navbar {
   width: min(1180px, calc(100% - 32px));
   margin: 20px auto 0;
-  padding: 16px 22px;
+  padding: 16px 22px !important;
   border: 1px solid rgba(16, 33, 23, 0.08);
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(18px);
-  display: flex;
+  display: flex !important;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 18px 50px rgba(16, 33, 23, 0.08);
@@ -43,37 +38,30 @@ a {
   line-height: 1.1;
 }
 
-.logo span {
-  color: #188d42;
-}
+.logo span { color: #188d42; }
 
 .nav-links {
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 10px;
   list-style: none;
-  padding: 0;
-  margin: 0;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-.lang-btn,
-.secondary-btn {
-  border: 0;
+.lang-btn {
+  border: 1px solid #dfe7dd !important;
   background: #eef5ef;
   color: #123821;
-  min-height: 46px;
-  padding: 0 18px;
+  min-height: 44px;
+  padding: 0 18px !important;
   border-radius: 999px;
   cursor: pointer;
   font-weight: 900;
   transition: 0.2s ease;
 }
 
-.lang-btn:hover,
-.secondary-btn:hover {
-  transform: translateY(-1px);
-  background: #dff0e3;
-}
+.lang-btn:hover { background: #dff0e3; }
 
 .cta-button {
   border: 0;
@@ -87,21 +75,16 @@ a {
   transition: 0.2s ease;
 }
 
-.cta-button:hover {
-  transform: translateY(-2px);
-}
-
-.cta-button:disabled,
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-}
+button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* HERO */
-.hero,
 .garden-hero {
   width: 100%;
+  padding: 40px 80px !important;
+}
+
+.garden-hero h1 {
+  font-size: 4rem !important;
 }
 
 .eyebrow {
@@ -118,6 +101,7 @@ button:disabled {
 .admin-section {
   width: min(1180px, calc(100% - 32px));
   margin: 34px auto;
+  padding: 0 !important;
 }
 
 .admin-card {
@@ -126,17 +110,18 @@ button:disabled {
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(16, 33, 23, 0.08);
   box-shadow: 0 24px 70px rgba(16, 33, 23, 0.08);
-  padding: 36px;
+  padding: 36px !important;
 }
 
 .plant-form {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   padding: 24px;
   border-radius: 28px;
   background: #f6faf5;
   border: 1px solid #eef1ec;
+  margin-bottom: 30px;
 }
 
 .plant-form input,
@@ -145,9 +130,9 @@ button:disabled {
 .filters select {
   width: 100%;
   min-height: 52px;
-  border: 1px solid rgba(16, 33, 23, 0.12);
-  border-radius: 18px;
-  padding: 14px 16px;
+  border: 1px solid rgba(16, 33, 23, 0.12) !important;
+  border-radius: 18px !important;
+  padding: 14px 16px !important;
   outline: none;
   background: white;
   color: #102319;
@@ -155,21 +140,14 @@ button:disabled {
   font-weight: 650;
 }
 
-.plant-form input:focus,
-.plant-form textarea:focus,
-.filters input:focus,
-.filters select:focus {
-  border-color: rgba(39, 214, 111, 0.65);
-  box-shadow: 0 0 0 4px rgba(39, 214, 111, 0.12);
-}
-
 .plant-form textarea {
-  grid-column: span 4;
+  grid-column: span 2;
   min-height: 110px;
   resize: vertical;
 }
 
 .check-row {
+  grid-column: span 2;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -178,29 +156,63 @@ button:disabled {
 }
 
 .form-actions {
-  grid-column: span 4;
-  display: flex;
+  grid-column: span 2;
+  display: flex !important;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin-top: 10px;
 }
 
-/* AI RESTOCK */
-input[type="file"] {
-  font: inherit;
+/* CATALOG */
+.catalog-section {
+  width: min(1280px, calc(100% - 32px));
+  margin: 24px auto 80px;
+  padding: 20px 0 80px !important;
 }
 
-.ai-loading-container {
-  margin-top: 18px;
-  padding: 18px;
-  border-radius: 20px;
-  background: #f3f8f3;
-  border: 1px solid rgba(16, 33, 23, 0.08);
+.catalog-top {
+  background: white !important;
+  padding: 28px 32px !important;
+  border-radius: 32px !important;
+  border: 1px solid #eef1ec !important;
+  margin-bottom: 40px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.section-title-left {
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: #102319;
+  margin: 0 !important;
+}
+
+.filters {
   display: flex;
-  gap: 14px;
-  align-items: center;
+  gap: 12px;
 }
 
+.plant-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.plant-card {
+  overflow: hidden;
+  border-radius: 24px;
+  background: white;
+  border: 1px solid rgba(16, 33, 23, 0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  transition: 0.24s ease;
+}
+
+/* SPINNER */
 .spinner {
   width: 28px;
   height: 28px;
@@ -210,100 +222,26 @@ input[type="file"] {
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* CATALOG */
-.catalog-section {
-  width: min(1280px, calc(100% - 32px));
-  margin: 24px auto 80px;
-}
-
-.catalog-top {
-  background: white !important;
-  padding: 32px 40px !important;
-  border-radius: 32px !important;
-  border: 1px solid #eef1ec !important;
-  margin-bottom: 40px !important;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  gap: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.025) !important;
-}
-
-.section-title-left {
-  font-size: 2.2rem;
-  line-height: 1;
-  letter-spacing: -0.05em;
-  color: #102319;
-}
-
-.filters {
-  display: flex;
-  gap: 12px;
-}
-
-.plant-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-}
-
-/* In case app-plant-card uses these classes internally */
-.plant-card {
-  overflow: hidden;
-  border-radius: 28px;
-  background: white;
-  border: 1px solid rgba(16, 33, 23, 0.08);
-  box-shadow: 0 20px 45px rgba(16, 33, 23, 0.08);
-  transition: 0.24s ease;
-}
-
-.plant-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 28px 70px rgba(16, 33, 23, 0.14);
-}
-
-.image-wrap {
-  height: 250px;
-  position: relative;
-  background: #eef4ee;
-  overflow: hidden;
-}
-
-.image-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* RESPONSIVE */
+/* ========================
+   RESPONSIVE - TABLET
+   ======================== */
 @media (max-width: 900px) {
   .garden-hero {
-    padding: 24px 16px !important;
+    padding: 24px 20px !important;
   }
 
   .garden-hero > div {
     flex-direction: column;
   }
 
-  .plant-form {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .plant-form textarea,
-  .form-actions,
-  .check-row {
-    grid-column: span 2 !important;
+  .garden-hero h1 {
+    font-size: 2.8rem !important;
   }
 
   .plant-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
   .catalog-top {
@@ -322,24 +260,46 @@ input[type="file"] {
   }
 }
 
+/* ========================
+   RESPONSIVE - MOBILE
+   ======================== */
 @media (max-width: 640px) {
   .navbar {
-    position: static;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 14px;
+    position: static !important;
+    top: 0;
+    margin: 12px auto 0;
+    border-radius: 20px;
   }
 
   .nav-links {
     justify-content: space-between;
   }
 
+  .garden-hero {
+    padding: 16px !important;
+  }
+
+  .garden-hero h1 {
+    font-size: 2.2rem !important;
+    letter-spacing: -1px !important;
+  }
+
+  .garden-hero > div > div:last-child {
+    display: none; /* oculta el bloque verde WhatsApp en móvil */
+  }
+
+  .admin-section {
+    margin: 16px auto;
+  }
+
   .admin-card {
-    padding: 22px;
+    padding: 20px !important;
+    border-radius: 24px;
   }
 
   .plant-form {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    padding: 16px;
   }
 
   .plant-form textarea,
@@ -349,10 +309,19 @@ input[type="file"] {
   }
 
   .plant-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .filters {
     flex-direction: column;
+  }
+
+  .catalog-top {
+    padding: 20px !important;
+    border-radius: 20px !important;
+  }
+
+  .catalog-section {
+    padding: 12px 0 40px !important;
   }
 }
