@@ -22,7 +22,8 @@
   <div class="search-bar-container" style="display: flex; align-items: center; background-color: #F0F2F0; border-radius: 25px; padding: 10px 15px; margin-bottom: 15px;">
     <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" stroke="#888" stroke-width="2" fill="none" style="margin-right: 10px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
     <input type="text" [(ngModel)]="search" placeholder="Buscar plantas..." style="flex: 1; border: none; background: transparent; font-size: 1rem; outline: none; color: #333;">
-    <a [href]="'https://wa.me/19392360534?text=' + encodeURIComponent('Hola, me gustaría hacer una consulta general sobre el inventario.')" target="_blank" class="whatsapp-search-btn" style="color: #2B7A3E; border: none; background: none; padding: 0; cursor: pointer; display: flex; align-items: center;">
+    
+    <a [href]="getGeneralWhatsappLink()" target="_blank" class="whatsapp-search-btn" style="color: #2B7A3E; border: none; background: none; padding: 0; cursor: pointer; display: flex; align-items: center;">
       <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
     </a>
   </div>

@@ -51,85 +51,93 @@ export class AppComponent implements OnInit {
       }
     });
   }
-constructor(private plantService: PlantService, private cdr: ChangeDetectorRef) {}
+
+  constructor(private plantService: PlantService, private cdr: ChangeDetectorRef) {}
+  
   ngOnInit() {
     this.loadData();
   }
 
-loadData() {
-  if (!this.plants.length) this.loading = true;
+  // --- NUEVA FUNCIÓN PARA EL ENLACE GENERAL DE WHATSAPP ---
+  getGeneralWhatsappLink(): string {
+    const phone = this.client?.whatsapp_number || '19392360534';
+    const message = "Hola, me gustaría hacer una consulta general sobre el inventario.";
+    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  }
 
-  this.plantService.getPlants(this.clientSlug).subscribe({
-    next: plants => {
-      console.log('✅ Plantas recibidas:', plants.length); // ← línea 42
-      this.plants = [...plants];
-      this.loading = false;
+  loadData() {
+    if (!this.plants.length) this.loading = true;
+
+    this.plantService.getPlants(this.clientSlug).subscribe({
+      next: plants => {
+        console.log('✅ Plantas recibidas:', plants.length);
+        this.plants = [...plants];
+        this.loading = false;
         this.cdr.detectChanges(); 
-    },
-    error: err => {
-      console.log('❌ Error plantas:', err); // ← línea 47
-      this.loading = false;
-    }
-  });
+      },
+      error: err => {
+        console.log('❌ Error plantas:', err);
+        this.loading = false;
+      }
+    });
 
-  this.plantService.getClient(this.clientSlug).subscribe({
-    next: client => this.client = { ...client }, // ← fuerza detección de cambios
-    error: err => console.error('Error cargando cliente:', err)
-  });
-}
+    this.plantService.getClient(this.clientSlug).subscribe({
+      next: client => this.client = { ...client },
+      error: err => console.error('Error cargando cliente:', err)
+    });
+  }
 
   toggleLanguage() {
     this.isEnglish = !this.isEnglish;
   }
 
   openAdminModal() {
-  if (this.isAdminAuthenticated()) {
-    this.adminMode = true;
-  } else {
-    this.showLoginModal = true;
-    this.loginError = '';
-  }
-}
-
-isAdminAuthenticated(): boolean {
-  return sessionStorage.getItem('admin_slug') === this.clientSlug;
-}
-
-submitLogin() {
-  if (!this.loginUsername || !this.loginPassword) return;
-  this.loginLoading = true;
-  this.loginError = '';
-
-  this.plantService.login(this.clientSlug, this.loginUsername, this.loginPassword).subscribe({
-    next: () => {
-      sessionStorage.setItem('admin_slug', this.clientSlug);
-      this.showLoginModal = false;
+    if (this.isAdminAuthenticated()) {
       this.adminMode = true;
-      this.loginLoading = false;
-      this.loginUsername = '';
-      this.loginPassword = '';
-      this.cdr.detectChanges(); // ← agrega esta línea
-    },
-    error: () => {
-      this.loginError = 'Usuario o contraseña incorrectos';
-      this.loginLoading = false;
-      this.cdr.detectChanges(); // ← y esta
+    } else {
+      this.showLoginModal = true;
+      this.loginError = '';
     }
-  });
-}
+  }
 
+  isAdminAuthenticated(): boolean {
+    return sessionStorage.getItem('admin_slug') === this.clientSlug;
+  }
 
-closeModal() {
-  this.showLoginModal = false;
-  this.loginError = '';
-  this.loginUsername = '';
-  this.loginPassword = '';
-}
+  submitLogin() {
+    if (!this.loginUsername || !this.loginPassword) return;
+    this.loginLoading = true;
+    this.loginError = '';
 
-logout() {
-  sessionStorage.removeItem('admin_slug');
-  this.adminMode = false;
-}
+    this.plantService.login(this.clientSlug, this.loginUsername, this.loginPassword).subscribe({
+      next: () => {
+        sessionStorage.setItem('admin_slug', this.clientSlug);
+        this.showLoginModal = false;
+        this.adminMode = true;
+        this.loginLoading = false;
+        this.loginUsername = '';
+        this.loginPassword = '';
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loginError = 'Usuario o contraseña incorrectos';
+        this.loginLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  closeModal() {
+    this.showLoginModal = false;
+    this.loginError = '';
+    this.loginUsername = '';
+    this.loginPassword = '';
+  }
+
+  logout() {
+    sessionStorage.removeItem('admin_slug');
+    this.adminMode = false;
+  }
 
   get categories() {
     return ['Todas', ...new Set(this.plants.map(p => p.category || 'Sin categoría'))];
@@ -145,7 +153,8 @@ logout() {
   }
 
   whatsappLink(plant: Plant) {
-    const number = this.client?.whatsapp_number || '17876195211';
+    // Número actualizado
+    const number = this.client?.whatsapp_number || '19392360534';
     const message = `Hola, me interesa esta planta del catálogo:\n\n🪴 Nombre: ${plant.name}\n💰 Precio: $${plant.price}\n\n¿Tienen disponibilidad?`;
     return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   }
