@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlantService, Client, Plant } from './services/plant.service';
@@ -29,8 +29,7 @@ export class AppComponent implements OnInit {
   invoiceLoading = false;
   invoiceResult: { items: any[] } | null = null;
 
-  constructor(private plantService: PlantService) {}
-
+constructor(private plantService: PlantService, private cdr: ChangeDetectorRef) {}
   ngOnInit() {
     this.loadData();
   }
@@ -43,6 +42,7 @@ loadData() {
       console.log('✅ Plantas recibidas:', plants.length); // ← línea 42
       this.plants = [...plants];
       this.loading = false;
+        this.cdr.detectChanges(); 
     },
     error: err => {
       console.log('❌ Error plantas:', err); // ← línea 47
