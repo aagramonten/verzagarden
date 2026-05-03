@@ -34,6 +34,23 @@ export class AppComponent implements OnInit {
   invoiceLoading = false;
   invoiceResult: { items: any[] } | null = null;
 
+  imageUploading = false;
+
+  uploadPlantImage(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+    this.imageUploading = true;
+    this.plantService.uploadImage(file).subscribe({
+      next: (res) => {
+        this.plantForm.image_url = res.url;
+        this.imageUploading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.imageUploading = false;
+      }
+    });
+  }
 constructor(private plantService: PlantService, private cdr: ChangeDetectorRef) {}
   ngOnInit() {
     this.loadData();

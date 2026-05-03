@@ -67,4 +67,10 @@ private apiUrl = 'https://verzagarden-production.up.railway.app/api';
     // Endpoint para subir las nuevas cantidades extraídas de la factura
 return this.http.post(`${this.apiUrl}/clients/${slug}/invoices/confirm-restock`, { items });
   }
+    uploadImage(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('image', file);
+    return this.http.post(`${this.apiUrl}/upload`, formData);
+  }
 }
+
