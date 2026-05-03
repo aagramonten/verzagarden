@@ -27,6 +27,30 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, app: 'VerzaPlants API' });
 });
 
+app.post('/api/clients/:slug/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const [rows] = await pool.query(
+      'SELECT * FROM clients WHERE slug = ? LIMIT 1',
+      [req.params.slug]
+    );
+
+    if (!rows.length) return res.status(404).json({ message: 'Cliente no encontrado' });
+
+    const client = rows[0];
+
+    if (client.admin_user !== username || client.admin_password !== password) {
+      return res.status(401).json({ message: 'Credenciales incorrectas' });
+    }
+
+    res.json({ ok: true, slug: client.slug });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Error en login', error: error.message });
+  }
+});
+
 app.get('/api/clients/:slug', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
