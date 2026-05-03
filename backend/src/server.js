@@ -119,14 +119,15 @@ app.post('/api/clients/:slug/invoices/analyze', upload.single('invoice'), async 
     const base64File = req.file.buffer.toString('base64');
     const mimeType = req.file.mimetype;
 
-    const response = await openai.responses.create({
+    // ✅ Corregido el uso oficial de OpenAI v4 para lectura multimodal y JSON estructurado
+    const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
-      input: [
+      messages: [
         {
           role: 'user',
           content: [
             {
-              type: 'input_text',
+              type: 'text',
               text: `
 Analiza esta factura de compra para un vivero.
 
@@ -150,18 +151,18 @@ Reglas:
 `
             },
             {
-              type: 'input_image',
-              image_url: `data:${mimeType};base64,${base64File}`
+              type: 'image_url',
+              image_url: {
+                url: `data:${mimeType};base64,${base64File}`
+              }
             }
           ]
         }
       ],
-      text: {
-        format: { type: 'json_object' }
-      }
+      response_format: { type: 'json_object' }
     });
 
-    const parsed = JSON.parse(response.output_text);
+    const parsed = JSON.parse(response.choices[0].message.content);
 
     res.json({
       message: 'Factura analizada',
@@ -244,6 +245,7 @@ app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`VerzaPlants API running on http://localhost:${port}`);
+// ✅ Corregido: '0.0.0.0' para que Railway lo exponga a internet
+app.listen(port, '0.0.0.0', () => {
+  console.log(`VerzaPlants API running on port ${port}`);
 });
