@@ -26,11 +26,9 @@ export class AppComponent implements OnInit {
   loginLoading = false;
   loading = true;
 
-  // Variables para el formulario de plantas
   plantForm: Plant = this.emptyPlant();
   editingId?: number;
 
-  // Variables para el "AI Restock" (Facturas)
   selectedInvoice: File | null = null;
   invoiceLoading = false;
   invoiceResult: { items: any[] } | null = null;
@@ -47,19 +45,14 @@ export class AppComponent implements OnInit {
         this.imageUploading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.imageUploading = false;
-      }
+      error: () => { this.imageUploading = false; }
     });
   }
 
   constructor(private plantService: PlantService, private cdr: ChangeDetectorRef) {}
-  
-  ngOnInit() {
-    this.loadData();
-  }
 
-  // --- NUEVA FUNCIÓN PARA EL ENLACE GENERAL DE WHATSAPP ---
+  ngOnInit() { this.loadData(); }
+
   getGeneralWhatsappLink(): string {
     const phone = this.client?.whatsapp_number || '19392360534';
     const message = "Hola, me gustaría hacer una consulta general sobre el inventario.";
@@ -68,29 +61,21 @@ export class AppComponent implements OnInit {
 
   loadData() {
     if (!this.plants.length) this.loading = true;
-
     this.plantService.getPlants(this.clientSlug).subscribe({
       next: plants => {
-        console.log('✅ Plantas recibidas:', plants.length);
         this.plants = [...plants];
         this.loading = false;
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
       },
-      error: err => {
-        console.log('❌ Error plantas:', err);
-        this.loading = false;
-      }
+      error: () => { this.loading = false; }
     });
-
     this.plantService.getClient(this.clientSlug).subscribe({
       next: client => this.client = { ...client },
       error: err => console.error('Error cargando cliente:', err)
     });
   }
 
-  toggleLanguage() {
-    this.isEnglish = !this.isEnglish;
-  }
+  toggleLanguage() { this.isEnglish = !this.isEnglish; }
 
   openAdminModal() {
     if (this.isAdminAuthenticated()) {
@@ -109,7 +94,6 @@ export class AppComponent implements OnInit {
     if (!this.loginUsername || !this.loginPassword) return;
     this.loginLoading = true;
     this.loginError = '';
-
     this.plantService.login(this.clientSlug, this.loginUsername, this.loginPassword).subscribe({
       next: () => {
         sessionStorage.setItem('admin_slug', this.clientSlug);
@@ -153,26 +137,36 @@ export class AppComponent implements OnInit {
     });
   }
 
+  // --- MÉTRICAS PARA EL DASHBOARD ---
+  get totalStock(): number {
+    return this.plants.reduce((sum, p) => sum + (p.stock || 0), 0);
+  }
+
+  get lowStockPlants(): Plant[] {
+    return this.plants.filter(p => p.stock > 0 && p.stock <= 5);
+  }
+
+  get outOfStockPlants(): Plant[] {
+    return this.plants.filter(p => p.stock <= 0);
+  }
+
+  get estimatedInventoryValue(): number {
+    return this.plants.reduce((sum, p) => sum + ((p.price || 0) * (p.stock || 0)), 0);
+  }
+
   whatsappLink(plant: Plant) {
     const number = this.client?.whatsapp_number || '19392360534';
     const message = `Hola, me interesa esta planta del catálogo:\n\n🪴 Nombre: ${plant.name}\n💰 Precio: $${plant.price}\n\n¿Tienen disponibilidad?`;
     return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   }
 
-  // --- MÉTODOS CRUD DE PLANTAS ---
-
   savePlant() {
     if (!this.plantForm.name || this.plantForm.price < 0) return;
-
     const request = this.editingId
       ? this.plantService.updatePlant(this.editingId, this.plantForm)
       : this.plantService.createPlant(this.clientSlug, this.plantForm);
-
     request.subscribe({
-      next: () => {
-        this.resetForm();
-        this.loadData();
-      },
+      next: () => { this.resetForm(); this.loadData(); },
       error: err => console.error(err)
     });
   }
@@ -200,64 +194,34 @@ export class AppComponent implements OnInit {
   }
 
   emptyPlant(): Plant {
-    return {
-      name: '',
-      category: 'Exterior',
-      description: '',
-      price: 0,
-      stock: 0,
-      image_url: '',
-      light: '',
-      water: '',
-      is_featured: false,
-      is_active: true
-    };
+    return { name: '', category: 'Exterior', description: '', price: 0, stock: 0, image_url: '', light: '', water: '', is_featured: false, is_active: true };
   }
-
-  // --- MÉTODOS DE FACTURACIÓN (AI RESTOCK) ---
 
   onInvoiceSelected(event: any) {
     const file = event.target.files[0];
-    if (file) {
-      this.selectedInvoice = file;
-    }
+    if (file) this.selectedInvoice = file;
   }
 
   analyzeInvoice() {
     if (!this.selectedInvoice) return;
     this.invoiceLoading = true;
-    
     this.plantService.analyzeInvoice(this.selectedInvoice).subscribe({
-      next: (res) => {
-        this.invoiceResult = res;
+      next: (res) => { this.invoiceResult = res; this.invoiceLoading = false; },
+      error: () => {
         this.invoiceLoading = false;
-      },
-      error: (err) => {
-        console.error('Error analizando la factura:', err);
-        this.invoiceLoading = false;
-        // Mock de prueba en caso de que el backend falle o no esté listo:
-        this.invoiceResult = {
-          items: [{ plant_name: 'Ficus Lyrata (Autodetectado)', quantity: 5, unit_cost: 15.00 }]
-        };
+        this.invoiceResult = { items: [{ plant_name: 'Ficus Lyrata (Autodetectado)', quantity: 5, unit_cost: 15.00 }] };
       }
     });
   }
 
   removeItemFromInvoice(index: number) {
-    if (this.invoiceResult && this.invoiceResult.items) {
-      this.invoiceResult.items.splice(index, 1);
-    }
+    if (this.invoiceResult?.items) this.invoiceResult.items.splice(index, 1);
   }
 
   confirmRestock() {
     if (!this.invoiceResult?.items?.length) return;
-    
     this.plantService.restockPlants(this.clientSlug, this.invoiceResult.items).subscribe({
-      next: () => {
-        this.cancelInvoice();
-        this.loadData();
-        alert('¡Inventario actualizado correctamente!');
-      },
+      next: () => { this.cancelInvoice(); this.loadData(); alert('¡Inventario actualizado correctamente!'); },
       error: err => console.error('Error al actualizar stock:', err)
     });
   }

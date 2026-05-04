@@ -1,169 +1,272 @@
-<header class="main-header" style="background-color: #14452F; color: white; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(20, 69, 47, 0.15);">
-  
-  <button class="icon-btn" (click)="toggleLanguage()" aria-label="Cambiar Idioma" style="background: none; border: 1px solid #A3C4B3; color: white; border-radius: 8px; padding: 5px 10px; cursor: pointer; font-weight: bold; font-size: 0.8rem;">
+<!-- ═══════════════════════════════════════════ -->
+<!--  HEADER — shared between public & admin    -->
+<!-- ═══════════════════════════════════════════ -->
+<header style="background:#14452F;color:white;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(20,69,47,0.18);">
+  <button (click)="toggleLanguage()" style="background:none;border:1px solid #A3C4B3;color:white;border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:bold;font-size:0.8rem;">
     {{ isEnglish ? 'ES' : 'EN' }}
   </button>
-  
-  <div class="logo-container" style="display: flex; align-items: center; gap: 8px;">
-    <span class="logo-icon" style="font-size: 1.5rem;">🌿</span>
-    <div class="logo-text" style="text-align: center;">
-      <h1 style="margin: 0; font-size: 1.2rem; font-weight: 600; line-height: 1.1; color: white;">Verde Vida</h1>
-      <p style="margin: 0; font-size: 0.7rem; color: #A3C4B3;">Plantas y Jardines</p>
+
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span style="font-size:1.5rem;">🌿</span>
+    <div style="text-align:center;">
+      <h1 style="margin:0;font-size:1.2rem;font-weight:600;line-height:1.1;color:white;">Verde Vida</h1>
+      <p style="margin:0;font-size:0.7rem;color:#A3C4B3;">Plantas y Jardines</p>
     </div>
   </div>
 
-  <button class="icon-btn" (click)="adminMode ? (adminMode = false) : openAdminModal()" aria-label="Admin" style="background: none; border: none; color: white; cursor: pointer; padding: 5px; display: flex; align-items: center; flex-direction: column;">
-    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-    <span style="font-size: 0.6rem; margin-top: 2px;">{{ adminMode ? 'Salir' : 'Admin' }}</span>
+  <!-- Public → shows Admin button | Admin → shows "Salir" -->
+  <button *ngIf="!adminMode" (click)="openAdminModal()" style="background:none;border:none;color:white;cursor:pointer;padding:5px;display:flex;align-items:center;flex-direction:column;">
+    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span style="font-size:0.6rem;margin-top:2px;">Admin</span>
+  </button>
+
+  <button *ngIf="adminMode" (click)="logout()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:white;border-radius:10px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:0.85rem;display:flex;align-items:center;gap:6px;">
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Salir
   </button>
 </header>
 
-<section class="search-filter-section" *ngIf="!adminMode" style="background-color: white; padding: 15px 20px; border-bottom: 1px solid #E0E0E0;">
-  <div class="search-bar-container" style="display: flex; align-items: center; background-color: #F0F2F0; border-radius: 25px; padding: 10px 15px; margin-bottom: 15px;">
-    <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" stroke="#888" stroke-width="2" fill="none" style="margin-right: 10px; min-width: 20px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-    <input type="text" [(ngModel)]="search" placeholder="Buscar plantas..." style="flex: 1; border: none; background: transparent; font-size: 1rem; outline: none; color: #333; width: 100%;">
-    
-    <a [href]="getGeneralWhatsappLink()" target="_blank" class="whatsapp-search-btn" style="color: #2B7A3E; border: none; background: none; padding: 0; cursor: pointer; display: flex; align-items: center; margin-left: 10px;">
-      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-    </a>
-  </div>
 
-  <div class="category-filters" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
-    <button *ngFor="let cat of categories" 
-            (click)="selectedCategory = cat"
-            style="border: 1px solid transparent; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.3s ease;"
-            [style.backgroundColor]="selectedCategory === cat ? '#14452F' : '#F0F2F0'"
-            [style.color]="selectedCategory === cat ? 'white' : '#666'">
-      {{ cat }}
-    </button>
-  </div>
-</section>
+<!-- ═══════════════════════════════════════════ -->
+<!--  PUBLIC VIEW                               -->
+<!-- ═══════════════════════════════════════════ -->
+<ng-container *ngIf="!adminMode">
 
-<header class="hero garden-hero" *ngIf="!adminMode" style="min-height: auto; background: #fafdf8;">
-  <div style="display: flex; gap: 20px; max-width: 1200px; width: 100%; text-align: left; flex-wrap: wrap; margin: 0 auto;">
-    
-    <div style="flex: 1 1 300px; background: white; border-radius: 24px; padding: 24px; box-shadow: 0 10px 30px rgba(16, 35, 25, 0.04); border: 1px solid #eef1ec;">
-      <span class="eyebrow" style="color: #1f7a4d; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;">INVENTARIO DISPONIBLE</span>
-      <h1 style="font-size: 2.8rem; margin-top: 10px; margin-bottom: 15px; color: #102319; letter-spacing: -1px; line-height: 1.1;">{{ client?.business_name || 'Jardines Morales' }}</h1>
-      <p style="font-size: 1rem; margin-bottom: 24px; color: #516052;">Explora plantas disponibles, precios actualizados y ordena directo por WhatsApp.</p>
-      
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <div style="background: #f4f8f1; padding: 16px; border-radius: 16px; flex: 1; min-width: 80px; text-align: center;">
-          <h2 style="font-size: 1.8rem; color: #102319; margin: 0 0 4px 0; line-height: 1;">{{ plants.length }}</h2>
-          <span style="font-size: 0.75rem; color: #516052; font-weight: 600;">Plantas</span>
-        </div>
-        <div style="background: #f4f8f1; padding: 16px; border-radius: 16px; flex: 1; min-width: 80px; text-align: center;">
-          <h2 style="font-size: 1.8rem; color: #102319; margin: 0 0 4px 0; line-height: 1;">{{ categories.length - 1 }}</h2>
-          <span style="font-size: 0.75rem; color: #516052; font-weight: 600;">Categorías</span>
-        </div>
-        <div style="background: #f4f8f1; padding: 16px; border-radius: 16px; flex: 1; min-width: 80px; text-align: center;">
-          <h2 style="font-size: 1.8rem; color: #102319; margin: 0 0 4px 0; line-height: 1;">{{ filteredPlants.length }}</h2>
-          <span style="font-size: 0.75rem; color: #516052; font-weight: 600;">Disponibles</span>
-        </div>
-      </div>
+  <!-- Search + Category filters -->
+  <section style="background:white;padding:15px 20px;border-bottom:1px solid #E0E0E0;">
+    <div style="display:flex;align-items:center;background:#F0F2F0;border-radius:25px;padding:10px 15px;margin-bottom:15px;">
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="#888" stroke-width="2" fill="none" style="margin-right:10px;min-width:20px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" [(ngModel)]="search" placeholder="Buscar plantas..." style="flex:1;border:none;background:transparent;font-size:1rem;outline:none;color:#333;width:100%;">
+      <a [href]="getGeneralWhatsappLink()" target="_blank" style="color:#2B7A3E;border:none;background:none;padding:0;cursor:pointer;display:flex;align-items:center;margin-left:10px;">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      </a>
     </div>
-    
-    <div style="flex: 1 1 300px; background: linear-gradient(135deg, #1f7a4d, #145635); border-radius: 24px; padding: 32px; color: white; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(31,122,77,0.2);">
-      <span style="background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 99px; font-size: 0.75rem; font-weight: 800; width: fit-content; margin-bottom: 20px; letter-spacing: 1px;">ORDEN RÁPIDO</span>
-      <h2 style="font-size: 2.2rem; line-height: 1.1; margin: 0 0 15px 0; font-weight: 900; letter-spacing: -1px;">Compra por<br>WhatsApp</h2>
-      <p style="font-size: 0.95rem; color: rgba(255,255,255,0.85); line-height: 1.5; margin: 0;">El cliente escoge la planta y te escribe con el detalle automático.</p>
+    <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:5px;scrollbar-width:none;">
+      <button *ngFor="let cat of categories" (click)="selectedCategory = cat"
+        style="border:1px solid transparent;padding:8px 16px;border-radius:20px;font-size:0.9rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.3s ease;"
+        [style.backgroundColor]="selectedCategory === cat ? '#14452F' : '#F0F2F0'"
+        [style.color]="selectedCategory === cat ? 'white' : '#666'">
+        {{ cat }}
+      </button>
     </div>
-  </div>
-</header>
+  </section>
 
-<section class="admin-section" *ngIf="adminMode" style="max-width: 1200px; margin: 0 auto;">
-  <div class="admin-card" style="background: white; border-radius: 24px; padding: 24px; border: 1px solid #eef1ec;">
-    
-    <h2 style="margin-top: 0; color: #102319; font-size: 1.8rem;">Gestión de Plantas</h2>
-    <div class="plant-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 30px;">
-      <input type="text" placeholder="Nombre de la planta" [(ngModel)]="plantForm.name" style="padding: 14px; border-radius: 12px; border: 1px solid #dfe7dd;">
-      <input type="text" placeholder="Categoría (ej. Exterior)" [(ngModel)]="plantForm.category" style="padding: 14px; border-radius: 12px; border: 1px solid #dfe7dd;">
-      <input type="number" placeholder="Precio" [(ngModel)]="plantForm.price" style="padding: 14px; border-radius: 12px; border: 1px solid #dfe7dd;">
-      <input type="number" placeholder="Stock" [(ngModel)]="plantForm.stock" style="padding: 14px; border-radius: 12px; border: 1px solid #dfe7dd;">
-      <div style="position: relative; border: 2px dashed #dfe7dd; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 52px; background: #fafdf8; cursor: pointer;">
-        <input type="file" accept="image/*" (change)="uploadPlantImage($event)" style="position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;">
-        <span style="color: #516052; font-weight: 600; font-size: 0.9rem; pointer-events: none; text-align: center;">
-          {{ imageUploading ? '⏳ Subiendo...' : plantForm.image_url ? '✅ Imagen subida' : '📷 Subir imagen' }}
-        </span>
-      </div>
-      <input type="text" placeholder="Luz" [(ngModel)]="plantForm.light" style="padding: 14px; border-radius: 12px; border: 1px solid #dfe7dd;">
-      <textarea placeholder="Descripción" [(ngModel)]="plantForm.description" style="grid-column: 1 / -1; padding: 14px; border-radius: 12px; border: 1px solid #dfe7dd; min-height: 100px; width: 100%; box-sizing: border-box;"></textarea>
-      
-      <div class="check-row" style="grid-column: 1 / -1; display: flex; align-items: center; gap: 10px;">
-        <input type="checkbox" [(ngModel)]="plantForm.is_featured" id="featured" style="width: 20px; height: 20px;">
-        <label for="featured">Destacar planta</label>
-      </div>
-      
-      <div class="form-actions" style="grid-column: 1 / -1; display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;">
-        <button (click)="savePlant()" style="flex: 1; min-width: 150px; background: #1f7a4d; color: white; padding: 14px 20px; border: none; border-radius: 99px; cursor: pointer; font-weight: 600;">{{ editingId ? 'Actualizar' : 'Crear' }} Planta</button>
-        <button (click)="resetForm()" style="flex: 1; min-width: 150px; background: #f4f8f1; color: #102319; padding: 14px 20px; border: 1px solid #dfe7dd; border-radius: 99px; cursor: pointer; font-weight: 600;">Limpiar</button>
-      </div>
-    </div>
-
-    <div style="margin-top: 40px; background: linear-gradient(to right, #f2faef, #fbfdf9); padding: 24px; border-radius: 20px; border: 1px solid #eef1ec;">
-      <span class="eyebrow" style="color: #1f7a4d; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;">AI RESTOCK</span>
-      <h2 style="margin: 8px 0; font-size: 1.5rem; color: #102319;">Actualizar inventario</h2>
-      <p style="color: #516052; margin-bottom: 20px; font-size: 0.9rem;">Sube una factura y el sistema detecta plantas automáticamente.</p>
-      
-      <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: white; padding: 12px; border-radius: 16px; border: 2px dashed #dfe7dd;">
-        <input type="file" (change)="onInvoiceSelected($event)" accept="image/*,.pdf" style="border: none; flex: 1; min-width: 200px; padding: 10px;">
-        <button [disabled]="!selectedInvoice || invoiceLoading" (click)="analyzeInvoice()" style="padding: 12px 20px; width: 100%; border: none; border-radius: 12px; background-color: #8ed0a8; color: #102319; font-weight: bold; cursor: pointer;">
-          {{ invoiceLoading ? 'Analizando...' : 'Analizar factura' }}
-        </button>
-      </div>
-
-      <div *ngIf="invoiceResult?.items?.length" style="margin-top: 24px; background: white; padding: 20px; border-radius: 16px; border: 1px solid #eef1ec;">
-        <h3 style="margin-top: 0; margin-bottom: 16px; color: #102319; font-size: 1.2rem;">Plantas detectadas</h3>
-        <div *ngFor="let item of invoiceResult!.items; let i = index" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
-          <input type="text" [(ngModel)]="item.plant_name" style="flex: 1 1 100%; padding: 12px; border: 1px solid #dfe7dd; border-radius: 12px;" placeholder="Nombre">
-          <input type="number" [(ngModel)]="item.quantity" style="flex: 1; min-width: 80px; padding: 12px; border: 1px solid #dfe7dd; border-radius: 12px;" placeholder="Cant.">
-          <input type="number" step="0.01" [(ngModel)]="item.unit_cost" style="flex: 1; min-width: 80px; padding: 12px; border: 1px solid #dfe7dd; border-radius: 12px;" placeholder="Costo">
-          <button (click)="removeItemFromInvoice(i)" style="background: #fff0f0; border: none; color: #9b1c1c; border-radius: 12px; padding: 12px 20px; font-weight: bold; cursor: pointer;">X</button>
-        </div>
-        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px;">
-          <button (click)="confirmRestock()" style="flex: 1; min-width: 150px; background: #1f7a4d; color: white; padding: 14px; border: none; border-radius: 99px; cursor: pointer; font-weight: 600;">Confirmar Stock</button>
-          <button (click)="cancelInvoice()" style="flex: 1; min-width: 150px; background: white; color: #102319; padding: 14px; border: 1px solid #dfe7dd; border-radius: 99px; cursor: pointer; font-weight: 600;">Cancelar</button>
+  <!-- Hero banner -->
+  <section style="background:#fafdf8;padding:20px;">
+    <div style="display:flex;gap:20px;max-width:1200px;width:100%;flex-wrap:wrap;margin:0 auto;">
+      <div style="flex:1 1 300px;background:white;border-radius:24px;padding:24px;box-shadow:0 10px 30px rgba(16,35,25,0.04);border:1px solid #eef1ec;">
+        <span style="color:#1f7a4d;font-weight:700;font-size:0.85rem;letter-spacing:1px;">INVENTARIO DISPONIBLE</span>
+        <h1 style="font-size:2.4rem;margin-top:10px;margin-bottom:15px;color:#102319;letter-spacing:-1px;line-height:1.1;">{{ client?.business_name || 'Jardines Morales' }}</h1>
+        <p style="font-size:1rem;margin-bottom:24px;color:#516052;">Explora plantas disponibles, precios actualizados y ordena directo por WhatsApp.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="background:#f4f8f1;padding:16px;border-radius:16px;flex:1;min-width:80px;text-align:center;">
+            <h2 style="font-size:1.8rem;color:#102319;margin:0 0 4px 0;">{{ plants.length }}</h2>
+            <span style="font-size:0.75rem;color:#516052;font-weight:600;">Plantas</span>
+          </div>
+          <div style="background:#f4f8f1;padding:16px;border-radius:16px;flex:1;min-width:80px;text-align:center;">
+            <h2 style="font-size:1.8rem;color:#102319;margin:0 0 4px 0;">{{ categories.length - 1 }}</h2>
+            <span style="font-size:0.75rem;color:#516052;font-weight:600;">Categorías</span>
+          </div>
+          <div style="background:#f4f8f1;padding:16px;border-radius:16px;flex:1;min-width:80px;text-align:center;">
+            <h2 style="font-size:1.8rem;color:#102319;margin:0 0 4px 0;">{{ filteredPlants.length }}</h2>
+            <span style="font-size:0.75rem;color:#516052;font-weight:600;">Disponibles</span>
+          </div>
         </div>
       </div>
+      <div style="flex:1 1 300px;background:linear-gradient(135deg,#1f7a4d,#145635);border-radius:24px;padding:32px;color:white;display:flex;flex-direction:column;justify-content:center;box-shadow:0 10px 30px rgba(31,122,77,0.2);">
+        <span style="background:rgba(255,255,255,0.15);padding:6px 14px;border-radius:99px;font-size:0.75rem;font-weight:800;width:fit-content;margin-bottom:20px;letter-spacing:1px;">ORDEN RÁPIDO</span>
+        <h2 style="font-size:2.2rem;line-height:1.1;margin:0 0 15px 0;font-weight:900;letter-spacing:-1px;">Compra por<br>WhatsApp</h2>
+        <p style="font-size:0.95rem;color:rgba(255,255,255,0.85);line-height:1.5;margin:0;">El cliente escoge la planta y te escribe con el detalle automático.</p>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="catalog-section" style="max-width: 1200px; margin: 0 auto;">
-  
-  <div *ngIf="loading" style="text-align: center; padding: 40px 20px; color: #516052; font-weight: 600; font-size: 1.1rem;">
-    🌱 Cargando catálogo...
-  </div>
-
-  <div class="plant-grid" *ngIf="!loading">
-    <app-plant-card 
-      *ngFor="let p of filteredPlants" 
-      [plant]="p" 
-      [adminMode]="adminMode" 
-      [client]="client"
-      (onEdit)="editPlant($event)" 
-      (onRemove)="removePlant($event)">
-    </app-plant-card>
-    
-    <div *ngIf="filteredPlants.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #888; font-weight: 500;">
-      No se encontraron plantas que coincidan con la búsqueda.
+  <!-- Plant catalog grid -->
+  <section style="max-width:1200px;margin:0 auto;padding:0 20px 40px;">
+    <div *ngIf="loading" style="text-align:center;padding:40px 20px;color:#516052;font-weight:600;font-size:1.1rem;">
+      🌱 Cargando catálogo...
     </div>
-  </div>
-</section>
+    <div class="plant-grid" *ngIf="!loading">
+      <app-plant-card *ngFor="let p of filteredPlants" [plant]="p" [adminMode]="false" [client]="client"></app-plant-card>
+      <div *ngIf="filteredPlants.length === 0" style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#888;font-weight:500;">
+        No se encontraron plantas que coincidan con la búsqueda.
+      </div>
+    </div>
+  </section>
 
-<div *ngIf="showLoginModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px;">
-  <div style="background: white; border-radius: 24px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 24px 70px rgba(0,0,0,0.2);">
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h2 style="margin: 0; color: #102319; font-size: 1.5rem;">Acceso Admin</h2>
-      <button (click)="closeModal()" style="border: none; background: #f4f8f1; border-radius: 99px; width: 36px; height: 36px; cursor: pointer; font-size: 1rem;">✕</button>
+</ng-container>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  ADMIN PANEL                               -->
+<!-- ═══════════════════════════════════════════ -->
+<ng-container *ngIf="adminMode">
+  <div style="max-width:1200px;margin:0 auto;padding:24px 20px 60px;">
+
+    <!-- ── Dashboard de métricas ── -->
+    <div style="margin-bottom:28px;">
+      <h2 style="margin:0 0 6px 0;color:#102319;font-size:1.6rem;font-weight:700;">Dashboard</h2>
+      <p style="margin:0 0 20px 0;color:#516052;font-size:0.95rem;">Resumen de tu inventario en tiempo real.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:20px;">
+        <!-- Total plantas -->
+        <div style="background:white;border:1px solid #eef1ec;border-radius:20px;padding:20px;text-align:center;box-shadow:0 4px 12px rgba(16,35,25,0.04);">
+          <div style="font-size:2rem;font-weight:800;color:#102319;line-height:1;">{{ plants.length }}</div>
+          <div style="font-size:0.78rem;color:#516052;font-weight:600;margin-top:6px;">Total Plantas</div>
+        </div>
+        <!-- Total en stock -->
+        <div style="background:white;border:1px solid #eef1ec;border-radius:20px;padding:20px;text-align:center;box-shadow:0 4px 12px rgba(16,35,25,0.04);">
+          <div style="font-size:2rem;font-weight:800;color:#1f7a4d;line-height:1;">{{ totalStock }}</div>
+          <div style="font-size:0.78rem;color:#516052;font-weight:600;margin-top:6px;">Total en Stock</div>
+        </div>
+        <!-- Bajo stock -->
+        <div style="background:white;border:1px solid #fef3c7;border-radius:20px;padding:20px;text-align:center;box-shadow:0 4px 12px rgba(16,35,25,0.04);">
+          <div style="font-size:2rem;font-weight:800;color:#d97706;line-height:1;">{{ lowStockPlants.length }}</div>
+          <div style="font-size:0.78rem;color:#516052;font-weight:600;margin-top:6px;">Bajo Stock</div>
+        </div>
+        <!-- Sin stock -->
+        <div style="background:white;border:1px solid #fee2e2;border-radius:20px;padding:20px;text-align:center;box-shadow:0 4px 12px rgba(16,35,25,0.04);">
+          <div style="font-size:2rem;font-weight:800;color:#dc2626;line-height:1;">{{ outOfStockPlants.length }}</div>
+          <div style="font-size:0.78rem;color:#516052;font-weight:600;margin-top:6px;">Sin Stock</div>
+        </div>
+        <!-- Valor estimado -->
+        <div style="background:linear-gradient(135deg,#102319,#1f7a4d);border-radius:20px;padding:20px;text-align:center;box-shadow:0 4px 12px rgba(31,122,77,0.18);grid-column:span 1;">
+          <div style="font-size:1.6rem;font-weight:800;color:white;line-height:1;">${{ estimatedInventoryValue | number:'1.0-0' }}</div>
+          <div style="font-size:0.78rem;color:rgba(255,255,255,0.75);font-weight:600;margin-top:6px;">Valor Estimado</div>
+        </div>
+      </div>
+
+      <!-- Bajo stock alert list -->
+      <div *ngIf="lowStockPlants.length > 0" style="background:#fffbeb;border:1px solid #fde68a;border-radius:16px;padding:16px 20px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <span style="font-size:1rem;">⚠️</span>
+          <span style="font-weight:700;color:#92400e;font-size:0.9rem;">Productos con bajo stock (≤5 unidades)</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span *ngFor="let p of lowStockPlants" style="background:white;border:1px solid #fde68a;border-radius:10px;padding:5px 12px;font-size:0.82rem;color:#78350f;font-weight:600;">
+            {{ p.name }} — {{ p.stock }} u.
+          </span>
+        </div>
+      </div>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 16px;">
-      <input type="text" placeholder="Usuario" [(ngModel)]="loginUsername" style="padding: 14px 16px; border-radius: 12px; border: 1px solid #dfe7dd; font-size: 1rem; outline: none; width: 100%; box-sizing: border-box;">
-      <input type="password" placeholder="Contraseña" [(ngModel)]="loginPassword" (keyup.enter)="submitLogin()" style="padding: 14px 16px; border-radius: 12px; border: 1px solid #dfe7dd; font-size: 1rem; outline: none; width: 100%; box-sizing: border-box;">
-      <div *ngIf="loginError" style="color: #c5221f; font-size: 0.9rem; font-weight: 600;">{{ loginError }}</div>
-      <button (click)="submitLogin()" [disabled]="loginLoading" style="background: #1f7a4d; color: white; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 8px;">
+    <!-- ── AI Restock — card premium ── -->
+    <div style="background:linear-gradient(135deg,#0d3320 0%,#1a5c38 60%,#236b45 100%);border-radius:28px;padding:32px;margin-bottom:28px;box-shadow:0 16px 48px rgba(15,50,30,0.22);position:relative;overflow:hidden;">
+      <!-- decorative blob -->
+      <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:rgba(255,255,255,0.04);border-radius:50%;pointer-events:none;"></div>
+      <div style="position:absolute;bottom:-60px;right:60px;width:150px;height:150px;background:rgba(255,255,255,0.03);border-radius:50%;pointer-events:none;"></div>
+
+      <div style="position:relative;z-index:1;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <span style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:white;font-size:0.72rem;font-weight:800;letter-spacing:1.5px;padding:5px 12px;border-radius:99px;">✨ AI RESTOCK</span>
+        </div>
+        <h2 style="color:white;font-size:1.9rem;font-weight:800;margin:0 0 10px 0;letter-spacing:-0.5px;line-height:1.15;">AI Restock Assistant</h2>
+        <p style="color:rgba(255,255,255,0.8);font-size:1rem;line-height:1.6;margin:0 0 28px 0;max-width:520px;">
+          Actualiza tu inventario subiendo una factura del suplidor.<br>
+          <span style="color:rgba(255,255,255,0.6);font-size:0.9rem;">Detecta plantas, cantidades y costos para ayudarte a mantener el catálogo actualizado sin hacerlo todo manualmente.</span>
+        </p>
+
+        <!-- Upload area -->
+        <div style="background:rgba(255,255,255,0.08);border:2px dashed rgba(255,255,255,0.2);border-radius:18px;padding:20px;margin-bottom:16px;">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+            <label style="display:flex;align-items:center;gap:8px;background:white;color:#102319;border-radius:12px;padding:10px 18px;font-weight:700;font-size:0.9rem;cursor:pointer;white-space:nowrap;">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Subir factura
+              <input type="file" (change)="onInvoiceSelected($event)" accept="image/*,.pdf" style="display:none;">
+            </label>
+            <span style="color:rgba(255,255,255,0.6);font-size:0.85rem;flex:1;min-width:120px;">
+              {{ selectedInvoice ? '📎 ' + selectedInvoice.name : 'JPG, PNG o PDF' }}
+            </span>
+            <button [disabled]="!selectedInvoice || invoiceLoading" (click)="analyzeInvoice()"
+              style="padding:12px 22px;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-size:0.9rem;transition:opacity 0.2s;"
+              [style.background]="(!selectedInvoice || invoiceLoading) ? 'rgba(255,255,255,0.15)' : '#6ee09a'"
+              [style.color]="(!selectedInvoice || invoiceLoading) ? 'rgba(255,255,255,0.4)' : '#0d3320'">
+              {{ invoiceLoading ? '⏳ Analizando...' : '🔍 Analizar factura' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Results from AI -->
+        <div *ngIf="invoiceResult?.items?.length" style="background:white;border-radius:18px;padding:20px;">
+          <h3 style="margin:0 0 16px 0;color:#102319;font-size:1.1rem;font-weight:700;">Plantas detectadas</h3>
+          <div *ngFor="let item of invoiceResult!.items; let i = index" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            <input type="text" [(ngModel)]="item.plant_name" style="flex:1 1 100%;padding:12px;border:1px solid #dfe7dd;border-radius:12px;" placeholder="Nombre">
+            <input type="number" [(ngModel)]="item.quantity" style="flex:1;min-width:80px;padding:12px;border:1px solid #dfe7dd;border-radius:12px;" placeholder="Cant.">
+            <input type="number" step="0.01" [(ngModel)]="item.unit_cost" style="flex:1;min-width:80px;padding:12px;border:1px solid #dfe7dd;border-radius:12px;" placeholder="Costo">
+            <button (click)="removeItemFromInvoice(i)" style="background:#fff0f0;border:none;color:#9b1c1c;border-radius:12px;padding:12px 20px;font-weight:bold;cursor:pointer;">✕</button>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;">
+            <button (click)="confirmRestock()" style="flex:1;min-width:150px;background:#1f7a4d;color:white;padding:14px;border:none;border-radius:99px;cursor:pointer;font-weight:700;">✅ Confirmar actualización</button>
+            <button (click)="cancelInvoice()" style="flex:1;min-width:150px;background:white;color:#102319;padding:14px;border:1px solid #dfe7dd;border-radius:99px;cursor:pointer;font-weight:600;">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Gestión de Plantas (CRUD form) ── -->
+    <div style="background:white;border-radius:24px;padding:28px;border:1px solid #eef1ec;margin-bottom:28px;box-shadow:0 4px 16px rgba(16,35,25,0.04);">
+      <h2 style="margin:0 0 6px 0;color:#102319;font-size:1.4rem;font-weight:700;">{{ editingId ? '✏️ Editar Planta' : '🌱 Nueva Planta' }}</h2>
+      <p style="margin:0 0 24px 0;color:#516052;font-size:0.9rem;">{{ editingId ? 'Modifica los datos de la planta seleccionada.' : 'Agrega una nueva planta al catálogo.' }}</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;">
+        <input type="text" placeholder="Nombre de la planta" [(ngModel)]="plantForm.name" style="padding:14px;border-radius:12px;border:1px solid #dfe7dd;font-size:1rem;outline:none;">
+        <input type="text" placeholder="Categoría (ej. Exterior)" [(ngModel)]="plantForm.category" style="padding:14px;border-radius:12px;border:1px solid #dfe7dd;font-size:1rem;outline:none;">
+        <input type="number" placeholder="Precio" [(ngModel)]="plantForm.price" style="padding:14px;border-radius:12px;border:1px solid #dfe7dd;font-size:1rem;outline:none;">
+        <input type="number" placeholder="Stock" [(ngModel)]="plantForm.stock" style="padding:14px;border-radius:12px;border:1px solid #dfe7dd;font-size:1rem;outline:none;">
+        <div style="position:relative;border:2px dashed #dfe7dd;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:52px;background:#fafdf8;cursor:pointer;">
+          <input type="file" accept="image/*" (change)="uploadPlantImage($event)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;">
+          <span style="color:#516052;font-weight:600;font-size:0.9rem;pointer-events:none;">
+            {{ imageUploading ? '⏳ Subiendo...' : plantForm.image_url ? '✅ Imagen subida' : '📷 Subir imagen' }}
+          </span>
+        </div>
+        <input type="text" placeholder="Luz (ej. Sol parcial)" [(ngModel)]="plantForm.light" style="padding:14px;border-radius:12px;border:1px solid #dfe7dd;font-size:1rem;outline:none;">
+        <input type="text" placeholder="Agua (ej. Moderada)" [(ngModel)]="plantForm.water" style="padding:14px;border-radius:12px;border:1px solid #dfe7dd;font-size:1rem;outline:none;">
+        <textarea placeholder="Descripción" [(ngModel)]="plantForm.description" style="grid-column:1/-1;padding:14px;border-radius:12px;border:1px solid #dfe7dd;min-height:90px;width:100%;box-sizing:border-box;font-size:1rem;outline:none;resize:vertical;"></textarea>
+        <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;">
+          <input type="checkbox" [(ngModel)]="plantForm.is_featured" id="featured" style="width:18px;height:18px;accent-color:#1f7a4d;">
+          <label for="featured" style="color:#102319;font-weight:500;cursor:pointer;">Destacar planta</label>
+        </div>
+        <div style="grid-column:1/-1;display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
+          <button (click)="savePlant()" style="flex:1;min-width:150px;background:#1f7a4d;color:white;padding:14px 20px;border:none;border-radius:99px;cursor:pointer;font-weight:700;font-size:1rem;">
+            {{ editingId ? '✅ Actualizar Planta' : '➕ Crear Planta' }}
+          </button>
+          <button (click)="resetForm()" style="flex:1;min-width:150px;background:#f4f8f1;color:#102319;padding:14px 20px;border:1px solid #dfe7dd;border-radius:99px;cursor:pointer;font-weight:600;font-size:1rem;">
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Inventario (admin plant cards) ── -->
+    <div>
+      <h2 style="margin:0 0 6px 0;color:#102319;font-size:1.4rem;font-weight:700;">Inventario</h2>
+      <p style="margin:0 0 20px 0;color:#516052;font-size:0.9rem;">{{ plants.length }} plantas en el catálogo.</p>
+      <div *ngIf="loading" style="text-align:center;padding:40px;color:#516052;font-weight:600;">🌱 Cargando...</div>
+      <div class="plant-grid" *ngIf="!loading">
+        <app-plant-card *ngFor="let p of plants" [plant]="p" [adminMode]="true" [client]="client"
+          (onEdit)="editPlant($event)" (onRemove)="removePlant($event)">
+        </app-plant-card>
+      </div>
+    </div>
+
+  </div>
+</ng-container>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  LOGIN MODAL                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div *ngIf="showLoginModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:white;border-radius:24px;padding:32px;width:100%;max-width:400px;box-shadow:0 24px 70px rgba(0,0,0,0.2);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h2 style="margin:0;color:#102319;font-size:1.5rem;">Acceso Admin</h2>
+      <button (click)="closeModal()" style="border:none;background:#f4f8f1;border-radius:99px;width:36px;height:36px;cursor:pointer;font-size:1rem;">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <input type="text" placeholder="Usuario" [(ngModel)]="loginUsername" style="padding:14px 16px;border-radius:12px;border:1px solid #dfe7dd;font-size:1rem;outline:none;width:100%;box-sizing:border-box;">
+      <input type="password" placeholder="Contraseña" [(ngModel)]="loginPassword" (keyup.enter)="submitLogin()" style="padding:14px 16px;border-radius:12px;border:1px solid #dfe7dd;font-size:1rem;outline:none;width:100%;box-sizing:border-box;">
+      <div *ngIf="loginError" style="color:#c5221f;font-size:0.9rem;font-weight:600;">{{ loginError }}</div>
+      <button (click)="submitLogin()" [disabled]="loginLoading" style="background:#1f7a4d;color:white;padding:14px;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:8px;">
         {{ loginLoading ? 'Verificando...' : 'Entrar' }}
       </button>
     </div>
