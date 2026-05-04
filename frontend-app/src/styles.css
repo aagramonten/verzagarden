@@ -35,4 +35,4 @@ body {
 
 /* ── SCROLLBAR HIDE ── */
 ::-webkit-scrollbar { display: none; }
-* { scrollbar-width: none; }
+* { scrollbar-width: none; }/* v2 */
