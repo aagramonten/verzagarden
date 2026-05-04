@@ -35,7 +35,6 @@ const openai = new OpenAI({
 // =======================
 async function ensureCostPriceColumn() {
   try {
-    // Check if column exists first
     const [rows] = await pool.query(`
       SELECT COUNT(*) as cnt FROM information_schema.COLUMNS 
       WHERE TABLE_SCHEMA = DATABASE() 
@@ -121,7 +120,7 @@ app.get('/api/clients/:slug/plants', async (req, res) => {
   }
 });
 
-// CREATE plant — now includes cost_price
+// CREATE plant
 app.post('/api/clients/:slug/plants', async (req, res) => {
   try {
     const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
@@ -143,7 +142,7 @@ app.post('/api/clients/:slug/plants', async (req, res) => {
   }
 });
 
-// UPDATE plant — now includes cost_price
+// UPDATE plant
 app.put('/api/plants/:id', async (req, res) => {
   try {
     const { name, category, description, price, cost_price, stock, image_url, light, water, is_featured, is_active } = req.body;
@@ -171,6 +170,73 @@ app.delete('/api/plants/:id', async (req, res) => {
     res.json({ message: 'Planta desactivada' });
   } catch (error) {
     res.status(500).json({ message: 'Error eliminando planta', error: error.message });
+  }
+});
+
+
+// =======================
+// 🌱 SEED DEMO PLANTS (one-time use)
+// POST /api/clients/demo-garden/seed-plants
+// =======================
+app.post('/api/clients/:slug/seed-plants', async (req, res) => {
+  try {
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
+    const clientId = clients[0].id;
+
+    const plants = [
+      { name: 'Olivo Negro / Shady Lady',       category: 'Árboles',             price: 96,  cost_price: 48,  stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Árbol ornamental de follaje denso, ideal para sombra y paisajismo.' },
+      { name: 'Podocarpus',                      category: 'Árboles',             price: 52,  cost_price: 26,  stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Árbol de crecimiento lento, ideal para setos y jardines formales.' },
+      { name: 'Ficus Benjamina',                 category: 'Árboles',             price: 64,  cost_price: 32,  stock: 0, light: 'Sol parcial',   water: 'Moderada',  description: 'Árbol tropical de follaje brillante, muy popular en paisajismo.' },
+      { name: 'Croton Petra',                    category: 'Arbustos',            price: 19,  cost_price: 9.5, stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Arbusto colorido con hojas multicolores, ideal para bordes y jardines.' },
+      { name: 'Ixora',                           category: 'Arbustos',            price: 18,  cost_price: 7.25,stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Arbusto de flores rojas en racimos, muy atractivo para jardines tropicales.' },
+      { name: 'Clusia',                          category: 'Arbustos',            price: 28,  cost_price: 14,  stock: 0, light: 'Sol parcial',   water: 'Poca',      description: 'Arbusto resistente y de bajo mantenimiento, ideal para setos.' },
+      { name: 'Pentas',                          category: 'Flores de estación',  price: 9,   cost_price: 4.25,stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Planta de flores estrelladas que atrae mariposas y colibríes.' },
+      { name: 'Blue Daze',                       category: 'Flores de estación',  price: 9,   cost_price: 4.75,stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Planta rastrera con flores azules, perfecta para bordes y macetas.' },
+      { name: 'Vinca',                           category: 'Flores de estación',  price: 8,   cost_price: 3.95,stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Planta resistente con flores vistosas, ideal para jardines de bajo mantenimiento.' },
+      { name: 'Monstera Deliciosa',              category: 'Plantas de interior', price: 28,  cost_price: 18,  stock: 0, light: 'Luz indirecta', water: 'Moderada',  description: 'Planta tropical perfecta para interior con luz indirecta.' },
+      { name: 'Pothos',                          category: 'Plantas de interior', price: 14,  cost_price: 6.5, stock: 0, light: 'Luz indirecta', water: 'Poca',      description: 'Planta colgante muy resistente y fácil de cuidar, ideal para interiores.' },
+      { name: 'Sansevieria',                     category: 'Plantas de interior', price: 18,  cost_price: 11,  stock: 0, light: 'Baja a media',  water: 'Poca',      description: 'Resistente, moderna y de bajo mantenimiento, purifica el aire.' },
+      { name: 'Trinitaria / Bougainvillea',      category: 'Trepadoras',          price: 30,  cost_price: 15,  stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Trepadora de flores vibrantes, ideal para pérgolas y verjas.' },
+      { name: 'Jazmín amarillo / Allamanda',     category: 'Trepadoras',          price: 24,  cost_price: 12,  stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Trepadora de flores amarillas brillantes, tropical y llamativa.' },
+      { name: 'Mandevilla',                      category: 'Trepadoras',          price: 27,  cost_price: 13.5,stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Trepadora de flores rosas o rojas, perfecta para terrazas.' },
+      { name: 'Agave',                           category: 'Suculentas',          price: 32,  cost_price: 16,  stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Suculenta imponente, muy resistente y de bajo mantenimiento.' },
+      { name: 'Echeveria',                       category: 'Suculentas',          price: 11,  cost_price: 5.25,stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Suculenta roseta compacta, perfecta para macetas y arreglos.' },
+      { name: 'Jade',                            category: 'Suculentas',          price: 18,  cost_price: 8.75,stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Suculenta arbustiva de hojas carnosas, símbolo de buena suerte.' },
+      { name: 'Areca Palm',                      category: 'Palmas',              price: 48,  cost_price: 24,  stock: 0, light: 'Sol parcial',   water: 'Moderada',  description: 'Palma elegante y frondosa, ideal para interiores y exteriores.' },
+      { name: 'Palma Robellini',                 category: 'Palmas',              price: 76,  cost_price: 38,  stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Palma enana ornamental, perfecta para entradas y terrazas.' },
+      { name: 'Palma Roja',                      category: 'Palmas',              price: 42,  cost_price: 21,  stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Palma tropical con follaje rojizo llamativo, ideal para jardines.' },
+    ];
+
+    // Skip plants that already exist by name
+    let inserted = 0;
+    let skipped = 0;
+
+    for (const plant of plants) {
+      const [existing] = await pool.query(
+        'SELECT id FROM plants WHERE client_id = ? AND name = ? LIMIT 1',
+        [clientId, plant.name]
+      );
+
+      if (existing.length) {
+        skipped++;
+        continue;
+      }
+
+      await pool.query(
+        `INSERT INTO plants (client_id, name, category, description, price, cost_price, stock, light, water, is_featured, image_url)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE, '')`,
+        [clientId, plant.name, plant.category, plant.description,
+         plant.price, plant.cost_price, plant.stock, plant.light, plant.water]
+      );
+      inserted++;
+    }
+
+    res.json({ message: `Seed completado: ${inserted} plantas insertadas, ${skipped} ya existían.` });
+
+  } catch (error) {
+    console.error('seed error:', error.message);
+    res.status(500).json({ message: 'Error en seed', error: error.message });
   }
 });
 
@@ -244,7 +310,6 @@ Reglas:
 
 // =======================
 // 📦 CONFIRM RESTOCK
-// Now supports: cost_price update + optional new sale price
 // =======================
 
 app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
@@ -268,7 +333,6 @@ app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
       if (plants.length) {
         const plant = plants[0];
 
-        // Always update: stock, cost_price, and price (new_price is always sent from frontend)
         await pool.query(
           `UPDATE plants SET stock = stock + ?, cost_price = ?, price = ? WHERE id = ?`,
           [quantity, unit_cost ?? null, new_price ?? plant.price, plant.id]
