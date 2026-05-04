@@ -35,15 +35,21 @@ const openai = new OpenAI({
 // =======================
 async function ensureCostPriceColumn() {
   try {
-    await pool.query(`
-      ALTER TABLE plants ADD COLUMN IF NOT EXISTS cost_price DECIMAL(10,2) NULL DEFAULT NULL
+    // Check if column exists first
+    const [rows] = await pool.query(`
+      SELECT COUNT(*) as cnt FROM information_schema.COLUMNS 
+      WHERE TABLE_SCHEMA = DATABASE() 
+      AND TABLE_NAME = 'plants' 
+      AND COLUMN_NAME = 'cost_price'
     `);
-    console.log('✅ cost_price column ready');
-  } catch (err) {
-    // Column may already exist in some MySQL versions that don't support IF NOT EXISTS
-    if (!err.message.includes('Duplicate column')) {
-      console.warn('cost_price migration note:', err.message);
+    if (rows[0].cnt === 0) {
+      await pool.query(`ALTER TABLE plants ADD COLUMN cost_price DECIMAL(10,2) NULL DEFAULT NULL`);
+      console.log('✅ cost_price column added');
+    } else {
+      console.log('✅ cost_price column already exists');
     }
+  } catch (err) {
+    console.warn('cost_price migration warning:', err.message);
   }
 }
 ensureCostPriceColumn();
@@ -283,6 +289,7 @@ app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
     res.json({ message: 'Inventario actualizado', updates });
 
   } catch (error) {
+    console.error('confirm-restock error:', error.message, error.stack);
     res.status(500).json({ message: 'Error actualizando inventario', error: error.message });
   }
 });
