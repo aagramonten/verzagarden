@@ -7,7 +7,7 @@ import { PlantCardComponent } from '../plant-card.component';
 
 export const PLANT_CATEGORIES = [
   'Árboles', 'Arbustos', 'Flores de estación', 'Plantas de interior',
-  'Trepadoras', 'Suculentas', 'Orquídeas', 'Palmas'
+  'Trepadoras', 'Suculentas', 'Palmas'
 ];
 
 const CHART_COLORS = ['#14452F','#4caf78','#f5c842','#9ecfb0','#e07b54','#6b8f71','#a78bfa','#38bdf8'];

@@ -12,9 +12,13 @@ const CATEGORIES = [
   { name: 'Plantas de interior', emoji: '🪴', desc: 'Plantas que se adaptan bien a espacios interiores con luz y humedad controladas.', ideal: 'Hogares, oficinas y decoración interior.' },
   { name: 'Trepadoras',          emoji: '🌱', desc: 'Plantas que necesitan soporte para crecer hacia arriba.',                         ideal: 'Cubrir paredes, crear sombra y añadir privacidad.' },
   { name: 'Suculentas',          emoji: '🌵', desc: 'Plantas que almacenan agua en hojas, tallos o raíces, toleran mejor la sequía.',  ideal: 'Bajo mantenimiento y espacios soleados.' },
-  { name: 'Orquídeas',           emoji: '🌺', desc: 'Plantas ornamentales conocidas por sus flores elegantes y llamativas.',            ideal: 'Decoración fina, regalos y espacios con luz indirecta.' },
   { name: 'Palmas',              emoji: '🌴', desc: 'Plantas tropicales que aportan altura, elegancia y sensación caribeña.',          ideal: 'Entradas, patios, terrazas y jardines tropicales.' },
 ];
+
+const FILTER_LABELS: Record<string, string> = {
+  'Plantas de interior': 'Interior',
+  'Flores de estación': 'Flores',
+};
 
 @Component({
   selector: 'app-catalog',
@@ -88,7 +92,7 @@ const CATEGORIES = [
         <button *ngFor="let cat of CATEGORIES" class="filter-pill" (click)="setCategory(cat.name)"
           [style.backgroundColor]="selectedCategory === cat.name ? '#14452F' : '#F0F2F0'"
           [style.color]="selectedCategory === cat.name ? 'white' : '#666'">
-          {{ cat.emoji }} {{ cat.name }}
+          {{ cat.emoji }} {{ getFilterLabel(cat.name) }}
         </button>
       </div>
     </section>
@@ -129,7 +133,6 @@ const CATEGORIES = [
         <h2 style="font-size:1.1rem;font-weight:700;color:#102319;margin:0 0 4px;">Explora por categoría</h2>
         <p style="font-size:0.8rem;color:#516052;margin:0;">Conoce los tipos de plantas disponibles y encuentra más rápido la opción ideal para tu espacio.</p>
       </div>
-
       <div class="cat-grid" style="margin-bottom:16px;">
         <div *ngFor="let cat of CATEGORIES" class="cat-card" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
           <div class="cat-emoji">{{ cat.emoji }}</div>
@@ -139,7 +142,6 @@ const CATEGORIES = [
           <button class="cat-btn" (click)="$event.stopPropagation(); setCategory(cat.name)">Ver plantas</button>
         </div>
       </div>
-
     </section>
 
     <!-- CATALOG GRID -->
@@ -234,6 +236,10 @@ export class CatalogComponent implements OnInit {
     setTimeout(() => {
       document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
+  }
+
+  getFilterLabel(name: string): string {
+    return FILTER_LABELS[name] || name;
   }
 
   getCatEmoji(name: string): string {
