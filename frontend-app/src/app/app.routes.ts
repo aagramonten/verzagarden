@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 
+// v2
 export const routes: Routes = [
   {
     path: '',
@@ -11,7 +12,6 @@ export const routes: Routes = [
     canActivate: [() => {
       const slug = sessionStorage.getItem('admin_slug');
       if (slug) return true;
-      // Si no está autenticado, redirige al catálogo con modal de login
       window.location.href = '/?login=true';
       return false;
     }]
