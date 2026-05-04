@@ -19,6 +19,7 @@ interface RestockItem {
   unit_cost: number;
   total_cost: number;
   current_sale_price: number | null;
+  row_margin: number;
   apply_suggested_price: boolean;
 }
 
@@ -192,62 +193,104 @@ interface RestockItem {
               <span style="font-size:0.75rem;color:#516052;">{{ restockItems.length }} item(s)</span>
             </div>
 
-            <!-- Desktop table -->
             <div style="overflow-x:auto;">
               <table class="restock-table">
                 <thead>
                   <tr>
                     <th>Planta</th>
                     <th>Cant.</th>
-                    <th>Costo unitario</th>
+                    <th>Costo unit.</th>
                     <th>Costo total</th>
-                    <th>Precio venta actual</th>
+                    <th>Precio venta</th>
+                    <th>Margen deseado</th>
                     <th>Precio sugerido</th>
-                    <th>Ganancia / Margen</th>
-                    <th>Aplicar precio sugerido</th>
+                    <th>Ganancia / Margen real</th>
+                    <th>Usar sugerido</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of restockItems; let i = index">
+
+                    <!-- Nombre -->
                     <td>
                       <input type="text" [(ngModel)]="item.plant_name"
-                        style="width:140px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;">
+                        style="width:130px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;">
                     </td>
+
+                    <!-- Cantidad -->
                     <td>
                       <input type="number" [(ngModel)]="item.quantity" min="1"
-                        style="width:60px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;">
+                        style="width:55px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;">
                     </td>
+
+                    <!-- Costo unitario -->
                     <td>
-                      <div style="display:flex;align-items:center;gap:4px;">
-                        <span style="color:#516052;font-size:0.8rem;">$</span>
+                      <div style="display:flex;align-items:center;gap:3px;">
+                        <span style="color:#9ca3af;font-size:0.78rem;">$</span>
                         <input type="number" [(ngModel)]="item.unit_cost" step="0.01" min="0"
-                          style="width:70px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;">
+                          style="width:65px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;">
                       </div>
                     </td>
-                    <td style="color:#516052;font-weight:600;">\${{ (item.unit_cost * item.quantity) | number:'1.2-2' }}</td>
-                    <td>
-                      <span *ngIf="item.current_sale_price" style="font-weight:700;color:#102319;">\${{ item.current_sale_price }}</span>
-                      <span *ngIf="!item.current_sale_price" style="color:#aaa;font-size:0.78rem;">Sin precio</span>
+
+                    <!-- Costo total -->
+                    <td style="color:#516052;font-weight:600;white-space:nowrap;">
+                      \${{ (item.unit_cost * item.quantity) | number:'1.2-2' }}
                     </td>
+
+                    <!-- Precio venta EDITABLE -->
                     <td>
-                      <span style="font-weight:700;color:#1f7a4d;">\${{ getSuggestedPrice(item.unit_cost) | number:'1.2-2' }}</span>
-                      <div class="tag-suggested" style="margin-top:3px;display:inline-block;">{{ desiredMargin }}% margen</div>
+                      <div style="display:flex;align-items:center;gap:3px;">
+                        <span style="color:#9ca3af;font-size:0.78rem;">$</span>
+                        <input type="number" [(ngModel)]="item.current_sale_price" step="0.01" min="0"
+                          placeholder="Precio venta"
+                          style="width:70px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;"
+                          [style.borderColor]="!item.current_sale_price && !item.apply_suggested_price ? '#fca5a5' : '#dfe7dd'">
+                      </div>
+                      <div *ngIf="!item.current_sale_price && !item.apply_suggested_price"
+                        style="font-size:0.65rem;color:#dc2626;margin-top:2px;">Requerido</div>
                     </td>
+
+                    <!-- Margen deseado EDITABLE por fila -->
                     <td>
-                      <ng-container *ngIf="item.current_sale_price">
-                        <div [class]="getProfitClass(item)">
-                          \${{ getProfit(item) | number:'1.2-2' }}
+                      <div style="display:flex;align-items:center;gap:3px;">
+                        <input type="number" [(ngModel)]="item.row_margin" min="1" max="99"
+                          style="width:46px;padding:6px 6px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;text-align:center;">
+                        <span style="color:#9ca3af;font-size:0.78rem;">%</span>
+                      </div>
+                    </td>
+
+                    <!-- Precio sugerido (calculado en tiempo real) -->
+                    <td style="white-space:nowrap;">
+                      <span style="font-weight:700;color:#1f7a4d;">
+                        \${{ getRowSuggestedPrice(item) | number:'1.2-2' }}
+                      </span>
+                      <div class="tag-suggested" style="margin-top:2px;display:inline-block;">
+                        {{ item.row_margin }}% margen
+                      </div>
+                    </td>
+
+                    <!-- Ganancia / Margen real (usa precio efectivo) -->
+                    <td style="white-space:nowrap;">
+                      <ng-container *ngIf="getEffectivePrice(item) > 0">
+                        <div [class]="getRowProfitClass(item)">
+                          \${{ getRowProfit(item) | number:'1.2-2' }}
                         </div>
-                        <div style="font-size:0.72rem;color:#516052;">{{ getMargin(item) | number:'1.0-1' }}%</div>
-                        <span [class]="getMarginTag(item)">{{ getMarginLabel(item) }}</span>
+                        <div style="font-size:0.72rem;color:#516052;">
+                          {{ getRowMargin(item) | number:'1.0-1' }}%
+                        </div>
+                        <span [class]="getRowMarginTag(item)">{{ getRowMarginLabel(item) }}</span>
                       </ng-container>
-                      <span *ngIf="!item.current_sale_price" style="color:#aaa;font-size:0.78rem;">—</span>
+                      <span *ngIf="getEffectivePrice(item) <= 0" style="color:#aaa;font-size:0.78rem;">—</span>
                     </td>
+
+                    <!-- Checkbox usar sugerido -->
                     <td style="text-align:center;">
                       <input type="checkbox" [(ngModel)]="item.apply_suggested_price"
                         style="width:16px;height:16px;accent-color:#14452F;cursor:pointer;">
                     </td>
+
+                    <!-- Borrar -->
                     <td>
                       <button (click)="removeRestockItem(i)"
                         style="background:#fff0f0;border:none;color:#9b1c1c;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:700;font-size:0.8rem;">✕</button>
@@ -264,8 +307,8 @@ interface RestockItem {
                 \${{ totalInvoiceCost | number:'1.2-2' }}
               </div>
               <div style="font-size:0.8rem;color:#516052;">
-                <span style="font-weight:700;color:#102319;">Precios sugeridos marcados:</span>
-                {{ restockItems.filter(i => i.apply_suggested_price).length }} de {{ restockItems.length }}
+                <span style="font-weight:700;color:#102319;">Usando precio sugerido:</span>
+                {{ countApplied() }} de {{ restockItems.length }}
               </div>
             </div>
 
@@ -414,37 +457,57 @@ export class AdminComponent implements OnInit {
     return segs;
   }
 
-  // ── PROFITABILITY HELPERS ──
-  getSuggestedPrice(unitCost: number): number {
-    if (!unitCost || this.desiredMargin >= 100) return 0;
-    return unitCost / (1 - this.desiredMargin / 100);
+  // ── PROFITABILITY HELPERS (per-row, real-time) ──
+
+  // Suggested price using per-row margin
+  getRowSuggestedPrice(item: RestockItem): number {
+    if (!item.unit_cost || item.row_margin >= 100) return 0;
+    return item.unit_cost / (1 - item.row_margin / 100);
   }
 
-  getProfit(item: RestockItem): number {
-    if (!item.current_sale_price) return 0;
-    return item.current_sale_price - item.unit_cost;
+  // Effective price = suggested if checkbox, else manual sale price
+  getEffectivePrice(item: RestockItem): number {
+    if (item.apply_suggested_price) return this.getRowSuggestedPrice(item);
+    return item.current_sale_price ?? 0;
   }
 
-  getMargin(item: RestockItem): number {
-    if (!item.current_sale_price || !item.unit_cost) return 0;
-    return (this.getProfit(item) / item.current_sale_price) * 100;
+  getRowProfit(item: RestockItem): number {
+    const p = this.getEffectivePrice(item);
+    if (!p) return 0;
+    return p - item.unit_cost;
   }
 
-  getProfitClass(item: RestockItem): string {
-    const p = this.getProfit(item);
+  getRowMargin(item: RestockItem): number {
+    const p = this.getEffectivePrice(item);
+    if (!p || !item.unit_cost) return 0;
+    return (this.getRowProfit(item) / p) * 100;
+  }
+
+  getRowProfitClass(item: RestockItem): string {
+    const p = this.getRowProfit(item);
     return p > 0 ? 'profit-positive' : p < 0 ? 'profit-negative' : 'profit-neutral';
   }
 
-  getMarginLabel(item: RestockItem): string {
-    const m = this.getMargin(item);
+  getRowMarginLabel(item: RestockItem): string {
+    const m = this.getRowMargin(item);
     if (m >= 40) return '✅ Buen margen';
     if (m >= 20) return '⚠️ Margen bajo';
     return '🔴 Sin margen';
   }
 
-  getMarginTag(item: RestockItem): string {
-    const m = this.getMargin(item);
+  getRowMarginTag(item: RestockItem): string {
+    const m = this.getRowMargin(item);
     return m >= 40 ? 'tag-ok' : m >= 20 ? 'tag-suggested' : 'tag-warn';
+  }
+
+  // Legacy — keep for global suggested price field
+  getSuggestedPrice(unitCost: number): number {
+    if (!unitCost || this.desiredMargin >= 100) return 0;
+    return unitCost / (1 - this.desiredMargin / 100);
+  }
+
+  countApplied(): number {
+    return this.restockItems.filter(i => i.apply_suggested_price).length;
   }
 
   get totalInvoiceCost(): number {
@@ -478,6 +541,7 @@ export class AdminComponent implements OnInit {
   buildRestockItems(raw: any[]): RestockItem[] {
     return raw.map(r => {
       const match = this.plants.find(p => p.name.toLowerCase().includes((r.plant_name||'').toLowerCase()));
+      const hasPrice = match?.price != null && match.price > 0;
       return {
         plant_name: r.plant_name || '',
         category: r.category || match?.category || '',
@@ -485,7 +549,8 @@ export class AdminComponent implements OnInit {
         unit_cost: r.unit_cost || 0,
         total_cost: (r.unit_cost || 0) * (r.quantity || 1),
         current_sale_price: match?.price ?? null,
-        apply_suggested_price: !match?.price, // auto-check if no price exists
+        row_margin: this.desiredMargin,         // default from global, editable per row
+        apply_suggested_price: !hasPrice,       // auto-check if no price exists
       };
     });
   }
@@ -494,13 +559,22 @@ export class AdminComponent implements OnInit {
 
   confirmRestock() {
     if (!this.restockItems.length) return;
+
+    // Validate: every item must have an effective price
+    const invalid = this.restockItems.filter(item => this.getEffectivePrice(item) <= 0);
+    if (invalid.length) {
+      alert(`Falta el precio de venta en: ${invalid.map(i => i.plant_name).join(', ')}\nIngresa un precio manual o activa "Usar sugerido".`);
+      return;
+    }
+
     const items = this.restockItems.map(item => ({
       plant_name: item.plant_name,
       quantity: item.quantity,
       unit_cost: item.unit_cost,
-      // Only update sale price if user checked the checkbox
-      new_price: item.apply_suggested_price ? this.getSuggestedPrice(item.unit_cost) : null,
+      new_price: this.getEffectivePrice(item),   // always send final price
+      target_margin: item.row_margin,
     }));
+
     this.plantService.restockPlants(this.clientSlug, items).subscribe({
       next: () => { this.cancelInvoice(); this.loadData(); alert('¡Inventario actualizado!'); },
       error: e => console.error(e)
@@ -532,7 +606,7 @@ export class AdminComponent implements OnInit {
   resetForm() { this.editingId = undefined; this.plantForm = this.emptyPlant(); }
 
   emptyPlant(): Plant {
-    return { name:'', category:'', description:'', price: null as any, cost_price: null, stock: null as any, image_url:'', light:'', water:'', is_featured:false, is_active:true };
+    return { name:'', category:'', description:'', price: 0, cost_price: null, stock: 0, image_url:'', light:'', water:'', is_featured:false, is_active:true };
   }
 
   uploadPlantImage(event: any) {
