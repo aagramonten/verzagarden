@@ -11,15 +11,24 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── PUBLIC CATALOG GRID: 2 cols desktop, 1 col mobile ── */
+/* ── PUBLIC CATALOG GRID ── */
 .plant-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   padding-top: 16px;
+  /* uniform height: each cell stretches to fill row height */
+  align-items: stretch;
 }
 
-@media (max-width: 480px) {
+/* app-plant-card must fill its grid cell */
+.plant-grid app-plant-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+@media (max-width: 500px) {
   .plant-grid {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -35,4 +44,5 @@ body {
 
 /* ── SCROLLBAR HIDE ── */
 ::-webkit-scrollbar { display: none; }
-* { scrollbar-width: none; }/* v2 */
+* { scrollbar-width: none; }
+/* v3 */
