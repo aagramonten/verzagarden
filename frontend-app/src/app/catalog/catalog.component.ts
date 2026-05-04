@@ -18,24 +18,27 @@ import { PlantCardComponent } from '../plant-card.component';
       <div style="display:flex;align-items:center;gap:8px;">
         <span style="font-size:1.5rem;">🌿</span>
         <div style="text-align:center;">
-          <h1 style="margin:0;font-size:1.2rem;font-weight:600;color:white;">Verde Vida</h1>
+          <h1 style="margin:0;font-size:1.2rem;font-weight:700;color:white;">Demo Garden PR</h1>
           <p style="margin:0;font-size:0.7rem;color:#A3C4B3;">Plantas y Jardines</p>
         </div>
       </div>
+      <button (click)="goToAdmin()" style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:0.75rem;font-weight:500;">
+        Admin
+      </button>
     </header>
 
     <!-- SEARCH + FILTERS -->
-    <section style="background:white;padding:15px 20px;border-bottom:1px solid #E0E0E0;">
-      <div style="display:flex;align-items:center;background:#F0F2F0;border-radius:25px;padding:10px 15px;margin-bottom:15px;">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#888" stroke-width="2" fill="none" style="margin-right:10px;min-width:20px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" [(ngModel)]="search" placeholder="Buscar plantas..." style="flex:1;border:none;background:transparent;font-size:1rem;outline:none;color:#333;">
+    <section style="background:white;padding:12px 20px;border-bottom:1px solid #E0E0E0;">
+      <div style="display:flex;align-items:center;background:#F0F2F0;border-radius:25px;padding:10px 15px;margin-bottom:12px;">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#888" stroke-width="2" fill="none" style="margin-right:10px;min-width:18px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" [(ngModel)]="search" placeholder="Buscar plantas..." style="flex:1;border:none;background:transparent;font-size:0.95rem;outline:none;color:#333;">
         <a [href]="getGeneralWhatsappLink()" target="_blank" style="color:#2B7A3E;border:none;background:none;padding:0;cursor:pointer;display:flex;align-items:center;margin-left:10px;">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
         </a>
       </div>
-      <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:5px;scrollbar-width:none;">
+      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;">
         <button *ngFor="let cat of categories" (click)="selectedCategory = cat"
-          style="border:1px solid transparent;padding:8px 16px;border-radius:20px;font-size:0.9rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.3s;"
+          style="border:1px solid transparent;padding:7px 14px;border-radius:20px;font-size:0.85rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.2s;"
           [style.backgroundColor]="selectedCategory === cat ? '#14452F' : '#F0F2F0'"
           [style.color]="selectedCategory === cat ? 'white' : '#666'">
           {{ cat }}
@@ -43,43 +46,45 @@ import { PlantCardComponent } from '../plant-card.component';
       </div>
     </section>
 
-    <!-- HERO -->
-    <section style="background:#fafdf8;padding:20px;">
-      <div style="display:flex;gap:20px;max-width:1200px;width:100%;flex-wrap:wrap;margin:0 auto;">
-        <div style="flex:1 1 300px;background:white;border-radius:24px;padding:24px;box-shadow:0 10px 30px rgba(16,35,25,0.04);border:1px solid #eef1ec;">
-          <span style="color:#1f7a4d;font-weight:700;font-size:0.85rem;letter-spacing:1px;">INVENTARIO DISPONIBLE</span>
-          <h1 style="font-size:2.4rem;margin-top:10px;margin-bottom:15px;color:#102319;letter-spacing:-1px;line-height:1.1;">{{ client?.business_name || 'Verde Vida' }}</h1>
-          <p style="font-size:1rem;margin-bottom:24px;color:#516052;">Explora plantas disponibles, precios actualizados y ordena directo por WhatsApp.</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <div style="background:#f4f8f1;padding:16px;border-radius:16px;flex:1;min-width:80px;text-align:center;">
-              <h2 style="font-size:1.8rem;color:#102319;margin:0 0 4px 0;">{{ plants.length }}</h2>
-              <span style="font-size:0.75rem;color:#516052;font-weight:600;">Plantas</span>
+    <!-- HERO COMPACTO -->
+    <section style="background:#fafdf8;padding:14px 20px;">
+      <div style="display:flex;gap:14px;max-width:1200px;width:100%;flex-wrap:wrap;margin:0 auto;">
+        <!-- Stats -->
+        <div style="flex:1 1 260px;background:white;border-radius:20px;padding:18px 20px;box-shadow:0 6px 20px rgba(16,35,25,0.04);border:1px solid #eef1ec;">
+          <span style="color:#1f7a4d;font-weight:700;font-size:0.78rem;letter-spacing:1px;">INVENTARIO DISPONIBLE</span>
+          <h1 style="font-size:1.9rem;margin:6px 0 10px 0;color:#102319;letter-spacing:-0.5px;line-height:1.1;">Demo Garden PR</h1>
+          <p style="font-size:0.88rem;margin-bottom:16px;color:#516052;">Explora plantas disponibles y ordena directo por WhatsApp.</p>
+          <div style="display:flex;gap:8px;">
+            <div style="background:#f4f8f1;padding:12px;border-radius:12px;flex:1;text-align:center;">
+              <div style="font-size:1.5rem;font-weight:800;color:#102319;line-height:1;">{{ plants.length }}</div>
+              <div style="font-size:0.7rem;color:#516052;font-weight:600;margin-top:3px;">Plantas</div>
             </div>
-            <div style="background:#f4f8f1;padding:16px;border-radius:16px;flex:1;min-width:80px;text-align:center;">
-              <h2 style="font-size:1.8rem;color:#102319;margin:0 0 4px 0;">{{ categories.length - 1 }}</h2>
-              <span style="font-size:0.75rem;color:#516052;font-weight:600;">Categorías</span>
+            <div style="background:#f4f8f1;padding:12px;border-radius:12px;flex:1;text-align:center;">
+              <div style="font-size:1.5rem;font-weight:800;color:#102319;line-height:1;">{{ categories.length - 1 }}</div>
+              <div style="font-size:0.7rem;color:#516052;font-weight:600;margin-top:3px;">Categorías</div>
             </div>
-            <div style="background:#f4f8f1;padding:16px;border-radius:16px;flex:1;min-width:80px;text-align:center;">
-              <h2 style="font-size:1.8rem;color:#102319;margin:0 0 4px 0;">{{ filteredPlants.length }}</h2>
-              <span style="font-size:0.75rem;color:#516052;font-weight:600;">Disponibles</span>
+            <div style="background:#f4f8f1;padding:12px;border-radius:12px;flex:1;text-align:center;">
+              <div style="font-size:1.5rem;font-weight:800;color:#102319;line-height:1;">{{ filteredPlants.length }}</div>
+              <div style="font-size:0.7rem;color:#516052;font-weight:600;margin-top:3px;">Disponibles</div>
             </div>
           </div>
         </div>
-        <div style="flex:1 1 300px;background:linear-gradient(135deg,#1f7a4d,#145635);border-radius:24px;padding:32px;color:white;display:flex;flex-direction:column;justify-content:center;box-shadow:0 10px 30px rgba(31,122,77,0.2);">
-          <span style="background:rgba(255,255,255,0.15);padding:6px 14px;border-radius:99px;font-size:0.75rem;font-weight:800;width:fit-content;margin-bottom:20px;letter-spacing:1px;">ORDEN RÁPIDO</span>
-          <h2 style="font-size:2.2rem;line-height:1.1;margin:0 0 15px 0;font-weight:900;letter-spacing:-1px;">Compra por<br>WhatsApp</h2>
-          <p style="font-size:0.95rem;color:rgba(255,255,255,0.85);line-height:1.5;margin:0;">El cliente escoge la planta y te escribe con el detalle automático.</p>
+        <!-- WhatsApp CTA -->
+        <div style="flex:1 1 220px;background:linear-gradient(135deg,#1f7a4d,#145635);border-radius:20px;padding:20px 24px;color:white;display:flex;flex-direction:column;justify-content:center;box-shadow:0 8px 24px rgba(31,122,77,0.2);">
+          <span style="background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:99px;font-size:0.7rem;font-weight:800;width:fit-content;margin-bottom:12px;letter-spacing:1px;">ORDEN RÁPIDO</span>
+          <h2 style="font-size:1.6rem;line-height:1.1;margin:0 0 8px 0;font-weight:900;">Consulta por<br>WhatsApp</h2>
+          <p style="font-size:0.85rem;color:rgba(255,255,255,0.8);line-height:1.4;margin:0;">Escoge la planta y te respondemos con disponibilidad y precio.</p>
         </div>
       </div>
     </section>
 
     <!-- CATALOG GRID -->
     <section style="max-width:1200px;margin:0 auto;padding:0 20px 40px;">
-      <div *ngIf="loading" style="text-align:center;padding:40px;color:#516052;font-weight:600;font-size:1.1rem;">🌱 Cargando catálogo...</div>
+      <div *ngIf="loading" style="text-align:center;padding:40px;color:#516052;font-weight:600;">🌱 Cargando catálogo...</div>
       <div class="plant-grid" *ngIf="!loading">
         <app-plant-card *ngFor="let p of filteredPlants" [plant]="p" [adminMode]="false" [client]="client"></app-plant-card>
         <div *ngIf="filteredPlants.length === 0" style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">
-          No se encontraron plantas que coincidan con la búsqueda.
+          No se encontraron plantas.
         </div>
       </div>
     </section>
@@ -111,21 +116,15 @@ export class CatalogComponent implements OnInit {
   search = '';
   selectedCategory = 'Todas';
   loading = true;
-
   showLoginModal = false;
   loginUsername = '';
   loginPassword = '';
   loginError = '';
   loginLoading = false;
 
-  constructor(
-    private plantService: PlantService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
-  ) {}
+  constructor(private plantService: PlantService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    // Si viene con ?login=true abrir modal automáticamente
     if (window.location.search.includes('login=true')) {
       this.showLoginModal = true;
       window.history.replaceState({}, '', '/');
@@ -180,15 +179,15 @@ export class CatalogComponent implements OnInit {
 
   get filteredPlants() {
     const term = this.search.toLowerCase().trim();
-    return this.plants.filter(plant => {
-      const matchSearch = !term || plant.name.toLowerCase().includes(term) || (plant.description || '').toLowerCase().includes(term);
-      const matchCategory = this.selectedCategory === 'Todas' || plant.category === this.selectedCategory;
-      return matchSearch && matchCategory;
+    return this.plants.filter(p => {
+      const matchSearch = !term || p.name.toLowerCase().includes(term) || (p.description || '').toLowerCase().includes(term);
+      const matchCat = this.selectedCategory === 'Todas' || p.category === this.selectedCategory;
+      return matchSearch && matchCat;
     });
   }
 
   getGeneralWhatsappLink(): string {
     const phone = this.client?.whatsapp_number || '19392360534';
-    return `https://wa.me/${phone}?text=${encodeURIComponent('Hola, me gustaría hacer una consulta general sobre el inventario.')}`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent('Hola, me gustaría consultar sobre el inventario.')}`;
   }
 }
