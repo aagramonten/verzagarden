@@ -312,6 +312,10 @@ interface RestockItem {
             <input type="number" [(ngModel)]="plantForm.price" class="form-input" placeholder="Precio público">
           </div>
           <div class="form-group">
+            <label class="form-label">Costo de compra</label>
+            <input type="number" [(ngModel)]="plantForm.cost_price" class="form-input" placeholder="Costo mayorista">
+          </div>
+          <div class="form-group">
             <label class="form-label">Cantidad disponible</label>
             <input type="number" [(ngModel)]="plantForm.stock" class="form-input" placeholder="Stock">
           </div>
@@ -528,7 +532,7 @@ export class AdminComponent implements OnInit {
   resetForm() { this.editingId = undefined; this.plantForm = this.emptyPlant(); }
 
   emptyPlant(): Plant {
-    return { name:'', category:'', description:'', price: null as any, stock: null as any, image_url:'', light:'', water:'', is_featured:false, is_active:true };
+    return { name:'', category:'', description:'', price: null as any, cost_price: null, stock: null as any, image_url:'', light:'', water:'', is_featured:false, is_active:true };
   }
 
   uploadPlantImage(event: any) {

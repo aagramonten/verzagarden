@@ -17,6 +17,7 @@ export interface Plant {
   category?: string;
   description?: string;
   price: number;
+  cost_price?: number | null;   // costo de compra mayorista
   stock: number;
   image_url?: string;
   light?: string;
@@ -27,7 +28,8 @@ export interface Plant {
 
 @Injectable({ providedIn: 'root' })
 export class PlantService {
-private apiUrl = 'https://verzagarden-production.up.railway.app/api';
+  private apiUrl = 'https://verzagarden-production.up.railway.app/api';
+
   constructor(private http: HttpClient) {}
 
   getClient(slug: string): Observable<Client> {
@@ -35,8 +37,8 @@ private apiUrl = 'https://verzagarden-production.up.railway.app/api';
   }
 
   login(slug: string, username: string, password: string): Observable<any> {
-  return this.http.post(`${this.apiUrl}/clients/${slug}/login`, { username, password });
-}
+    return this.http.post(`${this.apiUrl}/clients/${slug}/login`, { username, password });
+  }
 
   getPlants(slug: string): Observable<Plant[]> {
     return this.http.get<Plant[]>(`${this.apiUrl}/clients/${slug}/plants`);
@@ -54,23 +56,19 @@ private apiUrl = 'https://verzagarden-production.up.railway.app/api';
     return this.http.delete(`${this.apiUrl}/plants/${id}`);
   }
 
-  // --- NUEVOS ENDPOINTS PARA AI RESTOCK ---
-
   analyzeInvoice(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('invoice', file);
-    // Asumiendo que tu backend tiene un endpoint de análisis OCR / IA
-  return this.http.post(`${this.apiUrl}/clients/demo-garden/invoices/analyze`, formData);
+    return this.http.post(`${this.apiUrl}/clients/demo-garden/invoices/analyze`, formData);
   }
 
   restockPlants(slug: string, items: any[]): Observable<any> {
-    // Endpoint para subir las nuevas cantidades extraídas de la factura
-return this.http.post(`${this.apiUrl}/clients/${slug}/invoices/confirm-restock`, { items });
+    return this.http.post(`${this.apiUrl}/clients/${slug}/invoices/confirm-restock`, { items });
   }
-    uploadImage(file: File): Observable<any> {
+
+  uploadImage(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('image', file);
     return this.http.post(`${this.apiUrl}/upload`, formData);
   }
 }
-

@@ -35,9 +35,8 @@ import { Plant, Client } from './services/plant.service';
     .plant-price { font-size:0.95rem; font-weight:700; color:#1f7a4d; margin-bottom:7px; }
     .plant-price.no-price { color:#516052; font-weight:500; font-size:0.85rem; }
     .plant-desc {
-      font-size:0.78rem; color:#516052; margin:0 0 10px 0; line-height:1.45;
+      font-size:0.78rem; color:#516052; margin:0 0 10px 0; line-height:1.45; flex-grow:1;
       display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-      flex-grow:1;
     }
     .care-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
     .chip { background:#f4f8f1; border:1px solid #eef1ec; padding:4px 9px;
@@ -57,10 +56,7 @@ import { Plant, Client } from './services/plant.service';
       animation: fadeIn 0.15s ease;
     }
     @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-    .lightbox-img {
-      max-width:90vw; max-height:85vh; border-radius:16px; object-fit:contain;
-      box-shadow:0 24px 80px rgba(0,0,0,0.5);
-    }
+    .lightbox-img { max-width:90vw; max-height:85vh; border-radius:16px; object-fit:contain; box-shadow:0 24px 80px rgba(0,0,0,0.5); }
     .lightbox-close {
       position:fixed; top:18px; right:18px;
       background:rgba(255,255,255,0.15); border:none; color:white;
@@ -69,10 +65,12 @@ import { Plant, Client } from './services/plant.service';
       transition:background 0.2s; z-index:10000;
     }
     .lightbox-close:hover { background:rgba(255,255,255,0.28); }
+
+    /* ── ADMIN ROW ── */
     .admin-row {
       display:flex; align-items:center; gap:12px;
       background:white; border-radius:14px; padding:12px 14px;
-      border:1px solid #eef1ec; transition:box-shadow 0.2s;
+      border:1px solid #eef1ec; transition:box-shadow 0.2s; flex-wrap:wrap;
     }
     .admin-row:hover { box-shadow:0 4px 12px rgba(16,35,25,0.07); }
     .admin-thumb { width:52px; height:52px; border-radius:10px; overflow:hidden; background:#f4f8f1; flex-shrink:0; }
@@ -80,6 +78,11 @@ import { Plant, Client } from './services/plant.service';
     .admin-badge { font-size:0.68rem; font-weight:700; padding:3px 8px; border-radius:8px; white-space:nowrap; }
     .btn-edit { background:#f4f8f1; border:1px solid #dfe7dd; color:#102319; border-radius:9px; padding:7px 13px; font-weight:600; cursor:pointer; font-size:0.8rem; white-space:nowrap; }
     .btn-delete { background:#fff0f0; border:1px solid #fad5d5; color:#9b1c1c; border-radius:9px; padding:7px 13px; font-weight:600; cursor:pointer; font-size:0.8rem; white-space:nowrap; }
+    .price-col { display:flex; flex-direction:column; gap:3px; align-items:flex-end; flex-shrink:0; }
+    .price-row { display:flex; align-items:center; gap:5px; }
+    .price-label { font-size:0.65rem; color:#9ca3af; font-weight:600; text-transform:uppercase; letter-spacing:0.3px; }
+    .price-value { font-size:0.88rem; font-weight:700; }
+    .margin-badge { font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:6px; margin-top:2px; }
   `],
   template: `
     <!-- PUBLIC CARD -->
@@ -95,23 +98,16 @@ import { Plant, Client } from './services/plant.service';
             {{ plant.stock > 0 ? plant.stock + ' en stock' : 'Agotada' }}
           </span>
         </div>
-
         <div class="card-body">
           <h3 class="plant-name">{{ plant.name }}</h3>
-
           <div class="plant-price" [class.no-price]="!plant.price">
             {{ plant.price ? '$' + plant.price : 'Consultar precio' }}
           </div>
-
-          <p class="plant-desc">
-            {{ plant.description || 'Consulta disponibilidad y detalles por WhatsApp.' }}
-          </p>
-
+          <p class="plant-desc">{{ plant.description || 'Consulta disponibilidad y detalles por WhatsApp.' }}</p>
           <div class="care-row">
             <span class="chip">☀️ {{ plant.light || 'Consultar luz' }}</span>
             <span class="chip">💧 {{ plant.water || 'Consultar riego' }}</span>
           </div>
-
           <a *ngIf="plant.stock > 0" class="wa-btn" [href]="getWhatsappLink()" target="_blank">
             <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="margin-right:7px;flex-shrink:0;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
             Consultar por WhatsApp
@@ -119,8 +115,6 @@ import { Plant, Client } from './services/plant.service';
           <button *ngIf="plant.stock <= 0" disabled class="wa-btn wa-disabled">No disponible</button>
         </div>
       </article>
-
-      <!-- Lightbox -->
       <div *ngIf="lightboxOpen" class="lightbox-overlay" (click)="closeLightbox($event)">
         <button class="lightbox-close" (click)="lightboxOpen = false">✕</button>
         <img class="lightbox-img" [src]="plant.image_url" [alt]="plant.name">
@@ -134,15 +128,38 @@ import { Plant, Client } from './services/plant.service';
           <img *ngIf="plant.image_url" [src]="plant.image_url" [alt]="plant.name">
           <div *ngIf="!plant.image_url" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🪴</div>
         </div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:700;color:#102319;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ plant.name }}</div>
-          <div style="font-size:0.76rem;color:#516052;margin-top:2px;">{{ plant.category || '—' }} · {{ plant.price ? '$' + plant.price : 'Sin precio' }}</div>
+
+        <!-- Name + category -->
+        <div style="flex:1;min-width:120px;">
+          <div style="font-weight:700;color:#102319;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ plant.name }}</div>
+          <div style="font-size:0.75rem;color:#516052;margin-top:2px;">{{ plant.category || '—' }}</div>
         </div>
+
+        <!-- Price / Cost / Margin -->
+        <div class="price-col">
+          <div class="price-row">
+            <span class="price-label">Venta</span>
+            <span class="price-value" style="color:#1f7a4d;">{{ plant.price ? '$' + plant.price : '—' }}</span>
+          </div>
+          <div class="price-row" *ngIf="plant.cost_price">
+            <span class="price-label">Costo</span>
+            <span class="price-value" style="color:#516052;">\${{ plant.cost_price }}</span>
+          </div>
+          <div *ngIf="plant.price && plant.cost_price" class="margin-badge"
+            [style.background]="getMarginBg()"
+            [style.color]="getMarginColor()">
+            {{ getMarginPct() | number:'1.0-1' }}% margen
+          </div>
+        </div>
+
+        <!-- Stock + badges -->
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
           <div style="font-weight:700;color:#102319;font-size:0.85rem;">{{ plant.stock }} u.</div>
           <span *ngIf="plant.stock === 0" class="admin-badge" style="background:#fff0f0;color:#9b1c1c;">Sin stock</span>
           <span *ngIf="plant.stock > 0 && plant.stock <= 5" class="admin-badge" style="background:#fff7ed;color:#c2410c;">Bajo stock</span>
         </div>
+
+        <!-- Actions -->
         <div style="display:flex;gap:6px;flex-shrink:0;">
           <button class="btn-edit" (click)="onEdit.emit(plant)">Editar</button>
           <button class="btn-delete" (click)="onRemove.emit(plant)">Borrar</button>
@@ -170,6 +187,25 @@ export class PlantCardComponent {
 
   @HostListener('document:keydown.escape')
   onEscape() { this.lightboxOpen = false; }
+
+  getMarginPct(): number {
+    if (!this.plant.price || !this.plant.cost_price) return 0;
+    return ((this.plant.price - this.plant.cost_price) / this.plant.price) * 100;
+  }
+
+  getMarginBg(): string {
+    const m = this.getMarginPct();
+    if (m >= 40) return '#dcfce7';
+    if (m >= 20) return '#fef3c7';
+    return '#fee2e2';
+  }
+
+  getMarginColor(): string {
+    const m = this.getMarginPct();
+    if (m >= 40) return '#15803d';
+    if (m >= 20) return '#92400e';
+    return '#991b1b';
+  }
 
   getWhatsappLink(): string {
     const number = this.client?.whatsapp_number || '19392360534';

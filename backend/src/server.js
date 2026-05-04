@@ -12,12 +12,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-console.log('Cloudinary config:', {
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY ? 'OK' : 'MISSING',
-  api_secret: process.env.CLOUDINARY_API_SECRET ? 'OK' : 'MISSING'
-});
-
 dotenv.config();
 
 const app = express();
@@ -35,6 +29,26 @@ const upload = multer({ storage: multer.memoryStorage() });
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
+
+// =======================
+// 🔧 AUTO-MIGRATE: add cost_price column if missing
+// =======================
+async function ensureCostPriceColumn() {
+  try {
+    await pool.query(`
+      ALTER TABLE plants ADD COLUMN IF NOT EXISTS cost_price DECIMAL(10,2) NULL DEFAULT NULL
+    `);
+    console.log('✅ cost_price column ready');
+  } catch (err) {
+    // Column may already exist in some MySQL versions that don't support IF NOT EXISTS
+    if (!err.message.includes('Duplicate column')) {
+      console.warn('cost_price migration note:', err.message);
+    }
+  }
+}
+ensureCostPriceColumn();
+
+// =======================
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, app: 'VerzaPlants API' });
@@ -65,22 +79,13 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
 app.post('/api/clients/:slug/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-
-    const [rows] = await pool.query(
-      'SELECT * FROM clients WHERE slug = ? LIMIT 1',
-      [req.params.slug]
-    );
-
+    const [rows] = await pool.query('SELECT * FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
     if (!rows.length) return res.status(404).json({ message: 'Cliente no encontrado' });
-
     const client = rows[0];
-
     if (client.admin_user !== username || client.admin_password !== password) {
       return res.status(401).json({ message: 'Credenciales incorrectas' });
     }
-
     res.json({ ok: true, slug: client.slug });
-
   } catch (error) {
     res.status(500).json({ message: 'Error en login', error: error.message });
   }
@@ -100,51 +105,55 @@ app.get('/api/clients/:slug/plants', async (req, res) => {
   try {
     const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
     if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
-
     const [plants] = await pool.query(
       `SELECT * FROM plants WHERE client_id = ? AND is_active = TRUE ORDER BY is_featured DESC, name ASC`,
       [clients[0].id]
     );
-
     res.json(plants);
   } catch (error) {
     res.status(500).json({ message: 'Error buscando plantas', error: error.message });
   }
 });
 
+// CREATE plant — now includes cost_price
 app.post('/api/clients/:slug/plants', async (req, res) => {
   try {
     const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
     if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
 
-    const { name, category, description, price, stock, image_url, light, water, is_featured } = req.body;
+    const { name, category, description, price, cost_price, stock, image_url, light, water, is_featured } = req.body;
 
     const [result] = await pool.query(
-      `INSERT INTO plants (client_id, name, category, description, price, stock, image_url, light, water, is_featured)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [clients[0].id, name, category, description, price, stock, image_url, light, water, !!is_featured]
+      `INSERT INTO plants (client_id, name, category, description, price, cost_price, stock, image_url, light, water, is_featured)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [clients[0].id, name, category, description,
+       price ?? null, cost_price ?? null,
+       stock, image_url, light, water, !!is_featured]
     );
 
     res.status(201).json({ id: result.insertId, message: 'Planta creada' });
-
   } catch (error) {
     res.status(500).json({ message: 'Error creando planta', error: error.message });
   }
 });
 
+// UPDATE plant — now includes cost_price
 app.put('/api/plants/:id', async (req, res) => {
   try {
-    const { name, category, description, price, stock, image_url, light, water, is_featured, is_active } = req.body;
+    const { name, category, description, price, cost_price, stock, image_url, light, water, is_featured, is_active } = req.body;
 
     await pool.query(
       `UPDATE plants 
-       SET name=?, category=?, description=?, price=?, stock=?, image_url=?, light=?, water=?, is_featured=?, is_active=? 
+       SET name=?, category=?, description=?, price=?, cost_price=?, stock=?, image_url=?, light=?, water=?, is_featured=?, is_active=? 
        WHERE id=?`,
-      [name, category, description, price, stock, image_url, light, water, !!is_featured, is_active !== false, req.params.id]
+      [name, category, description,
+       price ?? null, cost_price ?? null,
+       stock, image_url, light, water,
+       !!is_featured, is_active !== false,
+       req.params.id]
     );
 
     res.json({ message: 'Planta actualizada' });
-
   } catch (error) {
     res.status(500).json({ message: 'Error actualizando planta', error: error.message });
   }
@@ -154,7 +163,6 @@ app.delete('/api/plants/:id', async (req, res) => {
   try {
     await pool.query('UPDATE plants SET is_active = FALSE WHERE id = ?', [req.params.id]);
     res.json({ message: 'Planta desactivada' });
-
   } catch (error) {
     res.status(500).json({ message: 'Error eliminando planta', error: error.message });
   }
@@ -167,23 +175,14 @@ app.delete('/api/plants/:id', async (req, res) => {
 
 app.post('/api/clients/:slug/invoices/analyze', upload.single('invoice'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'No se subió ninguna factura.' });
-    }
+    if (!req.file) return res.status(400).json({ message: 'No se subió ninguna factura.' });
 
-    const [clients] = await pool.query(
-      'SELECT id FROM clients WHERE slug = ? LIMIT 1',
-      [req.params.slug]
-    );
-
-    if (!clients.length) {
-      return res.status(404).json({ message: 'Cliente no encontrado' });
-    }
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
 
     const base64File = req.file.buffer.toString('base64');
     const mimeType = req.file.mimetype;
 
-    // ✅ Corregido el uso oficial de OpenAI v4 para lectura multimodal y JSON estructurado
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -202,7 +201,8 @@ Devuelve SOLO JSON válido con esta estructura:
     {
       "plant_name": "",
       "quantity": 0,
-      "unit_cost": 0
+      "unit_cost": 0,
+      "total_cost": 0
     }
   ]
 }
@@ -210,15 +210,15 @@ Devuelve SOLO JSON válido con esta estructura:
 Reglas:
 - Solo incluye plantas
 - Ignora IVU, delivery, herramientas, etc
-- quantity debe ser número
-- unit_cost debe ser número
+- quantity debe ser número entero
+- unit_cost es el costo unitario de compra (precio mayorista)
+- total_cost = unit_cost * quantity
+- Todos los valores deben ser números
 `
             },
             {
               type: 'image_url',
-              image_url: {
-                url: `data:${mimeType};base64,${base64File}`
-              }
+              image_url: { url: `data:${mimeType};base64,${base64File}` }
             }
           ]
         }
@@ -227,80 +227,71 @@ Reglas:
     });
 
     const parsed = JSON.parse(response.choices[0].message.content);
-
-    res.json({
-      message: 'Factura analizada',
-      result: parsed
-    });
+    res.json({ message: 'Factura analizada', items: parsed.items || [] });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      message: 'Error analizando factura',
-      error: error.message
-    });
+    res.status(500).json({ message: 'Error analizando factura', error: error.message });
   }
 });
 
 
 // =======================
 // 📦 CONFIRM RESTOCK
+// Now supports: cost_price update + optional new sale price
 // =======================
 
 app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
   try {
     const { items } = req.body;
 
-    const [clients] = await pool.query(
-      'SELECT id FROM clients WHERE slug = ? LIMIT 1',
-      [req.params.slug]
-    );
-
-    if (!clients.length) {
-      return res.status(404).json({ message: 'Cliente no encontrado' });
-    }
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
 
     const clientId = clients[0].id;
-
-    let updates = [];
+    const updates = [];
 
     for (const item of items) {
-      const { plant_name, quantity } = item;
+      const { plant_name, quantity, unit_cost, new_price } = item;
 
       const [plants] = await pool.query(
-        `SELECT id, name FROM plants 
-         WHERE client_id = ? AND name LIKE ? LIMIT 1`,
+        `SELECT id, name, price FROM plants WHERE client_id = ? AND name LIKE ? AND is_active = TRUE LIMIT 1`,
         [clientId, `%${plant_name}%`]
       );
 
       if (plants.length) {
-        await pool.query(
-          `UPDATE plants SET stock = stock + ? WHERE id = ?`,
-          [quantity, plants[0].id]
-        );
+        const plant = plants[0];
+
+        // Always: add stock + update cost_price
+        // Conditionally: update sale price only if new_price was explicitly provided
+        if (new_price !== null && new_price !== undefined) {
+          await pool.query(
+            `UPDATE plants SET stock = stock + ?, cost_price = ?, price = ? WHERE id = ?`,
+            [quantity, unit_cost ?? null, new_price, plant.id]
+          );
+        } else {
+          await pool.query(
+            `UPDATE plants SET stock = stock + ?, cost_price = ? WHERE id = ?`,
+            [quantity, unit_cost ?? null, plant.id]
+          );
+        }
 
         updates.push({
-          matched: plants[0].name,
-          added: quantity
+          matched: plant.name,
+          added: quantity,
+          cost_price_updated: unit_cost,
+          price_updated: new_price ?? false
         });
 
       } else {
-        updates.push({
-          unmatched: plant_name
-        });
+        updates.push({ unmatched: plant_name });
       }
     }
 
-    res.json({
-      message: 'Inventario actualizado',
-      updates
-    });
+    res.json({ message: 'Inventario actualizado', updates });
 
   } catch (error) {
-    res.status(500).json({
-      message: 'Error actualizando inventario',
-      error: error.message
-    });
+    res.status(500).json({ message: 'Error actualizando inventario', error: error.message });
   }
 });
 
@@ -309,7 +300,6 @@ app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 
-// ✅ Corregido: '0.0.0.0' para que Railway lo exponga a internet
 app.listen(port, '0.0.0.0', () => {
   console.log(`VerzaPlants API running on port ${port}`);
 });
