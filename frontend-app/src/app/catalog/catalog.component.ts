@@ -22,10 +22,6 @@ import { PlantCardComponent } from '../plant-card.component';
           <p style="margin:0;font-size:0.7rem;color:#A3C4B3;">Plantas y Jardines</p>
         </div>
       </div>
-      <button (click)="goToAdmin()" style="background:none;border:none;color:white;cursor:pointer;padding:5px;display:flex;align-items:center;flex-direction:column;">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span style="font-size:0.6rem;margin-top:2px;">Admin</span>
-      </button>
     </header>
 
     <!-- SEARCH + FILTERS -->
