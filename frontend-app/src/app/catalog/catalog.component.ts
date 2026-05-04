@@ -140,16 +140,6 @@ const CATEGORIES = [
         </div>
       </div>
 
-      <!-- Dato curioso -->
-      <div style="background:linear-gradient(135deg,#f0faf4,#fafdf8);border:1px solid #d4edda;border-radius:16px;padding:16px 20px;margin-bottom:4px;display:flex;gap:14px;align-items:flex-start;">
-        <span style="font-size:1.6rem;flex-shrink:0;">🌿</span>
-        <div>
-          <div style="font-weight:700;color:#14452F;font-size:0.85rem;margin-bottom:5px;">Dato curioso</div>
-          <p style="font-size:0.8rem;color:#516052;line-height:1.55;margin:0;">
-            ¿Sabías que no es lo mismo un árbol que un arbusto? Los árboles tienen un solo tronco principal y leñoso que se ramifica a cierta altura, mientras que los arbustos poseen múltiples tallos leñosos que se ramifican desde la misma base.
-          </p>
-        </div>
-      </div>
     </section>
 
     <!-- CATALOG GRID -->
