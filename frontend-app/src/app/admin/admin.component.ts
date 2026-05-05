@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PlantService, Client, Plant } from '../services/plant.service';
@@ -26,7 +26,7 @@ interface RestockItem {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, PlantCardComponent, DecimalPipe],
+  imports: [CommonModule, FormsModule, PlantCardComponent],
   styles: [`
     .metric-card { background:white;border:1px solid #eef1ec;border-radius:20px;padding:20px;text-align:center;box-shadow:0 4px 12px rgba(16,35,25,0.04); }
     .section-title { margin:0 0 4px 0;color:#102319;font-size:1.25rem;font-weight:700; }
