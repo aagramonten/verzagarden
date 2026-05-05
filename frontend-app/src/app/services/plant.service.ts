@@ -17,13 +17,40 @@ export interface Plant {
   category?: string;
   description?: string;
   price: number;
-  cost_price?: number | null;   // costo de compra mayorista
+  cost_price?: number | null;
   stock: number;
   image_url?: string;
   light?: string;
   water?: string;
   is_featured?: boolean;
   is_active?: boolean;
+}
+
+export interface SalesReport {
+  period: string;
+  summary: {
+    total_transactions: number;
+    total_units: number;
+    total_revenue: number;
+    total_cost: number;
+    total_profit: number;
+    margin_pct: number;
+  };
+  top_plants: {
+    name: string;
+    category: string;
+    image_url: string;
+    units_sold: number;
+    revenue: number;
+    cost: number;
+    profit: number;
+  }[];
+  chart_data: {
+    day: string;
+    units: number;
+    revenue: number;
+  }[];
+  recent_imports: any[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -78,5 +105,10 @@ export class PlantService {
 
   confirmPosImport(slug: string, items: any[], filename: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/clients/${slug}/pos-import/confirm`, { items, filename });
+  }
+
+  // ✅ Sales report con filtro de periodo
+  getSalesReport(slug: string, period: string = 'month'): Observable<SalesReport> {
+    return this.http.get<SalesReport>(`${this.apiUrl}/clients/${slug}/sales-report?period=${period}`);
   }
 }
