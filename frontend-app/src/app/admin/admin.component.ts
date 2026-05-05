@@ -156,8 +156,8 @@ interface RestockItem {
       <div style="background:linear-gradient(135deg,#0d3320,#1a5c38 60%,#236b45);border-radius:22px;padding:26px;margin-bottom:22px;box-shadow:0 16px 48px rgba(15,50,30,0.2);position:relative;overflow:hidden;">
         <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,0.04);border-radius:50%;pointer-events:none;"></div>
         <div style="position:relative;z-index:1;">
-          <span style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:white;font-size:0.68rem;font-weight:800;letter-spacing:1.5px;padding:4px 11px;border-radius:99px;display:inline-block;margin-bottom:12px;">✨ AI RESTOCK</span>
-          <h2 style="color:white;font-size:1.55rem;font-weight:800;margin:0 0 7px;letter-spacing:-0.5px;">AI Restock Assistant</h2>
+          <span style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:white;font-size:0.68rem;font-weight:800;letter-spacing:1.5px;padding:4px 11px;border-radius:99px;display:inline-block;margin-bottom:12px;">✨ ACTUALIZAR INVENTARIO</span>
+          <h2 style="color:white;font-size:1.55rem;font-weight:800;margin:0 0 7px;letter-spacing:-0.5px;">Actualizar Inventario</h2>
           <p style="color:rgba(255,255,255,0.85);font-size:0.9rem;margin:0 0 4px;font-weight:500;">Actualiza tu inventario subiendo una factura del suplidor.</p>
           <p style="color:rgba(255,255,255,0.6);font-size:0.82rem;margin:0 0 20px;">El sistema detecta plantas, cantidades y costos. El precio de venta público no se toca — tú decides si aplicar el precio sugerido.</p>
 

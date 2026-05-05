@@ -49,7 +49,6 @@ import { Plant, Client } from './services/plant.service';
       cursor:pointer; border:none; width:100%; flex-shrink:0;
     }
     .wa-btn:hover { background:#0d3320; }
-    .wa-disabled { background:#e5e7e5; color:#999; cursor:not-allowed; }
     .lightbox-overlay {
       position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:9999;
       display:flex; align-items:center; justify-content:center; padding:20px;
@@ -65,8 +64,6 @@ import { Plant, Client } from './services/plant.service';
       transition:background 0.2s; z-index:10000;
     }
     .lightbox-close:hover { background:rgba(255,255,255,0.28); }
-
-    /* ── ADMIN ROW ── */
     .admin-row {
       display:flex; align-items:center; gap:12px;
       background:white; border-radius:14px; padding:12px 14px;
@@ -95,26 +92,30 @@ import { Plant, Client } from './services/plant.service';
             [class.badge-ok]="plant.stock > 5"
             [class.badge-low]="plant.stock > 0 && plant.stock <= 5"
             [class.badge-out]="plant.stock <= 0">
-            {{ plant.stock > 0 ? plant.stock + ' en stock' : 'Agotada' }}
+            {{ plant.stock > 0 ? plant.stock + (isEnglish ? ' in stock' : ' en stock') : (isEnglish ? 'Out of stock' : 'Agotada') }}
           </span>
         </div>
         <div class="card-body">
           <h3 class="plant-name">{{ plant.name }}</h3>
           <div class="plant-price" [class.no-price]="!plant.price">
-            {{ plant.price ? '$' + plant.price : 'Consultar precio' }}
+            {{ plant.price ? '$' + plant.price : (isEnglish ? 'Ask for price' : 'Consultar precio') }}
           </div>
-          <p class="plant-desc">{{ plant.description || 'Consulta disponibilidad y detalles por WhatsApp.' }}</p>
+          <p class="plant-desc">{{ plant.description || (isEnglish ? 'Ask about availability and details via WhatsApp.' : 'Consulta disponibilidad y detalles por WhatsApp.') }}</p>
           <div class="care-row">
-            <span class="chip">☀️ {{ plant.light || 'Consultar luz' }}</span>
-            <span class="chip">💧 {{ plant.water || 'Consultar riego' }}</span>
+            <span class="chip">☀️ {{ plant.light || (isEnglish ? 'Ask about light' : 'Consultar luz') }}</span>
+            <span class="chip">💧 {{ plant.water || (isEnglish ? 'Ask about watering' : 'Consultar riego') }}</span>
           </div>
           <a *ngIf="plant.stock > 0" class="wa-btn" [href]="getWhatsappLink()" target="_blank">
             <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="margin-right:7px;flex-shrink:0;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-            Consultar por WhatsApp
+            {{ isEnglish ? 'Ask on WhatsApp' : 'Consultar por WhatsApp' }}
           </a>
-          <a *ngIf="plant.stock <= 0" class="wa-btn" [href]="getWhatsappLink()" target="_blank" style="opacity:0.75;">Consultar disponibilidad</a>
+          <a *ngIf="plant.stock <= 0" class="wa-btn" [href]="getWhatsappLink()" target="_blank" style="opacity:0.75;">
+            {{ isEnglish ? 'Check availability' : 'Consultar disponibilidad' }}
+          </a>
         </div>
       </article>
+
+      <!-- Lightbox -->
       <div *ngIf="lightboxOpen" class="lightbox-overlay" (click)="closeLightbox($event)">
         <button class="lightbox-close" (click)="lightboxOpen = false">✕</button>
         <img class="lightbox-img" [src]="plant.image_url" [alt]="plant.name">
@@ -128,14 +129,10 @@ import { Plant, Client } from './services/plant.service';
           <img *ngIf="plant.image_url" [src]="plant.image_url" [alt]="plant.name">
           <div *ngIf="!plant.image_url" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🪴</div>
         </div>
-
-        <!-- Name + category -->
-        <div style="flex:1;min-width:120px;">
+        <div style="flex:1;min-width:0;">
           <div style="font-weight:700;color:#102319;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ plant.name }}</div>
           <div style="font-size:0.75rem;color:#516052;margin-top:2px;">{{ plant.category || '—' }}</div>
         </div>
-
-        <!-- Price / Cost / Margin -->
         <div class="price-col">
           <div class="price-row">
             <span class="price-label">Venta</span>
@@ -143,7 +140,7 @@ import { Plant, Client } from './services/plant.service';
           </div>
           <div class="price-row" *ngIf="plant.cost_price">
             <span class="price-label">Costo</span>
-            <span class="price-value" style="color:#516052;">\${{ plant.cost_price }}</span>
+            <span class="price-value" style="color:#516052;">${{ plant.cost_price }}</span>
           </div>
           <div *ngIf="plant.price && plant.cost_price" class="margin-badge"
             [style.background]="getMarginBg()"
@@ -151,15 +148,11 @@ import { Plant, Client } from './services/plant.service';
             {{ getMarginPct() | number:'1.0-1' }}% margen
           </div>
         </div>
-
-        <!-- Stock + badges -->
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
           <div style="font-weight:700;color:#102319;font-size:0.85rem;">{{ plant.stock }} u.</div>
           <span *ngIf="plant.stock === 0" class="admin-badge" style="background:#fff0f0;color:#9b1c1c;">Sin stock</span>
           <span *ngIf="plant.stock > 0 && plant.stock <= 5" class="admin-badge" style="background:#fff7ed;color:#c2410c;">Bajo stock</span>
         </div>
-
-        <!-- Actions -->
         <div style="display:flex;gap:6px;flex-shrink:0;">
           <button class="btn-edit" (click)="onEdit.emit(plant)">Editar</button>
           <button class="btn-delete" (click)="onRemove.emit(plant)">Borrar</button>
@@ -171,6 +164,7 @@ import { Plant, Client } from './services/plant.service';
 export class PlantCardComponent {
   @Input({ required: true }) plant!: Plant;
   @Input() adminMode = false;
+  @Input() isEnglish = false;
   @Input() client?: Client;
   @Output() onEdit = new EventEmitter<Plant>();
   @Output() onRemove = new EventEmitter<Plant>();
@@ -209,7 +203,9 @@ export class PlantCardComponent {
 
   getWhatsappLink(): string {
     const number = this.client?.whatsapp_number || '19392360534';
-    const message = `¡Hola! Me interesa la planta *${this.plant.name}* que vi en el catálogo.\n\n*Precio:* ${this.plant.price ? '$' + this.plant.price : 'por confirmar'}\n\n¿Podrían darme más información?`;
+    const message = this.isEnglish
+      ? `Hello! I'm interested in *${this.plant.name}* from your catalog.\n\n*Price:* ${this.plant.price ? '$' + this.plant.price : 'TBD'}\n\nCould you give me more information?`
+      : `¡Hola! Me interesa la planta *${this.plant.name}* que vi en el catálogo.\n\n*Precio:* ${this.plant.price ? '$' + this.plant.price : 'por confirmar'}\n\n¿Podrían darme más información?`;
     return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   }
 }
