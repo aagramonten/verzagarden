@@ -35,6 +35,7 @@ const openai = new OpenAI({
 // =======================
 async function ensureCostPriceColumn() {
   try {
+    // Check if column exists first
     const [rows] = await pool.query(`
       SELECT COUNT(*) as cnt FROM information_schema.COLUMNS 
       WHERE TABLE_SCHEMA = DATABASE() 
@@ -120,7 +121,7 @@ app.get('/api/clients/:slug/plants', async (req, res) => {
   }
 });
 
-// CREATE plant
+// CREATE plant — now includes cost_price
 app.post('/api/clients/:slug/plants', async (req, res) => {
   try {
     const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
@@ -142,7 +143,7 @@ app.post('/api/clients/:slug/plants', async (req, res) => {
   }
 });
 
-// UPDATE plant
+// UPDATE plant — now includes cost_price
 app.put('/api/plants/:id', async (req, res) => {
   try {
     const { name, category, description, price, cost_price, stock, image_url, light, water, is_featured, is_active } = req.body;
@@ -170,73 +171,6 @@ app.delete('/api/plants/:id', async (req, res) => {
     res.json({ message: 'Planta desactivada' });
   } catch (error) {
     res.status(500).json({ message: 'Error eliminando planta', error: error.message });
-  }
-});
-
-
-// =======================
-// 🌱 SEED DEMO PLANTS (one-time use)
-// POST /api/clients/demo-garden/seed-plants
-// =======================
-app.post('/api/clients/:slug/seed-plants', async (req, res) => {
-  try {
-    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
-    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
-    const clientId = clients[0].id;
-
-    const plants = [
-      { name: 'Olivo Negro / Shady Lady',       category: 'Árboles',             price: 96,  cost_price: 48,  stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Árbol ornamental de follaje denso, ideal para sombra y paisajismo.' },
-      { name: 'Podocarpus',                      category: 'Árboles',             price: 52,  cost_price: 26,  stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Árbol de crecimiento lento, ideal para setos y jardines formales.' },
-      { name: 'Ficus Benjamina',                 category: 'Árboles',             price: 64,  cost_price: 32,  stock: 0, light: 'Sol parcial',   water: 'Moderada',  description: 'Árbol tropical de follaje brillante, muy popular en paisajismo.' },
-      { name: 'Croton Petra',                    category: 'Arbustos',            price: 19,  cost_price: 9.5, stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Arbusto colorido con hojas multicolores, ideal para bordes y jardines.' },
-      { name: 'Ixora',                           category: 'Arbustos',            price: 18,  cost_price: 7.25,stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Arbusto de flores rojas en racimos, muy atractivo para jardines tropicales.' },
-      { name: 'Clusia',                          category: 'Arbustos',            price: 28,  cost_price: 14,  stock: 0, light: 'Sol parcial',   water: 'Poca',      description: 'Arbusto resistente y de bajo mantenimiento, ideal para setos.' },
-      { name: 'Pentas',                          category: 'Flores de estación',  price: 9,   cost_price: 4.25,stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Planta de flores estrelladas que atrae mariposas y colibríes.' },
-      { name: 'Blue Daze',                       category: 'Flores de estación',  price: 9,   cost_price: 4.75,stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Planta rastrera con flores azules, perfecta para bordes y macetas.' },
-      { name: 'Vinca',                           category: 'Flores de estación',  price: 8,   cost_price: 3.95,stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Planta resistente con flores vistosas, ideal para jardines de bajo mantenimiento.' },
-      { name: 'Monstera Deliciosa',              category: 'Plantas de interior', price: 28,  cost_price: 18,  stock: 0, light: 'Luz indirecta', water: 'Moderada',  description: 'Planta tropical perfecta para interior con luz indirecta.' },
-      { name: 'Pothos',                          category: 'Plantas de interior', price: 14,  cost_price: 6.5, stock: 0, light: 'Luz indirecta', water: 'Poca',      description: 'Planta colgante muy resistente y fácil de cuidar, ideal para interiores.' },
-      { name: 'Sansevieria',                     category: 'Plantas de interior', price: 18,  cost_price: 11,  stock: 0, light: 'Baja a media',  water: 'Poca',      description: 'Resistente, moderna y de bajo mantenimiento, purifica el aire.' },
-      { name: 'Trinitaria / Bougainvillea',      category: 'Trepadoras',          price: 30,  cost_price: 15,  stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Trepadora de flores vibrantes, ideal para pérgolas y verjas.' },
-      { name: 'Jazmín amarillo / Allamanda',     category: 'Trepadoras',          price: 24,  cost_price: 12,  stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Trepadora de flores amarillas brillantes, tropical y llamativa.' },
-      { name: 'Mandevilla',                      category: 'Trepadoras',          price: 27,  cost_price: 13.5,stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Trepadora de flores rosas o rojas, perfecta para terrazas.' },
-      { name: 'Agave',                           category: 'Suculentas',          price: 32,  cost_price: 16,  stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Suculenta imponente, muy resistente y de bajo mantenimiento.' },
-      { name: 'Echeveria',                       category: 'Suculentas',          price: 11,  cost_price: 5.25,stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Suculenta roseta compacta, perfecta para macetas y arreglos.' },
-      { name: 'Jade',                            category: 'Suculentas',          price: 18,  cost_price: 8.75,stock: 0, light: 'Sol pleno',     water: 'Poca',      description: 'Suculenta arbustiva de hojas carnosas, símbolo de buena suerte.' },
-      { name: 'Areca Palm',                      category: 'Palmas',              price: 48,  cost_price: 24,  stock: 0, light: 'Sol parcial',   water: 'Moderada',  description: 'Palma elegante y frondosa, ideal para interiores y exteriores.' },
-      { name: 'Palma Robellini',                 category: 'Palmas',              price: 76,  cost_price: 38,  stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Palma enana ornamental, perfecta para entradas y terrazas.' },
-      { name: 'Palma Roja',                      category: 'Palmas',              price: 42,  cost_price: 21,  stock: 0, light: 'Sol pleno',     water: 'Moderada',  description: 'Palma tropical con follaje rojizo llamativo, ideal para jardines.' },
-    ];
-
-    // Skip plants that already exist by name
-    let inserted = 0;
-    let skipped = 0;
-
-    for (const plant of plants) {
-      const [existing] = await pool.query(
-        'SELECT id FROM plants WHERE client_id = ? AND name = ? LIMIT 1',
-        [clientId, plant.name]
-      );
-
-      if (existing.length) {
-        skipped++;
-        continue;
-      }
-
-      await pool.query(
-        `INSERT INTO plants (client_id, name, category, description, price, cost_price, stock, light, water, is_featured, image_url)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE, '')`,
-        [clientId, plant.name, plant.category, plant.description,
-         plant.price, plant.cost_price, plant.stock, plant.light, plant.water]
-      );
-      inserted++;
-    }
-
-    res.json({ message: `Seed completado: ${inserted} plantas insertadas, ${skipped} ya existían.` });
-
-  } catch (error) {
-    console.error('seed error:', error.message);
-    res.status(500).json({ message: 'Error en seed', error: error.message });
   }
 });
 
@@ -310,6 +244,7 @@ Reglas:
 
 // =======================
 // 📦 CONFIRM RESTOCK
+// Now supports: cost_price update + optional new sale price
 // =======================
 
 app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
@@ -333,6 +268,7 @@ app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
       if (plants.length) {
         const plant = plants[0];
 
+        // Always update: stock, cost_price, and price (new_price is always sent from frontend)
         await pool.query(
           `UPDATE plants SET stock = stock + ?, cost_price = ?, price = ? WHERE id = ?`,
           [quantity, unit_cost ?? null, new_price ?? plant.price, plant.id]
@@ -358,6 +294,174 @@ app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
   }
 });
 
+
+
+
+// =======================
+// 📊 POS SALES IMPORT
+// =======================
+
+// Analyze uploaded POS file (CSV/Excel) — returns matched items for review
+app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No se subió ningún archivo.' });
+
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
+    const clientId = clients[0].id;
+
+    // Get all active plants for matching
+    const [plants] = await pool.query(
+      'SELECT id, name, stock FROM plants WHERE client_id = ? AND is_active = TRUE',
+      [clientId]
+    );
+
+    // Parse file content (CSV only for now — Excel requires extra lib)
+    const fileContent = req.file.buffer.toString('utf8');
+    const lines = fileContent.split(/\r?\n/).filter(l => l.trim());
+    if (!lines.length) return res.status(400).json({ message: 'Archivo vacío o inválido.' });
+
+    // Detect header row
+    const headers = lines[0].split(/,|;|\t/).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+
+    // Find column indices
+    const nameIdx = headers.findIndex(h => ['producto','nombre','name','item','description','descripcion','product'].some(k => h.includes(k)));
+    const qtyIdx  = headers.findIndex(h => ['cantidad','quantity','qty','cant','vendido','sold','units'].some(k => h.includes(k)));
+
+    if (nameIdx === -1 || qtyIdx === -1) {
+      return res.status(400).json({ 
+        message: 'No se encontraron columnas de producto o cantidad.',
+        headers,
+        hint: 'El archivo debe tener columnas con nombres como: Producto/Nombre/Item y Cantidad/Qty'
+      });
+    }
+
+    // Parse rows
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(/,|;|\t/).map(c => c.trim().replace(/['"]/g, ''));
+      if (cols.length <= Math.max(nameIdx, qtyIdx)) continue;
+      const productName = cols[nameIdx];
+      const qty = parseInt(cols[qtyIdx]) || 0;
+      if (!productName || qty <= 0) continue;
+      rows.push({ productName, qty });
+    }
+
+    // Match each row to a plant
+    const normalize = s => s.toLowerCase().replace(/[^a-z0-9áéíóúñü]/g, ' ').replace(/\s+/g, ' ').trim();
+
+    const results = rows.map(row => {
+      const norm = normalize(row.productName);
+      
+      // 1. Exact name match
+      let match = plants.find(p => p.name.toLowerCase() === row.productName.toLowerCase());
+      let status = 'found';
+
+      // 2. Normalized exact match
+      if (!match) {
+        match = plants.find(p => normalize(p.name) === norm);
+      }
+
+      // 3. Fuzzy: does plant name appear in product name or vice versa
+      if (!match) {
+        match = plants.find(p => {
+          const pn = normalize(p.name);
+          return norm.includes(pn) || pn.includes(norm);
+        });
+        if (match) status = 'review';
+      }
+
+      // 4. Partial word match (at least 2 words overlap)
+      if (!match) {
+        const words = norm.split(' ').filter(w => w.length > 3);
+        match = plants.find(p => {
+          const pWords = normalize(p.name).split(' ').filter(w => w.length > 3);
+          return words.filter(w => pWords.includes(w)).length >= 1;
+        });
+        if (match) status = 'review';
+      }
+
+      if (!match) status = 'not_found';
+
+      const stockAfter = match ? Math.max(0, match.stock - row.qty) : null;
+      const overStock = match && row.qty > match.stock;
+
+      return {
+        product_name: row.productName,
+        qty_sold: row.qty,
+        matched_plant_id: match?.id || null,
+        matched_plant_name: match?.name || null,
+        current_stock: match?.stock ?? null,
+        stock_after: stockAfter,
+        over_stock: overStock,
+        status // 'found' | 'review' | 'not_found'
+      };
+    });
+
+    res.json({ items: results, total_rows: results.length });
+
+  } catch (error) {
+    console.error('pos-import analyze error:', error.message);
+    res.status(500).json({ message: 'Error analizando archivo', error: error.message });
+  }
+});
+
+
+// Confirm POS import — deduct stock and save history
+app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
+  try {
+    const { items, filename } = req.body;
+
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
+    const clientId = clients[0].id;
+
+    // Ensure history table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS pos_import_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        client_id INT NOT NULL,
+        filename VARCHAR(255),
+        product_name VARCHAR(255),
+        matched_plant_id INT,
+        qty_sold INT,
+        stock_before INT,
+        stock_after INT,
+        method VARCHAR(50) DEFAULT 'POS_IMPORT',
+        imported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    const updates = [];
+
+    for (const item of items) {
+      if (!item.matched_plant_id || item.skip) continue;
+
+      const [plants] = await pool.query('SELECT id, stock FROM plants WHERE id = ? LIMIT 1', [item.matched_plant_id]);
+      if (!plants.length) continue;
+
+      const plant = plants[0];
+      const stockBefore = plant.stock;
+      const stockAfter = Math.max(0, stockBefore - item.qty_sold);
+
+      await pool.query('UPDATE plants SET stock = ? WHERE id = ?', [stockAfter, plant.id]);
+
+      await pool.query(
+        `INSERT INTO pos_import_history (client_id, filename, product_name, matched_plant_id, qty_sold, stock_before, stock_after)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [clientId, filename || 'unknown', item.product_name, item.matched_plant_id, item.qty_sold, stockBefore, stockAfter]
+      );
+
+      updates.push({ plant_id: item.matched_plant_id, product: item.product_name, stock_before: stockBefore, stock_after: stockAfter });
+    }
+
+    res.json({ message: 'Inventario actualizado', updates });
+
+  } catch (error) {
+    console.error('pos-import confirm error:', error.message);
+    res.status(500).json({ message: 'Error confirmando importación', error: error.message });
+  }
+});
 
 // =======================
 
