@@ -330,8 +330,16 @@ interface RestockItem {
           </div>
         </div>
 
+        <!-- ✅ Mensaje de error -->
         <div *ngIf="posError" style="background:#fff0f0;border:1px solid #fad5d5;border-radius:12px;padding:12px 16px;margin-bottom:14px;color:#9b1c1c;font-size:0.85rem;">
           ⚠️ {{ posError }}
+        </div>
+
+        <!-- ✅ Mensaje de éxito después de confirmar importación -->
+        <div *ngIf="posImportSuccessMsg"
+          style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:14px;color:#15803d;font-size:0.88rem;font-weight:600;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:1.1rem;">✅</span>
+          {{ posImportSuccessMsg }}
         </div>
 
         <div *ngIf="posItems.length" style="overflow:hidden;border-radius:14px;border:1px solid #eef1ec;">
@@ -480,6 +488,7 @@ export class AdminComponent implements OnInit {
   posLoading = false;
   posError = '';
   posItems: any[] = [];
+  posImportSuccessMsg = '';   // ✅ Mensaje de éxito tras confirmar importación
 
   constructor(private plantService: PlantService, private router: Router, private cdr: ChangeDetectorRef) {}
 
@@ -628,13 +637,14 @@ export class AdminComponent implements OnInit {
   // ── POS IMPORT ──
   onPosFileSelected(event: any) {
     const f = event.target.files[0];
-    if (f) { this.posFile = f; this.posError = ''; this.posItems = []; }
+    if (f) { this.posFile = f; this.posError = ''; this.posItems = []; this.posImportSuccessMsg = ''; }
   }
 
   analyzePosFile() {
     if (!this.posFile) return;
     this.posLoading = true;
     this.posError = '';
+    this.posImportSuccessMsg = '';
     const formData = new FormData();
     formData.append('file', this.posFile);
     this.plantService.analyzePosFile(this.clientSlug, formData).subscribe({
@@ -651,12 +661,38 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  // ✅ Confirma importación POS y recarga inventario + dashboard automáticamente
   confirmPosImport() {
     const toImport = this.posItems.filter(i => !i.skip && i.matched_plant_id);
     if (!toImport.length) { alert('No hay productos válidos para importar.'); return; }
+
     this.plantService.confirmPosImport(this.clientSlug, toImport, this.posFile?.name || 'import').subscribe({
-      next: () => { this.cancelPosImport(); this.loadData(); alert('¡Inventario actualizado con las ventas del día!'); },
-      error: e => console.error(e)
+      next: (res) => {
+        const totalItems = res.summary?.total_items ?? toImport.length;
+        const totalUnits = res.summary?.total_units ?? 0;
+
+        // 1. Limpiar estado del POS
+        this.cancelPosImport();
+
+        // 2. Recargar inventario y métricas del dashboard
+        this.loadData();
+
+        // 3. Mostrar mensaje de confirmación
+        this.posImportSuccessMsg = `Ventas importadas correctamente. ${totalItems} producto(s), ${totalUnits} unidad(es) descontadas del inventario.`;
+
+        // 4. Auto-ocultar mensaje después de 7 segundos
+        setTimeout(() => {
+          this.posImportSuccessMsg = '';
+          this.cdr.detectChanges();
+        }, 7000);
+
+        this.cdr.detectChanges();
+      },
+      error: e => {
+        this.posError = 'Error confirmando la importación. Intenta de nuevo.';
+        console.error(e);
+        this.cdr.detectChanges();
+      }
     });
   }
 

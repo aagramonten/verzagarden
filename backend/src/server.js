@@ -35,7 +35,6 @@ const openai = new OpenAI({
 // =======================
 async function ensureCostPriceColumn() {
   try {
-    // Check if column exists first
     const [rows] = await pool.query(`
       SELECT COUNT(*) as cnt FROM information_schema.COLUMNS 
       WHERE TABLE_SCHEMA = DATABASE() 
@@ -121,7 +120,6 @@ app.get('/api/clients/:slug/plants', async (req, res) => {
   }
 });
 
-// CREATE plant — now includes cost_price
 app.post('/api/clients/:slug/plants', async (req, res) => {
   try {
     const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
@@ -143,7 +141,6 @@ app.post('/api/clients/:slug/plants', async (req, res) => {
   }
 });
 
-// UPDATE plant — now includes cost_price
 app.put('/api/plants/:id', async (req, res) => {
   try {
     const { name, category, description, price, cost_price, stock, image_url, light, water, is_featured, is_active } = req.body;
@@ -244,7 +241,6 @@ Reglas:
 
 // =======================
 // 📦 CONFIRM RESTOCK
-// Now supports: cost_price update + optional new sale price
 // =======================
 
 app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
@@ -268,7 +264,6 @@ app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
       if (plants.length) {
         const plant = plants[0];
 
-        // Always update: stock, cost_price, and price (new_price is always sent from frontend)
         await pool.query(
           `UPDATE plants SET stock = stock + ?, cost_price = ?, price = ? WHERE id = ?`,
           [quantity, unit_cost ?? null, new_price ?? plant.price, plant.id]
@@ -295,13 +290,11 @@ app.post('/api/clients/:slug/invoices/confirm-restock', async (req, res) => {
 });
 
 
-
-
 // =======================
 // 📊 POS SALES IMPORT
 // =======================
 
-// Analyze uploaded POS file (CSV/Excel) — returns matched items for review
+// Analyze uploaded POS file (CSV/Excel)
 app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No se subió ningún archivo.' });
@@ -310,21 +303,17 @@ app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (
     if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
     const clientId = clients[0].id;
 
-    // Get all active plants for matching
     const [plants] = await pool.query(
       'SELECT id, name, stock FROM plants WHERE client_id = ? AND is_active = TRUE',
       [clientId]
     );
 
-    // Parse file content (CSV only for now — Excel requires extra lib)
     const fileContent = req.file.buffer.toString('utf8');
     const lines = fileContent.split(/\r?\n/).filter(l => l.trim());
     if (!lines.length) return res.status(400).json({ message: 'Archivo vacío o inválido.' });
 
-    // Detect header row
     const headers = lines[0].split(/,|;|\t/).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
 
-    // Find column indices
     const nameIdx = headers.findIndex(h => ['producto','nombre','name','item','description','descripcion','product'].some(k => h.includes(k)));
     const qtyIdx  = headers.findIndex(h => ['cantidad','quantity','qty','cant','vendido','sold','units'].some(k => h.includes(k)));
 
@@ -336,7 +325,6 @@ app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (
       });
     }
 
-    // Parse rows
     const rows = [];
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(/,|;|\t/).map(c => c.trim().replace(/['"]/g, ''));
@@ -347,22 +335,18 @@ app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (
       rows.push({ productName, qty });
     }
 
-    // Match each row to a plant
     const normalize = s => s.toLowerCase().replace(/[^a-z0-9áéíóúñü]/g, ' ').replace(/\s+/g, ' ').trim();
 
     const results = rows.map(row => {
       const norm = normalize(row.productName);
       
-      // 1. Exact name match
       let match = plants.find(p => p.name.toLowerCase() === row.productName.toLowerCase());
       let status = 'found';
 
-      // 2. Normalized exact match
       if (!match) {
         match = plants.find(p => normalize(p.name) === norm);
       }
 
-      // 3. Fuzzy: does plant name appear in product name or vice versa
       if (!match) {
         match = plants.find(p => {
           const pn = normalize(p.name);
@@ -371,7 +355,6 @@ app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (
         if (match) status = 'review';
       }
 
-      // 4. Partial word match (at least 2 words overlap)
       if (!match) {
         const words = norm.split(' ').filter(w => w.length > 3);
         match = plants.find(p => {
@@ -394,7 +377,7 @@ app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (
         current_stock: match?.stock ?? null,
         stock_after: stockAfter,
         over_stock: overStock,
-        status // 'found' | 'review' | 'not_found'
+        status
       };
     });
 
@@ -407,7 +390,9 @@ app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (
 });
 
 
-// Confirm POS import — deduct stock and save history
+// =======================
+// ✅ Confirm POS import — deduct stock, save history, return summary
+// =======================
 app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
   try {
     const { items, filename } = req.body;
@@ -433,6 +418,7 @@ app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
     `);
 
     const updates = [];
+    let totalUnits = 0;
 
     for (const item of items) {
       if (!item.matched_plant_id || item.skip) continue;
@@ -452,10 +438,24 @@ app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
         [clientId, filename || 'unknown', item.product_name, item.matched_plant_id, item.qty_sold, stockBefore, stockAfter]
       );
 
-      updates.push({ plant_id: item.matched_plant_id, product: item.product_name, stock_before: stockBefore, stock_after: stockAfter });
+      totalUnits += item.qty_sold || 0;
+      updates.push({
+        plant_id: item.matched_plant_id,
+        product: item.product_name,
+        stock_before: stockBefore,
+        stock_after: stockAfter
+      });
     }
 
-    res.json({ message: 'Inventario actualizado', updates });
+    // ✅ Devuelve resumen para actualizar el frontend
+    res.json({
+      message: 'Inventario actualizado',
+      summary: {
+        total_items: updates.length,
+        total_units: totalUnits
+      },
+      updates
+    });
 
   } catch (error) {
     console.error('pos-import confirm error:', error.message);
