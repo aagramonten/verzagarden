@@ -140,7 +140,9 @@ import { Plant, Client } from './services/plant.service';
           </div>
           <div class="price-row" *ngIf="plant.cost_price">
             <span class="price-label">Costo</span>
-            <span class="price-value" style="color:#516052;">${{ plant.cost_price }}</span>
+            <span class="price-value" style="color:#516052;">\${{ plant.cost_price }}</span>
+
+
           </div>
           <div *ngIf="plant.price && plant.cost_price" class="margin-badge"
             [style.background]="getMarginBg()"
