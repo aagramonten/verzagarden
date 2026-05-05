@@ -71,4 +71,12 @@ export class PlantService {
     formData.append('image', file);
     return this.http.post(`${this.apiUrl}/upload`, formData);
   }
+
+  analyzePosFile(slug: string, formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/clients/${slug}/pos-import/analyze`, formData);
+  }
+
+  confirmPosImport(slug: string, items: any[], filename: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/clients/${slug}/pos-import/confirm`, { items, filename });
+  }
 }

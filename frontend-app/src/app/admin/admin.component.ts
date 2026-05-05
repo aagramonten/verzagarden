@@ -104,7 +104,6 @@ interface RestockItem {
         </div>
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;">
-          <!-- Donut -->
           <div style="background:white;border:1px solid #eef1ec;border-radius:20px;padding:20px;box-shadow:0 4px 12px rgba(16,35,25,0.04);">
             <h3 style="margin:0 0 16px 0;color:#102319;font-size:0.9rem;font-weight:700;">Inventario por categoría</h3>
             <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
@@ -132,7 +131,6 @@ interface RestockItem {
             </div>
           </div>
 
-          <!-- Low stock list -->
           <div style="background:white;border:1px solid #eef1ec;border-radius:20px;padding:20px;box-shadow:0 4px 12px rgba(16,35,25,0.04);">
             <h3 style="margin:0 0 4px 0;color:#102319;font-size:0.9rem;font-weight:700;">Productos con bajo stock</h3>
             <p style="margin:0 0 12px 0;color:#516052;font-size:0.75rem;">≤5 unidades disponibles</p>
@@ -152,7 +150,7 @@ interface RestockItem {
         </div>
       </div>
 
-      <!-- ── 2. AI RESTOCK ── -->
+      <!-- ── 2. ACTUALIZAR INVENTARIO (AI Restock) ── -->
       <div style="background:linear-gradient(135deg,#0d3320,#1a5c38 60%,#236b45);border-radius:22px;padding:26px;margin-bottom:22px;box-shadow:0 16px 48px rgba(15,50,30,0.2);position:relative;overflow:hidden;">
         <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,0.04);border-radius:50%;pointer-events:none;"></div>
         <div style="position:relative;z-index:1;">
@@ -161,7 +159,6 @@ interface RestockItem {
           <p style="color:rgba(255,255,255,0.85);font-size:0.9rem;margin:0 0 4px;font-weight:500;">Actualiza tu inventario subiendo una factura del suplidor.</p>
           <p style="color:rgba(255,255,255,0.6);font-size:0.82rem;margin:0 0 20px;">El sistema detecta plantas, cantidades y costos. El precio de venta público no se toca — tú decides si aplicar el precio sugerido.</p>
 
-          <!-- Margen deseado -->
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
             <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:10px;">
               <span style="color:rgba(255,255,255,0.75);font-size:0.8rem;font-weight:600;white-space:nowrap;">Margen deseado:</span>
@@ -172,7 +169,6 @@ interface RestockItem {
             <span style="color:rgba(255,255,255,0.5);font-size:0.76rem;">Usado para calcular precio sugerido cuando no hay precio de venta.</span>
           </div>
 
-          <!-- Upload -->
           <div style="background:rgba(255,255,255,0.08);border:2px dashed rgba(255,255,255,0.2);border-radius:14px;padding:16px;">
             <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
               <label style="display:flex;align-items:center;gap:7px;background:white;color:#102319;border-radius:10px;padding:9px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;">
@@ -192,73 +188,53 @@ interface RestockItem {
             </div>
           </div>
 
-          <!-- Results — mobile cards / desktop table -->
           <div *ngIf="restockItems.length" style="background:white;border-radius:16px;margin-top:16px;overflow:hidden;">
             <div style="padding:16px 20px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
               <h3 style="margin:0;color:#102319;font-size:0.95rem;font-weight:700;">Plantas detectadas — Análisis de rentabilidad</h3>
               <span style="font-size:0.75rem;color:#516052;">{{ restockItems.length }} item(s)</span>
             </div>
 
-            <!-- MOBILE CARDS -->
             <div class="restock-mobile">
-              <div *ngFor="let item of restockItems; let i = index"
-                style="padding:16px;border-bottom:1px solid #f4f4f4;">
-
-                <!-- Row 1: name + delete -->
+              <div *ngFor="let item of restockItems; let i = index" style="padding:16px;border-bottom:1px solid #f4f4f4;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                  <input type="text" [(ngModel)]="item.plant_name"
-                    style="flex:1;padding:8px 10px;border:1px solid #dfe7dd;border-radius:10px;font-size:0.88rem;outline:none;font-weight:600;">
-                  <button (click)="removeRestockItem(i)"
-                    style="background:#fff0f0;border:none;color:#9b1c1c;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;flex-shrink:0;">✕</button>
+                  <input type="text" [(ngModel)]="item.plant_name" style="flex:1;padding:8px 10px;border:1px solid #dfe7dd;border-radius:10px;font-size:0.88rem;outline:none;font-weight:600;">
+                  <button (click)="removeRestockItem(i)" style="background:#fff0f0;border:none;color:#9b1c1c;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;flex-shrink:0;">✕</button>
                 </div>
-
-                <!-- Row 2: qty + unit cost + total -->
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
                   <div>
                     <div style="font-size:0.65rem;font-weight:700;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;">Cantidad</div>
-                    <input type="number" [(ngModel)]="item.quantity" min="1"
-                      style="width:100%;padding:7px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.88rem;outline:none;box-sizing:border-box;">
+                    <input type="number" [(ngModel)]="item.quantity" min="1" style="width:100%;padding:7px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.88rem;outline:none;box-sizing:border-box;">
                   </div>
                   <div>
                     <div style="font-size:0.65rem;font-weight:700;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;">Costo unit.</div>
                     <div style="display:flex;align-items:center;gap:2px;">
                       <span style="color:#9ca3af;font-size:0.78rem;">$</span>
-                      <input type="number" [(ngModel)]="item.unit_cost" step="0.01" min="0"
-                        style="width:100%;padding:7px 6px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.88rem;outline:none;box-sizing:border-box;">
+                      <input type="number" [(ngModel)]="item.unit_cost" step="0.01" min="0" style="width:100%;padding:7px 6px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.88rem;outline:none;box-sizing:border-box;">
                     </div>
                   </div>
                   <div>
                     <div style="font-size:0.65rem;font-weight:700;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;">Total</div>
-                    <div style="padding:7px 8px;background:#f4f8f1;border-radius:8px;font-size:0.88rem;font-weight:600;color:#516052;">
-                      \${{ (item.unit_cost * item.quantity) | number:'1.2-2' }}
-                    </div>
+                    <div style="padding:7px 8px;background:#f4f8f1;border-radius:8px;font-size:0.88rem;font-weight:600;color:#516052;">\${{ (item.unit_cost * item.quantity) | number:'1.2-2' }}</div>
                   </div>
                 </div>
-
-                <!-- Row 3: precio venta + margen -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
                   <div>
                     <div style="font-size:0.65rem;font-weight:700;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;">Precio venta</div>
                     <div style="display:flex;align-items:center;gap:2px;">
                       <span style="color:#9ca3af;font-size:0.78rem;">$</span>
-                      <input type="number" [(ngModel)]="item.current_sale_price" step="0.01" min="0"
-                        placeholder="0.00"
+                      <input type="number" [(ngModel)]="item.current_sale_price" step="0.01" min="0" placeholder="0.00"
                         style="width:100%;padding:7px 6px;border-radius:8px;font-size:0.88rem;outline:none;box-sizing:border-box;"
-                        [style.borderColor]="!item.current_sale_price && !item.apply_suggested_price ? '#fca5a5' : '#dfe7dd'"
                         [style.border]="'1px solid ' + (!item.current_sale_price && !item.apply_suggested_price ? '#fca5a5' : '#dfe7dd')">
                     </div>
                   </div>
                   <div>
                     <div style="font-size:0.65rem;font-weight:700;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;">Margen deseado</div>
                     <div style="display:flex;align-items:center;gap:4px;">
-                      <input type="number" [(ngModel)]="item.row_margin" min="1" max="99"
-                        style="width:60px;padding:7px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.88rem;outline:none;text-align:center;">
+                      <input type="number" [(ngModel)]="item.row_margin" min="1" max="99" style="width:60px;padding:7px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.88rem;outline:none;text-align:center;">
                       <span style="color:#9ca3af;font-size:0.82rem;">%</span>
                     </div>
                   </div>
                 </div>
-
-                <!-- Row 4: sugerido + ganancia + checkbox -->
                 <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px;background:#f9fdf9;border-radius:10px;">
                   <div style="flex:1;min-width:100px;">
                     <div style="font-size:0.65rem;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:2px;">Precio sugerido</div>
@@ -272,61 +248,31 @@ interface RestockItem {
                     <span [class]="getRowMarginTag(item)">{{ getRowMarginLabel(item) }}</span>
                   </div>
                   <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-                    <input type="checkbox" [(ngModel)]="item.apply_suggested_price"
-                      [id]="'chk-' + i"
-                      style="width:18px;height:18px;accent-color:#14452F;cursor:pointer;">
+                    <input type="checkbox" [(ngModel)]="item.apply_suggested_price" [id]="'chk-' + i" style="width:18px;height:18px;accent-color:#14452F;cursor:pointer;">
                     <label [for]="'chk-' + i" style="font-size:0.78rem;color:#102319;font-weight:600;cursor:pointer;">Usar sugerido</label>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- DESKTOP TABLE (hidden on mobile via CSS) -->
             <div class="restock-desktop" style="overflow-x:auto;">
               <table class="restock-table">
                 <thead>
                   <tr>
-                    <th>Planta</th>
-                    <th>Cant.</th>
-                    <th>Costo unit.</th>
-                    <th>Costo total</th>
-                    <th>Precio venta</th>
-                    <th>Margen deseado</th>
-                    <th>Precio sugerido</th>
-                    <th>Ganancia / Margen</th>
-                    <th>Usar sugerido</th>
-                    <th></th>
+                    <th>Planta</th><th>Cant.</th><th>Costo unit.</th><th>Costo total</th>
+                    <th>Precio venta</th><th>Margen deseado</th><th>Precio sugerido</th>
+                    <th>Ganancia / Margen</th><th>Usar sugerido</th><th></th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of restockItems; let i = index">
                     <td><input type="text" [(ngModel)]="item.plant_name" style="width:130px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;"></td>
                     <td><input type="number" [(ngModel)]="item.quantity" min="1" style="width:55px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;"></td>
-                    <td>
-                      <div style="display:flex;align-items:center;gap:3px;">
-                        <span style="color:#9ca3af;font-size:0.78rem;">$</span>
-                        <input type="number" [(ngModel)]="item.unit_cost" step="0.01" min="0" style="width:65px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;">
-                      </div>
-                    </td>
+                    <td><div style="display:flex;align-items:center;gap:3px;"><span style="color:#9ca3af;font-size:0.78rem;">$</span><input type="number" [(ngModel)]="item.unit_cost" step="0.01" min="0" style="width:65px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;"></div></td>
                     <td style="color:#516052;font-weight:600;white-space:nowrap;">\${{ (item.unit_cost * item.quantity) | number:'1.2-2' }}</td>
-                    <td>
-                      <div style="display:flex;align-items:center;gap:3px;">
-                        <span style="color:#9ca3af;font-size:0.78rem;">$</span>
-                        <input type="number" [(ngModel)]="item.current_sale_price" step="0.01" min="0" placeholder="Precio venta"
-                          style="width:70px;padding:6px 8px;border-radius:8px;font-size:0.82rem;outline:none;"
-                          [style.border]="'1px solid ' + (!item.current_sale_price && !item.apply_suggested_price ? '#fca5a5' : '#dfe7dd')">
-                      </div>
-                    </td>
-                    <td>
-                      <div style="display:flex;align-items:center;gap:3px;">
-                        <input type="number" [(ngModel)]="item.row_margin" min="1" max="99" style="width:46px;padding:6px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;text-align:center;">
-                        <span style="color:#9ca3af;font-size:0.78rem;">%</span>
-                      </div>
-                    </td>
-                    <td style="white-space:nowrap;">
-                      <span style="font-weight:700;color:#1f7a4d;">\${{ getRowSuggestedPrice(item) | number:'1.2-2' }}</span>
-                      <div class="tag-suggested" style="margin-top:2px;display:inline-block;">{{ item.row_margin }}% margen</div>
-                    </td>
+                    <td><div style="display:flex;align-items:center;gap:3px;"><span style="color:#9ca3af;font-size:0.78rem;">$</span><input type="number" [(ngModel)]="item.current_sale_price" step="0.01" min="0" placeholder="Precio venta" style="width:70px;padding:6px 8px;border-radius:8px;font-size:0.82rem;outline:none;" [style.border]="'1px solid ' + (!item.current_sale_price && !item.apply_suggested_price ? '#fca5a5' : '#dfe7dd')"></div></td>
+                    <td><div style="display:flex;align-items:center;gap:3px;"><input type="number" [(ngModel)]="item.row_margin" min="1" max="99" style="width:46px;padding:6px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;text-align:center;"><span style="color:#9ca3af;font-size:0.78rem;">%</span></div></td>
+                    <td style="white-space:nowrap;"><span style="font-weight:700;color:#1f7a4d;">\${{ getRowSuggestedPrice(item) | number:'1.2-2' }}</span><div class="tag-suggested" style="margin-top:2px;display:inline-block;">{{ item.row_margin }}% margen</div></td>
                     <td style="white-space:nowrap;">
                       <ng-container *ngIf="getEffectivePrice(item) > 0">
                         <div [class]="getRowProfitClass(item)">\${{ getRowProfit(item) | number:'1.2-2' }}</div>
@@ -335,29 +281,17 @@ interface RestockItem {
                       </ng-container>
                       <span *ngIf="getEffectivePrice(item) <= 0" style="color:#aaa;font-size:0.78rem;">—</span>
                     </td>
-                    <td style="text-align:center;">
-                      <input type="checkbox" [(ngModel)]="item.apply_suggested_price" style="width:16px;height:16px;accent-color:#14452F;cursor:pointer;">
-                    </td>
-                    <td>
-                      <button (click)="removeRestockItem(i)" style="background:#fff0f0;border:none;color:#9b1c1c;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:700;font-size:0.8rem;">✕</button>
-                    </td>
+                    <td style="text-align:center;"><input type="checkbox" [(ngModel)]="item.apply_suggested_price" style="width:16px;height:16px;accent-color:#14452F;cursor:pointer;"></td>
+                    <td><button (click)="removeRestockItem(i)" style="background:#fff0f0;border:none;color:#9b1c1c;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:700;font-size:0.8rem;">✕</button></td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <!-- Summary -->
             <div style="padding:14px 20px;background:#f9fdf9;border-top:1px solid #eef1ec;display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
-              <div style="font-size:0.8rem;color:#516052;">
-                <span style="font-weight:700;color:#102319;">Costo total factura:</span>
-                \${{ totalInvoiceCost | number:'1.2-2' }}
-              </div>
-              <div style="font-size:0.8rem;color:#516052;">
-                <span style="font-weight:700;color:#102319;">Usando precio sugerido:</span>
-                {{ countApplied() }} de {{ restockItems.length }}
-              </div>
+              <div style="font-size:0.8rem;color:#516052;"><span style="font-weight:700;color:#102319;">Costo total factura:</span> \${{ totalInvoiceCost | number:'1.2-2' }}</div>
+              <div style="font-size:0.8rem;color:#516052;"><span style="font-weight:700;color:#102319;">Usando precio sugerido:</span> {{ countApplied() }} de {{ restockItems.length }}</div>
             </div>
-
             <div style="padding:14px 20px 18px;display:flex;flex-wrap:wrap;gap:10px;">
               <button (click)="confirmRestock()" class="btn-primary" style="flex:1;min-width:160px;">✅ Confirmar actualización</button>
               <button (click)="cancelInvoice()" class="btn-secondary" style="flex:1;min-width:130px;">Cancelar</button>
@@ -366,7 +300,113 @@ interface RestockItem {
         </div>
       </div>
 
-      <!-- ── 3. INVENTARIO ── -->
+      <!-- ── 3. IMPORTAR VENTAS DEL DÍA ── -->
+      <div style="background:white;border-radius:22px;padding:26px;border:1px solid #eef1ec;box-shadow:0 4px 16px rgba(16,35,25,0.04);margin-bottom:22px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;">
+          <div style="background:#f4f8f1;border-radius:14px;padding:12px;flex-shrink:0;">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="#14452F" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <div>
+            <h2 class="section-title">Importar ventas del día</h2>
+            <p style="margin:4px 0 0;color:#516052;font-size:0.85rem;">Sube el reporte diario de ventas de tu POS para descontar inventario automáticamente.</p>
+            <p style="margin:6px 0 0;color:#9ca3af;font-size:0.78rem;">Si vendes en tienda física, no tienes que actualizar planta por planta. Exporta las ventas del día desde tu POS, súbelas aquí y el sistema descuenta las cantidades vendidas del inventario.</p>
+          </div>
+        </div>
+
+        <div style="border:2px dashed #dfe7dd;border-radius:14px;padding:16px;background:#fafdf8;margin-bottom:16px;">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <label style="display:flex;align-items:center;gap:7px;background:#14452F;color:white;border-radius:10px;padding:9px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;">
+              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Subir archivo
+              <input type="file" (change)="onPosFileSelected($event)" accept=".csv,.xlsx,.xls" style="display:none;">
+            </label>
+            <span style="color:#516052;font-size:0.82rem;flex:1;min-width:100px;">{{ posFile ? '📎 ' + posFile.name : 'CSV o Excel del POS' }}</span>
+            <button [disabled]="!posFile || posLoading" (click)="analyzePosFile()"
+              style="padding:9px 18px;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.85rem;transition:all 0.2s;"
+              [style.background]="(!posFile || posLoading) ? '#e5e7e5' : '#1f7a4d'"
+              [style.color]="(!posFile || posLoading) ? '#9ca3af' : 'white'">
+              {{ posLoading ? '⏳ Analizando...' : '📊 Analizar ventas' }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="posError" style="background:#fff0f0;border:1px solid #fad5d5;border-radius:12px;padding:12px 16px;margin-bottom:14px;color:#9b1c1c;font-size:0.85rem;">
+          ⚠️ {{ posError }}
+        </div>
+
+        <div *ngIf="posItems.length" style="overflow:hidden;border-radius:14px;border:1px solid #eef1ec;">
+          <div style="padding:14px 16px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <span style="font-weight:700;color:#102319;font-size:0.9rem;">Ventas detectadas — {{ posItems.length }} productos</span>
+            <div style="display:flex;gap:8px;font-size:0.75rem;">
+              <span style="background:#dcfce7;color:#15803d;padding:3px 8px;border-radius:6px;font-weight:600;">{{ countPosStatus('found') }} encontrados</span>
+              <span style="background:#fef3c7;color:#92400e;padding:3px 8px;border-radius:6px;font-weight:600;">{{ countPosStatus('review') }} revisar</span>
+              <span style="background:#fee2e2;color:#991b1b;padding:3px 8px;border-radius:6px;font-weight:600;">{{ countPosStatus('not_found') }} no encontrados</span>
+            </div>
+          </div>
+
+          <div class="restock-mobile">
+            <div *ngFor="let item of posItems; let i = index" style="padding:14px 16px;border-bottom:1px solid #f4f4f4;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                <div>
+                  <div style="font-weight:700;color:#102319;font-size:0.88rem;">{{ item.product_name }}</div>
+                  <div style="font-size:0.76rem;color:#516052;margin-top:2px;">Cant. vendida: {{ item.qty_sold }}</div>
+                </div>
+                <span [style.background]="getPosBadgeBg(item.status)" [style.color]="getPosBadgeColor(item.status)" style="font-size:0.68rem;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;">{{ getPosBadgeLabel(item.status) }}</span>
+              </div>
+              <div *ngIf="item.matched_plant_name" style="background:#f4f8f1;border-radius:10px;padding:10px;font-size:0.8rem;">
+                <div style="color:#102319;font-weight:600;">→ {{ item.matched_plant_name }}</div>
+                <div style="color:#516052;margin-top:3px;">Stock: {{ item.current_stock }} → <strong [style.color]="item.over_stock ? '#dc2626' : '#15803d'">{{ item.stock_after }}</strong></div>
+                <div *ngIf="item.over_stock" style="color:#dc2626;font-size:0.72rem;margin-top:4px;">⚠️ Venta supera el stock actual</div>
+              </div>
+              <div *ngIf="!item.matched_plant_name" style="font-size:0.78rem;color:#9ca3af;margin-top:4px;">No se encontró en el catálogo</div>
+              <div style="margin-top:8px;display:flex;align-items:center;gap:6px;">
+                <input type="checkbox" [id]="'skip-'+i" [(ngModel)]="item.skip" style="width:15px;height:15px;accent-color:#14452F;">
+                <label [for]="'skip-'+i" style="font-size:0.75rem;color:#516052;cursor:pointer;">Omitir esta fila</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="restock-desktop" style="overflow-x:auto;">
+            <table class="restock-table">
+              <thead>
+                <tr>
+                  <th>Producto del POS</th><th>Cant. vendida</th><th>Planta encontrada</th>
+                  <th>Stock actual</th><th>Stock después</th><th>Estado</th><th>Omitir</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of posItems; let i = index" [style.opacity]="item.skip ? '0.4' : '1'">
+                  <td style="font-weight:600;color:#102319;">{{ item.product_name }}</td>
+                  <td style="font-weight:700;color:#516052;">{{ item.qty_sold }}</td>
+                  <td>
+                    <span *ngIf="item.matched_plant_name" style="color:#102319;">{{ item.matched_plant_name }}</span>
+                    <span *ngIf="!item.matched_plant_name" style="color:#aaa;font-size:0.78rem;">—</span>
+                  </td>
+                  <td style="color:#516052;">{{ item.current_stock ?? '—' }}</td>
+                  <td>
+                    <span *ngIf="item.stock_after !== null" [style.color]="item.over_stock ? '#dc2626' : '#15803d'" style="font-weight:700;">{{ item.stock_after }}</span>
+                    <span *ngIf="item.stock_after === null" style="color:#aaa;">—</span>
+                    <div *ngIf="item.over_stock" style="font-size:0.65rem;color:#dc2626;">⚠️ supera stock</div>
+                  </td>
+                  <td>
+                    <span [style.background]="getPosBadgeBg(item.status)" [style.color]="getPosBadgeColor(item.status)" style="font-size:0.7rem;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;">{{ getPosBadgeLabel(item.status) }}</span>
+                  </td>
+                  <td style="text-align:center;">
+                    <input type="checkbox" [(ngModel)]="item.skip" style="width:15px;height:15px;accent-color:#14452F;cursor:pointer;">
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="padding:14px 18px 16px;display:flex;flex-wrap:wrap;gap:10px;">
+            <button (click)="confirmPosImport()" class="btn-primary" style="flex:1;min-width:160px;">✅ Confirmar descuento de inventario</button>
+            <button (click)="cancelPosImport()" class="btn-secondary" style="flex:1;min-width:130px;">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 4. INVENTARIO ── -->
       <div style="margin-bottom:22px;">
         <h2 class="section-title">Inventario</h2>
         <p class="section-sub">{{ plants.length }} plantas en el catálogo.</p>
@@ -379,64 +419,37 @@ interface RestockItem {
         </div>
       </div>
 
-      <!-- ── 4. FORMULARIO ── -->
+      <!-- ── 5. FORMULARIO ── -->
       <div id="plant-form" style="background:white;border-radius:22px;padding:24px;border:1px solid #eef1ec;box-shadow:0 4px 16px rgba(16,35,25,0.04);">
         <h2 class="section-title">{{ editingId ? '✏️ Editar Planta' : '🌱 Nueva Planta' }}</h2>
         <p class="section-sub">{{ editingId ? 'Modifica los datos de la planta.' : 'Agrega una nueva planta al catálogo.' }}</p>
-
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:13px;">
-          <div class="form-group">
-            <label class="form-label">Nombre de la planta</label>
-            <input type="text" [(ngModel)]="plantForm.name" class="form-input" placeholder="Ej. Monstera Deliciosa">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Categoría</label>
+          <div class="form-group"><label class="form-label">Nombre de la planta</label><input type="text" [(ngModel)]="plantForm.name" class="form-input" placeholder="Ej. Monstera Deliciosa"></div>
+          <div class="form-group"><label class="form-label">Categoría</label>
             <select [(ngModel)]="plantForm.category" class="form-input">
               <option value="" disabled>Selecciona una categoría</option>
               <option *ngFor="let cat of PLANT_CATEGORIES" [value]="cat">{{ cat }}</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Precio de venta</label>
-            <input type="number" [(ngModel)]="plantForm.price" class="form-input" placeholder="Precio público">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Costo de compra</label>
-            <input type="number" [(ngModel)]="plantForm.cost_price" class="form-input" placeholder="Costo mayorista">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Cantidad disponible</label>
-            <input type="number" [(ngModel)]="plantForm.stock" class="form-input" placeholder="Stock">
-          </div>
+          <div class="form-group"><label class="form-label">Precio de venta</label><input type="number" [(ngModel)]="plantForm.price" class="form-input" placeholder="Precio público"></div>
+          <div class="form-group"><label class="form-label">Costo de compra</label><input type="number" [(ngModel)]="plantForm.cost_price" class="form-input" placeholder="Costo mayorista"></div>
+          <div class="form-group"><label class="form-label">Cantidad disponible</label><input type="number" [(ngModel)]="plantForm.stock" class="form-input" placeholder="Stock"></div>
           <div class="form-group">
             <label class="form-label">Imagen</label>
             <div style="position:relative;border:2px dashed #dfe7dd;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:46px;background:#fafdf8;cursor:pointer;">
               <input type="file" accept="image/*" (change)="uploadPlantImage($event)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;">
-              <span style="color:#516052;font-weight:600;font-size:0.85rem;pointer-events:none;">
-                {{ imageUploading ? '⏳ Subiendo...' : plantForm.image_url ? '✅ Imagen subida' : '📷 Subir imagen' }}
-              </span>
+              <span style="color:#516052;font-weight:600;font-size:0.85rem;pointer-events:none;">{{ imageUploading ? '⏳ Subiendo...' : plantForm.image_url ? '✅ Imagen subida' : '📷 Subir imagen' }}</span>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Luz</label>
-            <input type="text" [(ngModel)]="plantForm.light" class="form-input" placeholder="Ej. Sol parcial, Luz indirecta">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Agua / Riego</label>
-            <input type="text" [(ngModel)]="plantForm.water" class="form-input" placeholder="Ej. Moderada, Poca">
-          </div>
-          <div class="form-group" style="grid-column:1/-1;">
-            <label class="form-label">Descripción</label>
-            <textarea [(ngModel)]="plantForm.description" class="form-input" style="min-height:76px;resize:vertical;" placeholder="Descripción breve de la planta..."></textarea>
-          </div>
+          <div class="form-group"><label class="form-label">Luz</label><input type="text" [(ngModel)]="plantForm.light" class="form-input" placeholder="Ej. Sol parcial, Luz indirecta"></div>
+          <div class="form-group"><label class="form-label">Agua / Riego</label><input type="text" [(ngModel)]="plantForm.water" class="form-input" placeholder="Ej. Moderada, Poca"></div>
+          <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Descripción</label><textarea [(ngModel)]="plantForm.description" class="form-input" style="min-height:76px;resize:vertical;" placeholder="Descripción breve de la planta..."></textarea></div>
           <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;">
             <input type="checkbox" [(ngModel)]="plantForm.is_featured" id="featured" style="width:17px;height:17px;accent-color:#14452F;">
             <label for="featured" style="color:#102319;font-weight:500;cursor:pointer;font-size:0.9rem;">Destacar planta</label>
           </div>
           <div style="grid-column:1/-1;display:flex;gap:11px;flex-wrap:wrap;margin-top:4px;">
-            <button (click)="savePlant()" class="btn-primary" style="flex:1;min-width:130px;">
-              {{ editingId ? '✅ Actualizar Planta' : '➕ Crear Planta' }}
-            </button>
+            <button (click)="savePlant()" class="btn-primary" style="flex:1;min-width:130px;">{{ editingId ? '✅ Actualizar Planta' : '➕ Crear Planta' }}</button>
             <button (click)="resetForm()" class="btn-secondary" style="flex:1;min-width:130px;">Limpiar formulario</button>
           </div>
         </div>
@@ -460,7 +473,13 @@ export class AdminComponent implements OnInit {
   selectedInvoice: File | null = null;
   invoiceLoading = false;
   restockItems: RestockItem[] = [];
-  desiredMargin = 50; // %
+  desiredMargin = 50;
+
+  // POS Import
+  posFile: File | null = null;
+  posLoading = false;
+  posError = '';
+  posItems: any[] = [];
 
   constructor(private plantService: PlantService, private router: Router, private cdr: ChangeDetectorRef) {}
 
@@ -483,7 +502,6 @@ export class AdminComponent implements OnInit {
   logout() { sessionStorage.removeItem('admin_slug'); this.router.navigate(['/']); }
   goToPublic() { this.router.navigate(['/']); }
 
-  // ── METRICS ──
   get totalStock() { return this.plants.reduce((s,p) => s + (p.stock||0), 0); }
   get lowStockPlants() { return this.plants.filter(p => p.stock > 0 && p.stock <= 5); }
   get outOfStockPlants() { return this.plants.filter(p => p.stock <= 0); }
@@ -503,15 +521,11 @@ export class AdminComponent implements OnInit {
     return segs;
   }
 
-  // ── PROFITABILITY HELPERS (per-row, real-time) ──
-
-  // Suggested price using per-row margin
   getRowSuggestedPrice(item: RestockItem): number {
     if (!item.unit_cost || item.row_margin >= 100) return 0;
     return item.unit_cost / (1 - item.row_margin / 100);
   }
 
-  // Effective price = suggested if checkbox, else manual sale price
   getEffectivePrice(item: RestockItem): number {
     if (item.apply_suggested_price) return this.getRowSuggestedPrice(item);
     return item.current_sale_price ?? 0;
@@ -546,39 +560,25 @@ export class AdminComponent implements OnInit {
     return m >= 40 ? 'tag-ok' : m >= 20 ? 'tag-suggested' : 'tag-warn';
   }
 
-  // Legacy — keep for global suggested price field
   getSuggestedPrice(unitCost: number): number {
     if (!unitCost || this.desiredMargin >= 100) return 0;
     return unitCost / (1 - this.desiredMargin / 100);
   }
 
-  countApplied(): number {
-    return this.restockItems.filter(i => i.apply_suggested_price).length;
-  }
+  countApplied(): number { return this.restockItems.filter(i => i.apply_suggested_price).length; }
 
-  get totalInvoiceCost(): number {
-    return this.restockItems.reduce((s,i) => s + (i.unit_cost * i.quantity), 0);
-  }
+  get totalInvoiceCost(): number { return this.restockItems.reduce((s,i) => s + (i.unit_cost * i.quantity), 0); }
 
-  // ── AI RESTOCK ──
   onInvoiceSelected(event: any) { const f = event.target.files[0]; if (f) this.selectedInvoice = f; }
 
   analyzeInvoice() {
     if (!this.selectedInvoice) return;
     this.invoiceLoading = true;
     this.plantService.analyzeInvoice(this.selectedInvoice).subscribe({
-      next: (res) => {
-        this.restockItems = this.buildRestockItems(res.items || []);
-        this.invoiceLoading = false;
-        this.cdr.detectChanges();
-      },
+      next: (res) => { this.restockItems = this.buildRestockItems(res.items || []); this.invoiceLoading = false; this.cdr.detectChanges(); },
       error: () => {
         this.invoiceLoading = false;
-        // Mock fallback
-        this.restockItems = this.buildRestockItems([
-          { plant_name: 'Ficus Lyrata', quantity: 5, unit_cost: 15.00 },
-          { plant_name: 'Monstera Deliciosa', quantity: 3, unit_cost: 10.00 },
-        ]);
+        this.restockItems = this.buildRestockItems([{ plant_name: 'Ficus Lyrata', quantity: 5, unit_cost: 15.00 }]);
         this.cdr.detectChanges();
       }
     });
@@ -595,8 +595,8 @@ export class AdminComponent implements OnInit {
         unit_cost: r.unit_cost || 0,
         total_cost: (r.unit_cost || 0) * (r.quantity || 1),
         current_sale_price: match?.price ?? null,
-        row_margin: this.desiredMargin,         // default from global, editable per row
-        apply_suggested_price: !hasPrice,       // auto-check if no price exists
+        row_margin: this.desiredMargin,
+        apply_suggested_price: !hasPrice,
       };
     });
   }
@@ -605,22 +605,18 @@ export class AdminComponent implements OnInit {
 
   confirmRestock() {
     if (!this.restockItems.length) return;
-
-    // Validate: every item must have an effective price
     const invalid = this.restockItems.filter(item => this.getEffectivePrice(item) <= 0);
     if (invalid.length) {
       alert(`Falta el precio de venta en: ${invalid.map(i => i.plant_name).join(', ')}\nIngresa un precio manual o activa "Usar sugerido".`);
       return;
     }
-
     const items = this.restockItems.map(item => ({
       plant_name: item.plant_name,
       quantity: item.quantity,
       unit_cost: item.unit_cost,
-      new_price: this.getEffectivePrice(item),   // always send final price
+      new_price: this.getEffectivePrice(item),
       target_margin: item.row_margin,
     }));
-
     this.plantService.restockPlants(this.clientSlug, items).subscribe({
       next: () => { this.cancelInvoice(); this.loadData(); alert('¡Inventario actualizado!'); },
       error: e => console.error(e)
@@ -628,6 +624,63 @@ export class AdminComponent implements OnInit {
   }
 
   cancelInvoice() { this.selectedInvoice = null; this.restockItems = []; }
+
+  // ── POS IMPORT ──
+  onPosFileSelected(event: any) {
+    const f = event.target.files[0];
+    if (f) { this.posFile = f; this.posError = ''; this.posItems = []; }
+  }
+
+  analyzePosFile() {
+    if (!this.posFile) return;
+    this.posLoading = true;
+    this.posError = '';
+    const formData = new FormData();
+    formData.append('file', this.posFile);
+    this.plantService.analyzePosFile(this.clientSlug, formData).subscribe({
+      next: (res) => {
+        this.posItems = res.items.map((i: any) => ({ ...i, skip: i.status === 'not_found' }));
+        this.posLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.posError = err.error?.message || 'Error analizando el archivo. Verifica el formato.';
+        this.posLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  confirmPosImport() {
+    const toImport = this.posItems.filter(i => !i.skip && i.matched_plant_id);
+    if (!toImport.length) { alert('No hay productos válidos para importar.'); return; }
+    this.plantService.confirmPosImport(this.clientSlug, toImport, this.posFile?.name || 'import').subscribe({
+      next: () => { this.cancelPosImport(); this.loadData(); alert('¡Inventario actualizado con las ventas del día!'); },
+      error: e => console.error(e)
+    });
+  }
+
+  cancelPosImport() { this.posFile = null; this.posItems = []; this.posError = ''; }
+
+  countPosStatus(status: string): number { return this.posItems.filter(i => i.status === status).length; }
+
+  getPosBadgeBg(status: string): string {
+    if (status === 'found') return '#dcfce7';
+    if (status === 'review') return '#fef3c7';
+    return '#fee2e2';
+  }
+
+  getPosBadgeColor(status: string): string {
+    if (status === 'found') return '#15803d';
+    if (status === 'review') return '#92400e';
+    return '#991b1b';
+  }
+
+  getPosBadgeLabel(status: string): string {
+    if (status === 'found') return '✅ Encontrado';
+    if (status === 'review') return '⚠️ Revisar';
+    return '❌ No encontrado';
+  }
 
   // ── CRUD ──
   savePlant() {
