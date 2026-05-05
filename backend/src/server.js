@@ -336,13 +336,13 @@ app.get('/api/clients/:slug/sales-report', async (req, res) => {
       default:      dateFilter = '';
     }
 
-    // Summary totals
+    // ✅ total_transactions = archivos únicos importados (no filas individuales)
     const [summary] = await pool.query(`
       SELECT
-        COUNT(DISTINCT h.id)                                          AS total_transactions,
-        COALESCE(SUM(h.qty_sold), 0)                                  AS total_units,
-        COALESCE(SUM(h.qty_sold * p.price), 0)                        AS total_revenue,
-        COALESCE(SUM(h.qty_sold * COALESCE(p.cost_price, 0)), 0)      AS total_cost
+        COUNT(DISTINCT CONCAT(h.filename, '_', DATE(h.imported_at)))   AS total_transactions,
+        COALESCE(SUM(h.qty_sold), 0)                                    AS total_units,
+        COALESCE(SUM(h.qty_sold * p.price), 0)                          AS total_revenue,
+        COALESCE(SUM(h.qty_sold * COALESCE(p.cost_price, 0)), 0)        AS total_cost
       FROM pos_import_history h
       LEFT JOIN plants p ON p.id = h.matched_plant_id
       WHERE h.client_id = ? ${dateFilter}
@@ -368,7 +368,7 @@ app.get('/api/clients/:slug/sales-report', async (req, res) => {
       LIMIT 8
     `, [clientId]);
 
-    // Daily chart data — always last 14 days for the bar chart
+    // Daily chart — last 14 days always
     const [chartData] = await pool.query(`
       SELECT
         DATE(h.imported_at)       AS day,
