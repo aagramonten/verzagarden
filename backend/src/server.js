@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 import { pool } from './db.js';
 import OpenAI from 'openai';
 import multer from 'multer';
@@ -263,6 +264,7 @@ app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (
 
 // =======================
 // ✅ POS IMPORT — Confirm
+// ✅ Genera import_session_id único por cada confirmación
 // =======================
 app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
   try {
@@ -282,9 +284,13 @@ app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
         stock_before INT,
         stock_after INT,
         method VARCHAR(50) DEFAULT 'POS_IMPORT',
-        imported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        imported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        import_session_id VARCHAR(36) NULL
       )
     `);
+
+    // ✅ UUID único para todas las filas de esta importación
+    const import_session_id = crypto.randomUUID();
 
     const updates = [];
     let totalUnits = 0;
@@ -296,11 +302,18 @@ app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
       const plant = plants[0];
       const stockBefore = plant.stock;
       const stockAfter = Math.max(0, stockBefore - item.qty_sold);
+
       await pool.query('UPDATE plants SET stock = ? WHERE id = ?', [stockAfter, plant.id]);
+
+      // ✅ Guarda import_session_id en cada fila
       await pool.query(
-        `INSERT INTO pos_import_history (client_id, filename, product_name, matched_plant_id, qty_sold, stock_before, stock_after) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [clientId, filename || 'unknown', item.product_name, item.matched_plant_id, item.qty_sold, stockBefore, stockAfter]
+        `INSERT INTO pos_import_history 
+         (client_id, filename, product_name, matched_plant_id, qty_sold, stock_before, stock_after, import_session_id) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [clientId, filename || 'unknown', item.product_name, item.matched_plant_id,
+         item.qty_sold, stockBefore, stockAfter, import_session_id]
       );
+
       totalUnits += item.qty_sold || 0;
       updates.push({ plant_id: item.matched_plant_id, product: item.product_name, stock_before: stockBefore, stock_after: stockAfter });
     }
@@ -336,10 +349,10 @@ app.get('/api/clients/:slug/sales-report', async (req, res) => {
       default:      dateFilter = '';
     }
 
-    // ✅ total_transactions = archivos únicos importados (no filas individuales)
+    // ✅ Cuenta sesiones únicas de importación
     const [summary] = await pool.query(`
       SELECT
-        COUNT(DISTINCT CONCAT(h.filename, '_', DATE(h.imported_at)))   AS total_transactions,
+        COUNT(DISTINCT h.import_session_id)                             AS total_transactions,
         COALESCE(SUM(h.qty_sold), 0)                                    AS total_units,
         COALESCE(SUM(h.qty_sold * p.price), 0)                          AS total_revenue,
         COALESCE(SUM(h.qty_sold * COALESCE(p.cost_price, 0)), 0)        AS total_cost
