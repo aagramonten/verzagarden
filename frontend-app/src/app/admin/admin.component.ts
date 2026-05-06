@@ -55,10 +55,6 @@ interface RestockItem {
     .tag-warn { background:#fee2e2; color:#991b1b; font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:6px; }
     .period-pill { padding:6px 14px;border-radius:99px;font-size:0.8rem;font-weight:600;cursor:pointer;border:1px solid #dfe7dd;background:#f4f8f1;color:#516052;transition:all 0.15s; }
     .period-pill.active { background:#14452F;color:white;border-color:#14452F; }
-    .sales-table { width:100%;border-collapse:collapse;font-size:0.82rem; }
-    .sales-table th { background:#f4f8f1;color:#516052;font-weight:700;padding:10px 12px;text-align:left;font-size:0.72rem;letter-spacing:0.3px; }
-    .sales-table td { padding:10px 12px;border-bottom:1px solid #f0f0f0;vertical-align:middle; }
-    .sales-table tr:last-child td { border-bottom:none; }
   `],
   template: `
     <!-- HEADER -->
@@ -206,7 +202,7 @@ interface RestockItem {
 
           <ng-container *ngIf="salesReport.summary.total_units > 0">
 
-            <!-- ✅ Gráfica de barras corregida — altura en px, barras separadas por día -->
+            <!-- Gráfica de barras -->
             <div style="background:#f9fdf9;border-radius:16px;padding:18px;margin-bottom:18px;" *ngIf="salesReport.chart_data.length > 0">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
                 <h3 style="margin:0;color:#102319;font-size:0.88rem;font-weight:700;">Ventas diarias — últimos 14 días</h3>
@@ -221,29 +217,20 @@ interface RestockItem {
                   </div>
                 </div>
               </div>
-
-              <!-- Barras: altura fija en px, cada día una columna -->
               <div style="display:flex;align-items:flex-end;gap:6px;height:140px;overflow-x:auto;padding-bottom:4px;">
                 <div *ngFor="let d of salesReport.chart_data"
                   style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;flex:1;min-width:32px;height:100%;">
-                  <!-- Barra ingresos -->
-                  <div
-                    [style.height.px]="getBarPxRevenue(d.revenue)"
+                  <div [style.height.px]="getBarPxRevenue(d.revenue)"
                     style="width:100%;background:#14452F;border-radius:5px 5px 0 0;opacity:0.85;transition:height 0.3s;"
                     [title]="'$' + d.revenue">
                   </div>
-                  <!-- Barra unidades -->
-                  <div
-                    [style.height.px]="getBarPxUnits(d.units)"
+                  <div [style.height.px]="getBarPxUnits(d.units)"
                     style="width:100%;background:#4caf78;border-radius:5px 5px 0 0;transition:height 0.3s;"
                     [title]="d.units + ' u.'">
                   </div>
-                  <!-- Etiqueta fecha -->
                   <div style="font-size:0.6rem;color:#9ca3af;white-space:nowrap;margin-top:3px;">{{ formatChartDay(d.day) }}</div>
                 </div>
               </div>
-
-              <!-- Valores debajo -->
               <div style="display:flex;gap:6px;margin-top:6px;overflow-x:auto;">
                 <div *ngFor="let d of salesReport.chart_data" style="flex:1;min-width:32px;text-align:center;">
                   <div style="font-size:0.62rem;color:#14452F;font-weight:700;">\${{ d.revenue | number:'1.0-0' }}</div>
@@ -252,7 +239,7 @@ interface RestockItem {
               </div>
             </div>
 
-            <!-- Top plantas más vendidas -->
+            <!-- Top plantas -->
             <div style="margin-bottom:18px;" *ngIf="salesReport.top_plants.length > 0">
               <h3 style="margin:0 0 12px 0;color:#102319;font-size:0.88rem;font-weight:700;">🏆 Top plantas más vendidas</h3>
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
@@ -272,43 +259,28 @@ interface RestockItem {
               </div>
             </div>
 
-            <!-- Historial -->
-            <div *ngIf="salesReport.recent_imports.length > 0">
-              <h3 style="margin:0 0 12px 0;color:#102319;font-size:0.88rem;font-weight:700;">Historial de importaciones</h3>
-              <div style="overflow-x:auto;border-radius:14px;border:1px solid #eef1ec;">
-                <table class="sales-table">
-                  <thead>
-                    <tr>
-                      <th>Planta</th>
-                      <th>Archivo</th>
-                      <th>Cant.</th>
-                      <th>Stock antes</th>
-                      <th>Stock después</th>
-                      <th>Ingreso</th>
-                      <th>Fecha</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let row of salesReport.recent_imports">
-                      <td>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                          <div style="width:28px;height:28px;border-radius:7px;overflow:hidden;background:#f4f8f1;flex-shrink:0;">
-                            <img *ngIf="row.image_url" [src]="row.image_url" style="width:100%;height:100%;object-fit:cover;">
-                            <div *ngIf="!row.image_url" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;">🪴</div>
-                          </div>
-                          <span style="font-weight:600;color:#102319;font-size:0.82rem;">{{ row.plant_name || row.product_name }}</span>
-                        </div>
-                      </td>
-                      <td style="color:#9ca3af;font-size:0.75rem;">{{ row.filename }}</td>
-                      <td style="font-weight:700;color:#14452F;">{{ row.qty_sold }}</td>
-                      <td style="color:#516052;">{{ row.stock_before }}</td>
-                      <td style="font-weight:600;" [style.color]="row.stock_after < row.stock_before ? '#15803d' : '#516052'">{{ row.stock_after }}</td>
-                      <td style="font-weight:700;color:#15803d;" *ngIf="row.price">\${{ (row.qty_sold * row.price) | number:'1.2-2' }}</td>
-                      <td style="color:#9ca3af;" *ngIf="!row.price">—</td>
-                      <td style="color:#9ca3af;font-size:0.75rem;white-space:nowrap;">{{ row.imported_at | date:'dd/MM/yy HH:mm' }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <!-- ✅ Historial agrupado por día — limpio y compacto -->
+            <div *ngIf="getDailySummary().length > 0">
+              <h3 style="margin:0 0 12px 0;color:#102319;font-size:0.88rem;font-weight:700;">Historial por día</h3>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div *ngFor="let day of getDailySummary()"
+                  style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f9fdf9;border-radius:12px;border:1px solid #eef1ec;flex-wrap:wrap;gap:8px;">
+                  <div style="font-weight:700;color:#102319;font-size:0.88rem;">📅 {{ day.date }}</div>
+                  <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                    <div style="text-align:center;">
+                      <div style="font-size:0.68rem;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Unidades</div>
+                      <div style="font-weight:700;color:#102319;font-size:0.95rem;">{{ day.units }}</div>
+                    </div>
+                    <div style="text-align:center;">
+                      <div style="font-size:0.68rem;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Ingresos</div>
+                      <div style="font-weight:700;color:#15803d;font-size:0.95rem;">\${{ day.revenue | number:'1.0-0' }}</div>
+                    </div>
+                    <div style="text-align:center;">
+                      <div style="font-size:0.68rem;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">Productos</div>
+                      <div style="font-weight:700;color:#516052;font-size:0.95rem;">{{ day.items }}</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -628,21 +600,33 @@ export class AdminComponent implements OnInit {
     this.loadSalesReport(period);
   }
 
-  // ✅ Gráfica corregida — altura en px con escala real
-  // Barra de ingresos: máx 90px
+  // ✅ Historial agrupado por día
+  getDailySummary(): { date: string; units: number; revenue: number; items: number }[] {
+    if (!this.salesReport?.recent_imports?.length) return [];
+    const map = new Map<string, { date: string; units: number; revenue: number; items: number }>();
+    for (const row of this.salesReport.recent_imports) {
+      const d = new Date(row.imported_at);
+      const key = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear().toString().slice(2)}`;
+      if (!map.has(key)) map.set(key, { date: key, units: 0, revenue: 0, items: 0 });
+      const entry = map.get(key)!;
+      entry.units   += row.qty_sold   || 0;
+      entry.revenue += (row.qty_sold  || 0) * (row.price || 0);
+      entry.items   += 1;
+    }
+    return Array.from(map.values()).sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  // Gráfica
   getBarPxRevenue(value: number): number {
     if (!this.salesReport?.chart_data?.length) return 0;
     const max = Math.max(...this.salesReport.chart_data.map(d => d.revenue), 1);
     return Math.max(4, Math.round((value / max) * 90));
   }
-
-  // Barra de unidades: máx 40px (más pequeña, debajo de ingresos)
   getBarPxUnits(value: number): number {
     if (!this.salesReport?.chart_data?.length) return 0;
     const max = Math.max(...this.salesReport.chart_data.map(d => d.units), 1);
     return Math.max(4, Math.round((value / max) * 40));
   }
-
   formatChartDay(day: string): string {
     if (!day) return '';
     const d = new Date(day);
@@ -766,7 +750,6 @@ export class AdminComponent implements OnInit {
         const totalUnits = res.summary?.total_units ?? 0;
         this.cancelPosImport();
         this.loadData();
-        // ✅ Recarga ventas después de confirmar
         this.loadSalesReport(this.selectedSalesPeriod);
         this.posImportSuccessMsg = `Ventas importadas correctamente. ${totalItems} producto(s), ${totalUnits} unidad(es) descontadas del inventario.`;
         setTimeout(() => { this.posImportSuccessMsg = ''; this.cdr.detectChanges(); }, 7000);
