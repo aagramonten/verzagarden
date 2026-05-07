@@ -26,6 +26,40 @@ export interface Plant {
   is_active?: boolean;
 }
 
+export interface InvoiceItem {
+  plant_name: string;
+  quantity: number;
+  unit_cost?: number;
+  matched_plant_id?: number | null;
+  matched_plant_name?: string | null;
+}
+
+export interface InvoiceAnalysisResponse {
+  message: string;
+  result: {
+    items: InvoiceItem[];
+  };
+}
+
+export interface RestockResponse {
+  message: string;
+  updates: {
+    matched?: string;
+    unmatched?: string;
+    added?: number;
+  }[];
+}
+
+export interface PosImportItem {
+  product_name: string;
+  qty_sold: number;
+  unit_price?: number;
+  unit_cost?: number;
+  matched_plant_id?: number | null;
+  matched_plant_name?: string | null;
+  current_stock?: number;
+}
+
 export interface SalesReport {
   period: string;
   summary: {
@@ -64,7 +98,10 @@ export class PlantService {
   }
 
   login(slug: string, username: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/clients/${slug}/login`, { username, password });
+    return this.http.post(`${this.apiUrl}/clients/${slug}/login`, {
+      username,
+      password
+    });
   }
 
   getPlants(slug: string): Observable<Plant[]> {
@@ -83,32 +120,50 @@ export class PlantService {
     return this.http.delete(`${this.apiUrl}/plants/${id}`);
   }
 
-  analyzeInvoice(file: File): Observable<any> {
+  analyzeInvoice(slug: string, file: File): Observable<InvoiceAnalysisResponse> {
     const formData = new FormData();
     formData.append('invoice', file);
-    return this.http.post(`${this.apiUrl}/clients/demo-garden/invoices/analyze`, formData);
+
+    return this.http.post<InvoiceAnalysisResponse>(
+      `${this.apiUrl}/clients/${slug}/invoices/analyze`,
+      formData
+    );
   }
 
-  restockPlants(slug: string, items: any[]): Observable<any> {
-    return this.http.post(`${this.apiUrl}/clients/${slug}/invoices/confirm-restock`, { items });
+  restockPlants(slug: string, items: InvoiceItem[]): Observable<RestockResponse> {
+    return this.http.post<RestockResponse>(
+      `${this.apiUrl}/clients/${slug}/invoices/confirm-restock`,
+      { items }
+    );
   }
 
   uploadImage(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('image', file);
+
     return this.http.post(`${this.apiUrl}/upload`, formData);
   }
 
   analyzePosFile(slug: string, formData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/clients/${slug}/pos-import/analyze`, formData);
+    return this.http.post(
+      `${this.apiUrl}/clients/${slug}/pos-import/analyze`,
+      formData
+    );
   }
 
-  confirmPosImport(slug: string, items: any[], filename: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/clients/${slug}/pos-import/confirm`, { items, filename });
+  confirmPosImport(slug: string, items: PosImportItem[], filename: string): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/clients/${slug}/pos-import/confirm`,
+      {
+        items,
+        filename
+      }
+    );
   }
 
-  // ✅ Sales report con filtro de periodo
   getSalesReport(slug: string, period: string = 'month'): Observable<SalesReport> {
-    return this.http.get<SalesReport>(`${this.apiUrl}/clients/${slug}/sales-report?period=${period}`);
+    return this.http.get<SalesReport>(
+      `${this.apiUrl}/clients/${slug}/sales-report?period=${period}`
+    );
   }
 }
