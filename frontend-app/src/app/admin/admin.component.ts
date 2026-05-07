@@ -809,10 +809,36 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   analyzeInvoice() {
     if (!this.selectedInvoice) return;
+
     this.invoiceLoading = true;
-    this.plantService.analyzeInvoice(this.selectedInvoice).subscribe({
-      next: (res) => { this.restockItems = this.buildRestockItems(res.items || []); this.invoiceLoading = false; this.cdr.detectChanges(); this.renderIcons(); },
-      error: () => { this.invoiceLoading = false; this.restockItems = this.buildRestockItems([{ plant_name: 'Ficus Lyrata', quantity: 5, unit_cost: 15.00 }]); this.cdr.detectChanges(); }
+
+    this.plantService.analyzeInvoice(this.clientSlug, this.selectedInvoice).subscribe({
+      next: (res) => {
+        const items = res.result?.items || [];
+
+        this.restockItems = this.buildRestockItems(items);
+        this.invoiceLoading = false;
+
+        this.cdr.detectChanges();
+        this.renderIcons();
+      },
+      error: (err) => {
+        console.error('Error analizando factura:', err);
+
+        this.invoiceLoading = false;
+
+        // Demo fallback por si falla OpenAI o el backend
+        this.restockItems = this.buildRestockItems([
+          {
+            plant_name: 'Ficus Lyrata',
+            quantity: 5,
+            unit_cost: 15.0
+          }
+        ]);
+
+        this.cdr.detectChanges();
+        this.renderIcons();
+      }
     });
   }
 
