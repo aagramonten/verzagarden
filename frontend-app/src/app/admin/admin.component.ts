@@ -73,7 +73,7 @@ declare const lucide: any;
           Ver tienda
         </button>
         <div style="text-align:center;">
-          <div style="font-size:0.95rem;font-weight:700;color:white;">Demo Garden PR</div>
+          <div style="font-size:0.95rem;font-weight:700;color:white;">{{ client?.business_name || 'Admin' }}</div>
         </div>
         <button (click)="logout()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:0.78rem;display:flex;align-items:center;gap:5px;">
           <i data-lucide="log-out" style="width:13px;height:13px;"></i>
@@ -622,7 +622,8 @@ declare const lucide: any;
 export class AdminComponent implements OnInit, AfterViewInit {
   readonly PLANT_CATEGORIES = PLANT_CATEGORIES;
 
-  clientSlug = 'demo-garden';
+  // ✅ CAMBIO 1: slug dinámico desde sessionStorage
+  clientSlug = sessionStorage.getItem('admin_slug') || 'demo-garden';
   client?: Client;
   plants: Plant[] = [];
   loading = true;
@@ -631,26 +632,20 @@ export class AdminComponent implements OnInit, AfterViewInit {
   imageUploading = false;
   showForm = false;
 
-  // Navigation
   activeTab: 'dashboard' | 'ventas' | 'inventario' | 'pos' = 'dashboard';
-
-  // ✅ Inventory filter
   inventoryFilter: 'all' | 'low' | 'out' = 'all';
 
-  // AI Restock
   selectedInvoice: File | null = null;
   invoiceLoading = false;
   restockItems: RestockItem[] = [];
   desiredMargin = 50;
 
-  // POS Import
   posFile: File | null = null;
   posLoading = false;
   posError = '';
   posItems: any[] = [];
   posImportSuccessMsg = '';
 
-  // Sales Report
   salesReport: SalesReport | null = null;
   salesLoading = false;
   selectedSalesPeriod = 'month';
@@ -682,13 +677,11 @@ export class AdminComponent implements OnInit, AfterViewInit {
     this.renderIcons();
   }
 
-  // ✅ Navega al inventario con filtro específico
   goToInventory(filter: 'all' | 'low' | 'out') {
     this.inventoryFilter = filter;
     this.setTab('inventario');
   }
 
-  // ✅ Lista filtrada de plantas
   get filteredInventory(): Plant[] {
     if (this.inventoryFilter === 'low') return this.lowStockPlants;
     if (this.inventoryFilter === 'out') return this.outOfStockPlants;
@@ -809,33 +802,19 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   analyzeInvoice() {
     if (!this.selectedInvoice) return;
-
     this.invoiceLoading = true;
-
     this.plantService.analyzeInvoice(this.clientSlug, this.selectedInvoice).subscribe({
       next: (res) => {
         const items = res.result?.items || [];
-
         this.restockItems = this.buildRestockItems(items);
         this.invoiceLoading = false;
-
         this.cdr.detectChanges();
         this.renderIcons();
       },
       error: (err) => {
         console.error('Error analizando factura:', err);
-
         this.invoiceLoading = false;
-
-        // Demo fallback por si falla OpenAI o el backend
-        this.restockItems = this.buildRestockItems([
-          {
-            plant_name: 'Ficus Lyrata',
-            quantity: 5,
-            unit_cost: 15.0
-          }
-        ]);
-
+        this.restockItems = this.buildRestockItems([{ plant_name: 'Ficus Lyrata', quantity: 5, unit_cost: 15.0 }]);
         this.cdr.detectChanges();
         this.renderIcons();
       }
