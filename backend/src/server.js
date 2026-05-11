@@ -17,10 +17,30 @@ dotenv.config();
 
 const app = express();
 
+// ✅ CORS actualizado: acepta verzagarden.com y cualquier subdominio *.verzagarden.com
 app.use(cors({
-  origin: ['https://www.verzagarden.com', 'https://verzagarden.com'],
+  origin: function (origin, callback) {
+    // Permite requests sin origin (Postman, curl, apps móviles)
+    if (!origin) return callback(null, true);
+
+    const allowed =
+      origin === 'https://verzagarden.com' ||
+      origin === 'https://www.verzagarden.com' ||
+      /^https:\/\/[\w-]+\.verzagarden\.com$/.test(origin);
+
+    if (allowed) {
+      callback(null, true);
+    } else {
+      // En desarrollo local también permite localhost
+      if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+        return callback(null, true);
+      }
+      callback(new Error(`CORS bloqueado para origin: ${origin}`));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 app.use(express.json());
@@ -264,7 +284,6 @@ app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (
 
 // =======================
 // ✅ POS IMPORT — Confirm
-// ✅ Genera import_session_id único por cada confirmación
 // =======================
 app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
   try {
@@ -289,9 +308,7 @@ app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
       )
     `);
 
-    // ✅ UUID único para todas las filas de esta importación
     const import_session_id = crypto.randomUUID();
-
     const updates = [];
     let totalUnits = 0;
 
@@ -304,8 +321,6 @@ app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
       const stockAfter = Math.max(0, stockBefore - item.qty_sold);
 
       await pool.query('UPDATE plants SET stock = ? WHERE id = ?', [stockAfter, plant.id]);
-
-      // ✅ Guarda import_session_id en cada fila
       await pool.query(
         `INSERT INTO pos_import_history 
          (client_id, filename, product_name, matched_plant_id, qty_sold, stock_before, stock_after, import_session_id) 
@@ -331,7 +346,6 @@ app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
 
 // =======================
 // 📈 SALES REPORT
-// GET /api/clients/:slug/sales-report?period=today|week|month|year|all
 // =======================
 app.get('/api/clients/:slug/sales-report', async (req, res) => {
   try {
@@ -349,7 +363,6 @@ app.get('/api/clients/:slug/sales-report', async (req, res) => {
       default:      dateFilter = '';
     }
 
-    // ✅ Cuenta sesiones únicas de importación
     const [summary] = await pool.query(`
       SELECT
         COUNT(DISTINCT h.import_session_id)                             AS total_transactions,
@@ -366,7 +379,6 @@ app.get('/api/clients/:slug/sales-report', async (req, res) => {
     const totalProfit  = totalRevenue - totalCost;
     const marginPct    = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
 
-    // Top plants
     const [topPlants] = await pool.query(`
       SELECT
         p.name, p.category, p.image_url,
@@ -381,7 +393,6 @@ app.get('/api/clients/:slug/sales-report', async (req, res) => {
       LIMIT 8
     `, [clientId]);
 
-    // Daily chart — last 14 days always
     const [chartData] = await pool.query(`
       SELECT
         DATE(h.imported_at)       AS day,
@@ -394,7 +405,6 @@ app.get('/api/clients/:slug/sales-report', async (req, res) => {
       ORDER BY day ASC
     `, [clientId]);
 
-    // Recent history
     const [recentImports] = await pool.query(`
       SELECT
         h.id, h.filename, h.product_name, h.qty_sold,
