@@ -464,7 +464,22 @@ app.post('/api/clients/:slug/pos-import/confirm', async (req, res) => {
 });
 
 // =======================
-
+// 🖼️ UPDATE CLIENT LOGO
+// =======================
+app.put('/api/clients/:slug/logo', async (req, res) => {
+  try {
+    const { logo_url } = req.body;
+    if (!logo_url) return res.status(400).json({ message: 'logo_url es requerido' });
+    const [result] = await pool.query(
+      'UPDATE clients SET logo_url = ? WHERE slug = ?',
+      [logo_url, req.params.slug]
+    );
+    if (result.affectedRows === 0) return res.status(404).json({ message: 'Cliente no encontrado' });
+    res.json({ message: 'Logo actualizado', logo_url });
+  } catch (error) {
+    res.status(500).json({ message: 'Error actualizando logo', error: error.message });
+  }
+});
 const port = process.env.PORT || 3000;
 
 app.listen(port, '0.0.0.0', () => {
