@@ -138,9 +138,11 @@ const CATEGORIES_ES = [
         {{ isEnglish ? 'ES' : 'EN' }}
       </button>
       <div style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:1.4rem;">🌿</span>
+        <img *ngIf="client?.logo_url" [src]="client!.logo_url" alt="logo"
+          style="height:36px;width:36px;border-radius:8px;object-fit:cover;">
+        <span *ngIf="!client?.logo_url" style="font-size:1.4rem;">🌿</span>
         <div style="text-align:center;">
-          <h1 style="margin:0;font-size:1.1rem;font-weight:700;color:white;">Demo Garden PR</h1>
+          <h1 style="margin:0;font-size:1.1rem;font-weight:700;color:white;">{{ client?.business_name || t.heroTitle }}</h1>
           <p style="margin:0;font-size:0.68rem;color:#A3C4B3;">{{ t.tagline }}</p>
         </div>
       </div>
@@ -323,7 +325,6 @@ export class CatalogComponent implements OnInit {
   constructor(private plantService: PlantService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    // ✅ Lee el slug del subdominio automáticamente
     this.clientSlug = this.plantService.getSlug();
 
     if (window.location.search.includes('login=true')) {
