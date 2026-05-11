@@ -9,23 +9,23 @@ import { PlantCardComponent } from '../plant-card.component';
 const T = {
   es: {
     tagline: 'Plantas y Jardines',
-    search: 'Buscar plantas...',
+    search: 'Buscar productos...',
     all: 'Todas',
     available: 'INVENTARIO DISPONIBLE',
     heroTitle: 'Demo Garden PR',
-    heroSub: 'Explora plantas disponibles y ordena directo por WhatsApp.',
-    plants: 'Plantas',
+    heroSub: 'Explora plantas y productos disponibles y ordena directo por WhatsApp.',
+    plants: 'Productos',
     categories: 'Categorías',
     available2: 'Disponibles',
     quickOrder: 'ORDEN RÁPIDO',
     ctaTitle: 'Consulta por\nWhatsApp',
-    ctaSub: 'Escoge la planta y te respondemos de inmediato.',
+    ctaSub: 'Escoge el producto y te respondemos de inmediato.',
     exploreTitle: 'Explora por categoría',
-    exploreSub: 'Conoce los tipos de plantas disponibles y encuentra más rápido la opción ideal para tu espacio.',
-    viewPlants: 'Ver plantas',
+    exploreSub: 'Conoce los tipos de productos disponibles y encuentra más rápido la opción ideal para tu espacio.',
+    viewPlants: 'Ver productos',
     viewAll: 'Ver todas',
     loading: '🌱 Cargando catálogo...',
-    noPlants: 'No hay plantas disponibles en esta categoría por el momento.',
+    noPlants: 'No hay productos disponibles en esta categoría por el momento.',
     noPlantsSub: 'Escríbenos por WhatsApp para consultar disponibilidad.',
     consultWA: 'Consultar por WhatsApp',
     adminAccess: 'Acceso Admin',
@@ -41,23 +41,23 @@ const T = {
   },
   en: {
     tagline: 'Plants & Gardens',
-    search: 'Search plants...',
+    search: 'Search products...',
     all: 'All',
     available: 'AVAILABLE INVENTORY',
     heroTitle: 'Demo Garden PR',
-    heroSub: 'Browse available plants and order directly via WhatsApp.',
-    plants: 'Plants',
+    heroSub: 'Browse available plants and products and order directly via WhatsApp.',
+    plants: 'Products',
     categories: 'Categories',
     available2: 'Available',
     quickOrder: 'QUICK ORDER',
     ctaTitle: 'Order via\nWhatsApp',
-    ctaSub: 'Pick a plant and we\'ll respond right away.',
+    ctaSub: 'Pick a product and we\'ll respond right away.',
     exploreTitle: 'Browse by category',
-    exploreSub: 'Learn about the types of plants available and find the perfect option for your space.',
-    viewPlants: 'View plants',
+    exploreSub: 'Learn about the types of products available and find the perfect option for your space.',
+    viewPlants: 'View products',
     viewAll: 'View all',
     loading: '🌱 Loading catalog...',
-    noPlants: 'No plants available in this category at the moment.',
+    noPlants: 'No products available in this category at the moment.',
     noPlantsSub: 'Message us on WhatsApp to check availability.',
     consultWA: 'Ask on WhatsApp',
     adminAccess: 'Admin Access',
@@ -75,6 +75,7 @@ const T = {
 
 // ── CATEGORIES ────────────────────────────────────────────────
 const CATEGORIES_ES = [
+  // 🌿 PLANTAS
   { name: 'Árboles',             nameEn: 'Trees',            emoji: '🌳', desc: 'Plantas grandes con un tronco principal leñoso que se ramifica a cierta altura.', descEn: 'Large plants with a single woody trunk that branches at a certain height.', ideal: 'Sombra, estructura y jardines amplios.', idealEn: 'Shade, structure and large gardens.' },
   { name: 'Arbustos',            nameEn: 'Shrubs',           emoji: '🌿', desc: 'Plantas medianas con varios tallos leñosos que crecen desde la base.',             descEn: 'Medium-sized plants with multiple woody stems growing from the base.',       ideal: 'Bordes, divisiones naturales y jardines frondosos.', idealEn: 'Borders, natural dividers and lush gardens.' },
   { name: 'Flores de estación',  nameEn: 'Seasonal Flowers', emoji: '🌸', desc: 'Plantas que florecen en épocas específicas del año y aportan color al jardín.',   descEn: 'Plants that bloom at specific times of year and add color to the garden.',  ideal: 'Renovar espacios según la temporada.', idealEn: 'Refreshing spaces according to the season.' },
@@ -82,6 +83,11 @@ const CATEGORIES_ES = [
   { name: 'Trepadoras',          nameEn: 'Climbers',         emoji: '🌱', desc: 'Plantas que necesitan soporte para crecer hacia arriba.',                         descEn: 'Plants that need support to grow upward.',                                   ideal: 'Cubrir paredes, crear sombra y añadir privacidad.', idealEn: 'Covering walls, creating shade and adding privacy.' },
   { name: 'Suculentas',          nameEn: 'Succulents',       emoji: '🌵', desc: 'Plantas que almacenan agua en hojas, tallos o raíces, toleran mejor la sequía.',  descEn: 'Plants that store water in leaves, stems or roots, tolerating drought well.', ideal: 'Bajo mantenimiento y espacios soleados.', idealEn: 'Low maintenance and sunny spaces.' },
   { name: 'Palmas',              nameEn: 'Palms',            emoji: '🌴', desc: 'Plantas tropicales que aportan altura, elegancia y sensación caribeña.',          descEn: 'Tropical plants that add height, elegance and a Caribbean feel.',            ideal: 'Entradas, patios, terrazas y jardines tropicales.', idealEn: 'Entrances, patios, terraces and tropical gardens.' },
+  // 🪣 PRODUCTOS
+  { name: 'Tiestos y Macetas',       nameEn: 'Pots & Planters',      emoji: '🪣', desc: 'Envases de barro, plástico, cerámica y materiales reciclados para todo tipo de plantas.', descEn: 'Clay, plastic, ceramic and recycled pots for all types of plants.',       ideal: 'Interior, exterior, balcones y terrazas.', idealEn: 'Indoors, outdoors, balconies and terraces.' },
+  { name: 'Tierra y Sustratos',      nameEn: 'Soil & Substrates',    emoji: '🌍', desc: 'Mezclas de suelo, turba, perlita y sustrato especializado para cada tipo de planta.',     descEn: 'Soil mixes, peat, perlite and specialized substrate for every plant type.', ideal: 'Siembra, trasplante y jardinería en general.', idealEn: 'Planting, transplanting and general gardening.' },
+  { name: 'Fertilizantes y Abonos',  nameEn: 'Fertilizers',          emoji: '🧪', desc: 'Abonos orgánicos, líquidos y granulados para estimular el crecimiento y la floración.',   descEn: 'Organic, liquid and granulated fertilizers to boost growth and blooming.',  ideal: 'Nutrición, crecimiento y floración de plantas.', idealEn: 'Plant nutrition, growth and blooming.' },
+  { name: 'Herramientas',            nameEn: 'Tools',                emoji: '🛠️', desc: 'Palas, podadoras, guantes, regaderas y todo lo que necesitas para cuidar tu jardín.',    descEn: 'Shovels, pruners, gloves, watering cans and everything for your garden.',  ideal: 'Jardinería, poda, siembra y mantenimiento.', idealEn: 'Gardening, pruning, planting and maintenance.' },
 ];
 
 @Component({
@@ -119,6 +125,11 @@ const CATEGORIES_ES = [
       border: 1px solid transparent; padding: 7px 14px; border-radius: 20px;
       font-size: 0.85rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.2s;
     }
+    .section-divider {
+      font-size: 0.7rem; font-weight: 800; letter-spacing: 1.5px;
+      color: #9ca3af; text-transform: uppercase; padding: 4px 0 8px;
+      grid-column: 1 / -1; border-bottom: 1px solid #eef1ec; margin-bottom: 4px;
+    }
   `],
   template: `
     <!-- HEADER -->
@@ -147,15 +158,25 @@ const CATEGORIES_ES = [
           <svg viewBox="0 0 24 24" width="19" height="19" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
         </a>
       </div>
-      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;">
+      <!-- Pills separadas por grupo -->
+      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;align-items:center;">
         <button class="filter-pill" (click)="setCategory('Todas')"
           [style.backgroundColor]="selectedCategory === 'Todas' ? '#14452F' : '#F0F2F0'"
           [style.color]="selectedCategory === 'Todas' ? 'white' : '#666'">
           {{ t.all }}
         </button>
-        <button *ngFor="let cat of CATEGORIES" class="filter-pill" (click)="setCategory(cat.name)"
+        <!-- Plantas -->
+        <span style="font-size:0.68rem;color:#9ca3af;font-weight:700;padding:0 4px;white-space:nowrap;">— Plantas</span>
+        <button *ngFor="let cat of PLANT_CATS" class="filter-pill" (click)="setCategory(cat.name)"
           [style.backgroundColor]="selectedCategory === cat.name ? '#14452F' : '#F0F2F0'"
           [style.color]="selectedCategory === cat.name ? 'white' : '#666'">
+          {{ cat.emoji }} {{ getFilterLabel(cat) }}
+        </button>
+        <!-- Productos -->
+        <span style="font-size:0.68rem;color:#9ca3af;font-weight:700;padding:0 4px;white-space:nowrap;">— Productos</span>
+        <button *ngFor="let cat of PRODUCT_CATS" class="filter-pill" (click)="setCategory(cat.name)"
+          [style.backgroundColor]="selectedCategory === cat.name ? '#8B5E3C' : '#FFF3E8'"
+          [style.color]="selectedCategory === cat.name ? 'white' : '#8B5E3C'">
           {{ cat.emoji }} {{ getFilterLabel(cat) }}
         </button>
       </div>
@@ -166,7 +187,7 @@ const CATEGORIES_ES = [
       <div style="display:flex;gap:14px;max-width:1200px;width:100%;flex-wrap:wrap;margin:0 auto;">
         <div style="flex:1 1 260px;background:white;border-radius:20px;padding:18px 20px;box-shadow:0 6px 20px rgba(16,35,25,0.04);border:1px solid #eef1ec;">
           <span style="color:#1f7a4d;font-weight:700;font-size:0.75rem;letter-spacing:1px;">{{ t.available }}</span>
-          <h1 style="font-size:1.7rem;margin:6px 0 8px;color:#102319;letter-spacing:-0.5px;line-height:1.1;">{{ t.heroTitle }}</h1>
+          <h1 style="font-size:1.7rem;margin:6px 0 8px;color:#102319;letter-spacing:-0.5px;line-height:1.1;">{{ client?.business_name || t.heroTitle }}</h1>
           <p style="font-size:0.85rem;margin-bottom:14px;color:#516052;">{{ t.heroSub }}</p>
           <div style="display:flex;gap:8px;">
             <div style="background:#f4f8f1;padding:10px;border-radius:12px;flex:1;text-align:center;">
@@ -197,13 +218,36 @@ const CATEGORIES_ES = [
         <h2 style="font-size:1.1rem;font-weight:700;color:#102319;margin:0 0 4px;">{{ t.exploreTitle }}</h2>
         <p style="font-size:0.8rem;color:#516052;margin:0;">{{ t.exploreSub }}</p>
       </div>
-      <div class="cat-grid" style="margin-bottom:16px;">
-        <div *ngFor="let cat of CATEGORIES" class="cat-card" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
-          <div class="cat-emoji">{{ cat.emoji }}</div>
-          <div class="cat-name">{{ isEnglish ? cat.nameEn : cat.name }}</div>
-          <div class="cat-desc">{{ isEnglish ? cat.descEn : cat.desc }}</div>
-          <div class="cat-ideal">{{ t.catIdeal }} {{ isEnglish ? cat.idealEn : cat.ideal }}</div>
-          <button class="cat-btn" (click)="$event.stopPropagation(); setCategory(cat.name)">{{ t.viewPlants }}</button>
+
+      <!-- Sección Plantas -->
+      <div style="margin-bottom:8px;">
+        <p style="font-size:0.7rem;font-weight:800;color:#1f7a4d;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 10px;">🌿 Plantas</p>
+        <div class="cat-grid" style="margin-bottom:16px;">
+          <div *ngFor="let cat of PLANT_CATS" class="cat-card" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
+            <div class="cat-emoji">{{ cat.emoji }}</div>
+            <div class="cat-name">{{ isEnglish ? cat.nameEn : cat.name }}</div>
+            <div class="cat-desc">{{ isEnglish ? cat.descEn : cat.desc }}</div>
+            <div class="cat-ideal">{{ t.catIdeal }} {{ isEnglish ? cat.idealEn : cat.ideal }}</div>
+            <button class="cat-btn" (click)="$event.stopPropagation(); setCategory(cat.name)">{{ t.viewPlants }}</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección Productos -->
+      <div style="margin-bottom:16px;">
+        <p style="font-size:0.7rem;font-weight:800;color:#8B5E3C;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 10px;">🛒 Productos de jardín</p>
+        <div class="cat-grid">
+          <div *ngFor="let cat of PRODUCT_CATS" class="cat-card" [class.active]="selectedCategory === cat.name"
+            (click)="setCategory(cat.name)"
+            [style.borderColor]="selectedCategory === cat.name ? '#8B5E3C' : '#eef1ec'"
+            [style.background]="selectedCategory === cat.name ? '#FFF3E8' : 'white'">
+            <div class="cat-emoji">{{ cat.emoji }}</div>
+            <div class="cat-name">{{ isEnglish ? cat.nameEn : cat.name }}</div>
+            <div class="cat-desc">{{ isEnglish ? cat.descEn : cat.desc }}</div>
+            <div class="cat-ideal" style="color:#8B5E3C;">{{ t.catIdeal }} {{ isEnglish ? cat.idealEn : cat.ideal }}</div>
+            <button class="cat-btn" style="border-color:#f0d5c0;color:#8B5E3C;"
+              (click)="$event.stopPropagation(); setCategory(cat.name)">{{ t.viewPlants }}</button>
+          </div>
         </div>
       </div>
     </section>
@@ -258,6 +302,8 @@ const CATEGORIES_ES = [
 })
 export class CatalogComponent implements OnInit {
   readonly CATEGORIES = CATEGORIES_ES;
+  readonly PLANT_CATS = CATEGORIES_ES.slice(0, 7);
+  readonly PRODUCT_CATS = CATEGORIES_ES.slice(7);
 
   isEnglish = false;
   clientSlug = 'demo-garden';
@@ -277,6 +323,9 @@ export class CatalogComponent implements OnInit {
   constructor(private plantService: PlantService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
+    // ✅ Lee el slug del subdominio automáticamente
+    this.clientSlug = this.plantService.getSlug();
+
     if (window.location.search.includes('login=true')) {
       this.showLoginModal = true;
       window.history.replaceState({}, '', '/');
@@ -309,13 +358,17 @@ export class CatalogComponent implements OnInit {
 
   getFilterLabel(cat: typeof CATEGORIES_ES[0]): string {
     if (this.isEnglish) {
-      // Shorten long names for pills
       if (cat.nameEn === 'Seasonal Flowers') return 'Flowers';
       if (cat.nameEn === 'Indoor Plants') return 'Indoor';
+      if (cat.nameEn === 'Pots & Planters') return 'Pots';
+      if (cat.nameEn === 'Soil & Substrates') return 'Soil';
       return cat.nameEn;
     }
     if (cat.name === 'Plantas de interior') return 'Interior';
     if (cat.name === 'Flores de estación') return 'Flores';
+    if (cat.name === 'Tiestos y Macetas') return 'Tiestos';
+    if (cat.name === 'Tierra y Sustratos') return 'Tierra';
+    if (cat.name === 'Fertilizantes y Abonos') return 'Fertilizantes';
     return cat.name;
   }
 
@@ -373,7 +426,7 @@ export class CatalogComponent implements OnInit {
   getGeneralWhatsappLink(): string {
     const phone = this.client?.whatsapp_number || '19392360534';
     const msg = this.isEnglish
-      ? 'Hello, I would like to ask about your plant inventory.'
+      ? 'Hello, I would like to ask about your inventory.'
       : 'Hola, me gustaría consultar sobre el inventario.';
     return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
   }

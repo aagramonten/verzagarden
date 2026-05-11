@@ -6,11 +6,20 @@ import { PlantService, Client, Plant, SalesReport } from '../services/plant.serv
 import { PlantCardComponent } from '../plant-card.component';
 
 export const PLANT_CATEGORIES = [
+  // Plantas
   'Árboles', 'Arbustos', 'Flores de estación', 'Plantas de interior',
-  'Trepadoras', 'Suculentas', 'Palmas'
+  'Trepadoras', 'Suculentas', 'Palmas',
+  // Productos
+  'Tiestos y Macetas', 'Tierra y Sustratos', 'Fertilizantes y Abonos', 'Herramientas',
 ];
 
-const CHART_COLORS = ['#14452F','#4caf78','#f5c842','#9ecfb0','#e07b54','#6b8f71','#a78bfa','#38bdf8'];
+// Separador visual en el select del formulario
+export const CATEGORY_GROUPS = [
+  { label: '🌿 Plantas', items: ['Árboles', 'Arbustos', 'Flores de estación', 'Plantas de interior', 'Trepadoras', 'Suculentas', 'Palmas'] },
+  { label: '🛒 Productos de jardín', items: ['Tiestos y Macetas', 'Tierra y Sustratos', 'Fertilizantes y Abonos', 'Herramientas'] },
+];
+
+const CHART_COLORS = ['#14452F','#4caf78','#f5c842','#9ecfb0','#e07b54','#6b8f71','#a78bfa','#38bdf8','#8B5E3C','#f0a070','#d4a017','#b0c4de'];
 
 interface RestockItem {
   plant_name: string;
@@ -63,6 +72,7 @@ declare const lucide: any;
     .nav-tab { display:flex;align-items:center;gap:6px;padding:10px 16px;border:none;background:none;color:rgba(255,255,255,0.6);font-size:0.85rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap; }
     .nav-tab.active { color:white;border-bottom-color:white; }
     .nav-tab:hover { color:white; }
+    optgroup { font-weight:700; color:#516052; }
   `],
   template: `
     <!-- HEADER con tabs -->
@@ -103,56 +113,39 @@ declare const lucide: any;
         <h2 class="section-title">Dashboard</h2>
         <p class="section-sub">Resumen del inventario en tiempo real.</p>
 
-        <!-- Métricas clickeables -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:11px;margin-bottom:14px;">
-
-          <div class="metric-card clickable" (click)="goToInventory('all')" title="Ver todas las plantas">
-            <div style="display:flex;justify-content:center;margin-bottom:8px;">
-              <i data-lucide="leaf" style="width:20px;height:20px;color:#1f7a4d;"></i>
-            </div>
+          <div class="metric-card clickable" (click)="goToInventory('all')">
+            <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="leaf" style="width:20px;height:20px;color:#1f7a4d;"></i></div>
             <div style="font-size:1.8rem;font-weight:800;color:#102319;line-height:1;">{{ plants.length }}</div>
-            <div style="font-size:0.72rem;color:#516052;font-weight:600;margin-top:5px;">Total Plantas</div>
-            <div style="font-size:0.65rem;color:#9ca3af;margin-top:3px;">Ver todas →</div>
+            <div style="font-size:0.72rem;color:#516052;font-weight:600;margin-top:5px;">Total Productos</div>
+            <div style="font-size:0.65rem;color:#9ca3af;margin-top:3px;">Ver todos →</div>
           </div>
-
-          <div class="metric-card clickable" (click)="goToInventory('all')" title="Ver inventario">
-            <div style="display:flex;justify-content:center;margin-bottom:8px;">
-              <i data-lucide="boxes" style="width:20px;height:20px;color:#1f7a4d;"></i>
-            </div>
+          <div class="metric-card clickable" (click)="goToInventory('all')">
+            <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="boxes" style="width:20px;height:20px;color:#1f7a4d;"></i></div>
             <div style="font-size:1.8rem;font-weight:800;color:#1f7a4d;line-height:1;">{{ totalStock }}</div>
             <div style="font-size:0.72rem;color:#516052;font-weight:600;margin-top:5px;">Total en Stock</div>
             <div style="font-size:0.65rem;color:#9ca3af;margin-top:3px;">Ver inventario →</div>
           </div>
-
-          <div class="metric-card clickable" style="border-color:#fef3c7;" (click)="goToInventory('low')" title="Ver plantas con bajo stock">
-            <div style="display:flex;justify-content:center;margin-bottom:8px;">
-              <i data-lucide="alert-triangle" style="width:20px;height:20px;color:#d97706;"></i>
-            </div>
+          <div class="metric-card clickable" style="border-color:#fef3c7;" (click)="goToInventory('low')">
+            <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="alert-triangle" style="width:20px;height:20px;color:#d97706;"></i></div>
             <div style="font-size:1.8rem;font-weight:800;color:#d97706;line-height:1;">{{ lowStockPlants.length }}</div>
             <div style="font-size:0.72rem;color:#516052;font-weight:600;margin-top:5px;">Bajo Stock</div>
-            <div style="font-size:0.65rem;color:#d97706;margin-top:3px;">Ver plantas →</div>
+            <div style="font-size:0.65rem;color:#d97706;margin-top:3px;">Ver productos →</div>
           </div>
-
-          <div class="metric-card clickable" style="border-color:#fee2e2;" (click)="goToInventory('out')" title="Ver plantas sin stock">
-            <div style="display:flex;justify-content:center;margin-bottom:8px;">
-              <i data-lucide="x-circle" style="width:20px;height:20px;color:#dc2626;"></i>
-            </div>
+          <div class="metric-card clickable" style="border-color:#fee2e2;" (click)="goToInventory('out')">
+            <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="x-circle" style="width:20px;height:20px;color:#dc2626;"></i></div>
             <div style="font-size:1.8rem;font-weight:800;color:#dc2626;line-height:1;">{{ outOfStockPlants.length }}</div>
             <div style="font-size:0.72rem;color:#516052;font-weight:600;margin-top:5px;">Sin Stock</div>
-            <div style="font-size:0.65rem;color:#dc2626;margin-top:3px;">Ver plantas →</div>
+            <div style="font-size:0.65rem;color:#dc2626;margin-top:3px;">Ver productos →</div>
           </div>
-
-          <div class="metric-card clickable" style="background:linear-gradient(135deg,#102319,#1f7a4d);border:none;" (click)="setTab('ventas')" title="Ver reporte de ventas">
-            <div style="display:flex;justify-content:center;margin-bottom:8px;">
-              <i data-lucide="trending-up" style="width:20px;height:20px;color:rgba(255,255,255,0.8);"></i>
-            </div>
+          <div class="metric-card clickable" style="background:linear-gradient(135deg,#102319,#1f7a4d);border:none;" (click)="setTab('ventas')">
+            <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="trending-up" style="width:20px;height:20px;color:rgba(255,255,255,0.8);"></i></div>
             <div style="font-size:1.3rem;font-weight:800;color:white;line-height:1;">\${{ estimatedInventoryValue | number:'1.0-0' }}</div>
             <div style="font-size:0.72rem;color:rgba(255,255,255,0.75);font-weight:600;margin-top:5px;">Valor Estimado</div>
             <div style="font-size:0.65rem;color:rgba(255,255,255,0.5);margin-top:3px;">Ver ventas →</div>
           </div>
         </div>
 
-        <!-- Donut + Bajo stock -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-bottom:14px;">
           <div style="background:white;border:1px solid #eef1ec;border-radius:20px;padding:20px;box-shadow:0 4px 12px rgba(16,35,25,0.04);">
             <h3 style="margin:0 0 16px 0;color:#102319;font-size:0.9rem;font-weight:700;display:flex;align-items:center;gap:7px;">
@@ -202,7 +195,6 @@ declare const lucide: any;
           </div>
         </div>
 
-        <!-- Accesos rápidos -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
           <button (click)="setTab('ventas')" style="background:white;border:1px solid #eef1ec;border-radius:16px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.15s;" onmouseover="this.style.borderColor='#14452F'" onmouseout="this.style.borderColor='#eef1ec'">
             <div style="background:#f0fdf4;border-radius:10px;padding:8px;flex-shrink:0;"><i data-lucide="bar-chart-2" style="width:18px;height:18px;color:#14452F;"></i></div>
@@ -210,7 +202,7 @@ declare const lucide: any;
           </button>
           <button (click)="goToInventory('all')" style="background:white;border:1px solid #eef1ec;border-radius:16px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.15s;" onmouseover="this.style.borderColor='#14452F'" onmouseout="this.style.borderColor='#eef1ec'">
             <div style="background:#f0fdf4;border-radius:10px;padding:8px;flex-shrink:0;"><i data-lucide="package" style="width:18px;height:18px;color:#14452F;"></i></div>
-            <div><div style="font-weight:700;color:#102319;font-size:0.85rem;">Inventario</div><div style="font-size:0.72rem;color:#9ca3af;">{{ plants.length }} plantas</div></div>
+            <div><div style="font-weight:700;color:#102319;font-size:0.85rem;">Inventario</div><div style="font-size:0.72rem;color:#9ca3af;">{{ plants.length }} productos</div></div>
           </button>
           <button (click)="setTab('pos')" style="background:white;border:1px solid #eef1ec;border-radius:16px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.15s;" onmouseover="this.style.borderColor='#14452F'" onmouseout="this.style.borderColor='#eef1ec'">
             <div style="background:#f0fdf4;border-radius:10px;padding:8px;flex-shrink:0;"><i data-lucide="upload" style="width:18px;height:18px;color:#14452F;"></i></div>
@@ -218,7 +210,7 @@ declare const lucide: any;
           </button>
           <button (click)="goToInventory('all'); showForm=true" style="background:#14452F;border:none;border-radius:16px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:10px;">
             <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:8px;flex-shrink:0;"><i data-lucide="plus-circle" style="width:18px;height:18px;color:white;"></i></div>
-            <div><div style="font-weight:700;color:white;font-size:0.85rem;">Nueva planta</div><div style="font-size:0.72rem;color:rgba(255,255,255,0.6);">Agregar al catálogo</div></div>
+            <div><div style="font-weight:700;color:white;font-size:0.85rem;">Nuevo producto</div><div style="font-size:0.72rem;color:rgba(255,255,255,0.6);">Agregar al catálogo</div></div>
           </button>
         </div>
       </div>
@@ -300,7 +292,7 @@ declare const lucide: any;
             <div style="margin-bottom:18px;" *ngIf="salesReport.top_plants.length > 0">
               <h3 style="margin:0 0 12px 0;color:#102319;font-size:0.88rem;font-weight:700;display:flex;align-items:center;gap:6px;">
                 <i data-lucide="trophy" style="width:15px;height:15px;color:#d97706;"></i>
-                Top plantas más vendidas
+                Top productos más vendidos
               </h3>
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
                 <div *ngFor="let p of salesReport.top_plants; let i = index" style="display:flex;align-items:center;gap:10px;padding:12px;background:#f9fdf9;border-radius:14px;border:1px solid #eef1ec;">
@@ -351,7 +343,7 @@ declare const lucide: any;
               <i data-lucide="sparkles" style="width:12px;height:12px;"></i> ACTUALIZAR INVENTARIO
             </span>
             <h2 style="color:white;font-size:1.45rem;font-weight:800;margin:0 0 7px;">Actualizar con Factura</h2>
-            <p style="color:rgba(255,255,255,0.7);font-size:0.82rem;margin:0 0 16px;">Sube una factura del suplidor y el AI detecta plantas, cantidades y costos.</p>
+            <p style="color:rgba(255,255,255,0.7);font-size:0.82rem;margin:0 0 16px;">Sube una factura del suplidor y el AI detecta plantas y productos, cantidades y costos.</p>
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
               <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:10px;">
                 <span style="color:rgba(255,255,255,0.75);font-size:0.8rem;font-weight:600;white-space:nowrap;">Margen deseado:</span>
@@ -378,7 +370,7 @@ declare const lucide: any;
 
             <div *ngIf="restockItems.length" style="background:white;border-radius:16px;margin-top:16px;overflow:hidden;">
               <div style="padding:16px 20px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                <h3 style="margin:0;color:#102319;font-size:0.95rem;font-weight:700;">Plantas detectadas</h3>
+                <h3 style="margin:0;color:#102319;font-size:0.95rem;font-weight:700;">Productos detectados</h3>
                 <span style="font-size:0.75rem;color:#516052;">{{ restockItems.length }} item(s)</span>
               </div>
               <div class="restock-mobile">
@@ -405,7 +397,7 @@ declare const lucide: any;
               </div>
               <div class="restock-desktop" style="overflow-x:auto;">
                 <table class="restock-table">
-                  <thead><tr><th>Planta</th><th>Cant.</th><th>Costo unit.</th><th>Costo total</th><th>Precio venta</th><th>Margen</th><th>Precio sugerido</th><th>Ganancia</th><th>Usar sugerido</th><th></th></tr></thead>
+                  <thead><tr><th>Producto</th><th>Cant.</th><th>Costo unit.</th><th>Costo total</th><th>Precio venta</th><th>Margen</th><th>Precio sugerido</th><th>Ganancia</th><th>Usar sugerido</th><th></th></tr></thead>
                   <tbody>
                     <tr *ngFor="let item of restockItems; let i = index">
                       <td><input type="text" [(ngModel)]="item.plant_name" style="width:130px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;"></td>
@@ -437,22 +429,21 @@ declare const lucide: any;
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
           <div>
             <h2 class="section-title">Inventario</h2>
-            <p class="section-sub">{{ filteredInventory.length }} de {{ plants.length }} plantas</p>
+            <p class="section-sub">{{ filteredInventory.length }} de {{ plants.length }} productos</p>
           </div>
           <button (click)="showForm=!showForm" class="btn-primary" style="display:flex;align-items:center;gap:6px;padding:10px 18px;">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
-            {{ showForm ? 'Cerrar' : 'Nueva planta' }}
+            {{ showForm ? 'Cerrar' : 'Nuevo producto' }}
           </button>
         </div>
 
-        <!-- Pills de filtro -->
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
           <button class="inv-filter-pill"
             [style.background]="inventoryFilter==='all' ? '#14452F' : '#f4f8f1'"
             [style.color]="inventoryFilter==='all' ? 'white' : '#516052'"
             [style.borderColor]="inventoryFilter==='all' ? '#14452F' : '#dfe7dd'"
             (click)="inventoryFilter='all'">
-            Todas ({{ plants.length }})
+            Todos ({{ plants.length }})
           </button>
           <button class="inv-filter-pill"
             [style.background]="inventoryFilter==='low' ? '#d97706' : '#fef3c7'"
@@ -472,16 +463,22 @@ declare const lucide: any;
 
         <!-- Formulario colapsable -->
         <div *ngIf="showForm" id="plant-form" style="background:white;border-radius:22px;padding:24px;border:1px solid #eef1ec;box-shadow:0 4px 16px rgba(16,35,25,0.04);margin-bottom:18px;">
-          <h2 class="section-title">{{ editingId ? '✏️ Editar Planta' : '🌱 Nueva Planta' }}</h2>
-          <p class="section-sub">{{ editingId ? 'Modifica los datos.' : 'Agrega una nueva planta al catálogo.' }}</p>
+          <h2 class="section-title">{{ editingId ? '✏️ Editar Producto' : '🌱 Nuevo Producto' }}</h2>
+          <p class="section-sub">{{ editingId ? 'Modifica los datos.' : 'Agrega un nuevo producto al catálogo.' }}</p>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:13px;">
             <div class="form-group"><label class="form-label">Nombre</label><input type="text" [(ngModel)]="plantForm.name" class="form-input" placeholder="Ej. Monstera Deliciosa"></div>
-            <div class="form-group"><label class="form-label">Categoría</label>
+
+            <!-- ✅ Select con optgroup para separar plantas y productos -->
+            <div class="form-group">
+              <label class="form-label">Categoría</label>
               <select [(ngModel)]="plantForm.category" class="form-input">
                 <option value="" disabled>Selecciona una categoría</option>
-                <option *ngFor="let cat of PLANT_CATEGORIES" [value]="cat">{{ cat }}</option>
+                <optgroup *ngFor="let group of CATEGORY_GROUPS" [label]="group.label">
+                  <option *ngFor="let cat of group.items" [value]="cat">{{ cat }}</option>
+                </optgroup>
               </select>
             </div>
+
             <div class="form-group"><label class="form-label">Precio de venta</label><input type="number" [(ngModel)]="plantForm.price" class="form-input" placeholder="Precio público"></div>
             <div class="form-group"><label class="form-label">Costo de compra</label><input type="number" [(ngModel)]="plantForm.cost_price" class="form-input" placeholder="Costo mayorista"></div>
             <div class="form-group"><label class="form-label">Cantidad disponible</label><input type="number" [(ngModel)]="plantForm.stock" class="form-input" placeholder="Stock"></div>
@@ -492,26 +489,25 @@ declare const lucide: any;
                 <span style="color:#516052;font-weight:600;font-size:0.85rem;pointer-events:none;">{{ imageUploading ? '⏳ Subiendo...' : plantForm.image_url ? '✅ Imagen subida' : '📷 Subir imagen' }}</span>
               </div>
             </div>
-            <div class="form-group"><label class="form-label">Luz</label><input type="text" [(ngModel)]="plantForm.light" class="form-input" placeholder="Ej. Sol parcial"></div>
-            <div class="form-group"><label class="form-label">Agua / Riego</label><input type="text" [(ngModel)]="plantForm.water" class="form-input" placeholder="Ej. Moderada, Poca"></div>
+            <div class="form-group"><label class="form-label">Luz</label><input type="text" [(ngModel)]="plantForm.light" class="form-input" placeholder="Ej. Sol parcial (plantas)"></div>
+            <div class="form-group"><label class="form-label">Agua / Riego</label><input type="text" [(ngModel)]="plantForm.water" class="form-input" placeholder="Ej. Moderada, N/A"></div>
             <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Descripción</label><textarea [(ngModel)]="plantForm.description" class="form-input" style="min-height:76px;resize:vertical;" placeholder="Descripción breve..."></textarea></div>
             <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;">
               <input type="checkbox" [(ngModel)]="plantForm.is_featured" id="featured" style="width:17px;height:17px;accent-color:#14452F;">
-              <label for="featured" style="color:#102319;font-weight:500;cursor:pointer;font-size:0.9rem;">Destacar planta</label>
+              <label for="featured" style="color:#102319;font-weight:500;cursor:pointer;font-size:0.9rem;">Destacar producto</label>
             </div>
             <div style="grid-column:1/-1;display:flex;gap:11px;flex-wrap:wrap;margin-top:4px;">
-              <button (click)="savePlant()" class="btn-primary" style="flex:1;min-width:130px;">{{ editingId ? '✅ Actualizar' : '➕ Crear Planta' }}</button>
+              <button (click)="savePlant()" class="btn-primary" style="flex:1;min-width:130px;">{{ editingId ? '✅ Actualizar' : '➕ Crear Producto' }}</button>
               <button (click)="resetForm()" class="btn-secondary" style="flex:1;min-width:130px;">Limpiar</button>
             </div>
           </div>
         </div>
 
-        <!-- Lista filtrada -->
         <div *ngIf="inventoryFilter==='low' && lowStockPlants.length===0" style="text-align:center;padding:28px;background:#fef3c7;border-radius:14px;color:#92400e;font-size:0.88rem;">
-          ✅ No hay plantas con bajo stock en este momento.
+          ✅ No hay productos con bajo stock en este momento.
         </div>
         <div *ngIf="inventoryFilter==='out' && outOfStockPlants.length===0" style="text-align:center;padding:28px;background:#fee2e2;border-radius:14px;color:#991b1b;font-size:0.88rem;">
-          ✅ No hay plantas sin stock en este momento.
+          ✅ No hay productos sin stock en este momento.
         </div>
 
         <div *ngIf="loading" style="text-align:center;padding:40px;color:#516052;">🌱 Cargando...</div>
@@ -519,7 +515,7 @@ declare const lucide: any;
           <app-plant-card *ngFor="let p of filteredInventory" [plant]="p" [adminMode]="true" [client]="client"
             (onEdit)="editPlant($event)" (onRemove)="removePlant($event)">
           </app-plant-card>
-          <div *ngIf="filteredInventory.length===0 && inventoryFilter==='all'" style="text-align:center;padding:28px;color:#888;font-size:0.9rem;">No hay plantas aún.</div>
+          <div *ngIf="filteredInventory.length===0 && inventoryFilter==='all'" style="text-align:center;padding:28px;color:#888;font-size:0.9rem;">No hay productos aún.</div>
         </div>
       </div>
 
@@ -554,7 +550,6 @@ declare const lucide: any;
         </div>
 
         <div *ngIf="posError" style="background:#fff0f0;border:1px solid #fad5d5;border-radius:12px;padding:12px 16px;margin-bottom:14px;color:#9b1c1c;font-size:0.85rem;">⚠️ {{ posError }}</div>
-
         <div *ngIf="posImportSuccessMsg" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:14px;color:#15803d;font-size:0.88rem;font-weight:600;display:flex;align-items:center;gap:8px;">
           <i data-lucide="check-circle" style="width:18px;height:18px;"></i>
           {{ posImportSuccessMsg }}
@@ -569,7 +564,6 @@ declare const lucide: any;
               <span style="background:#fee2e2;color:#991b1b;padding:3px 8px;border-radius:6px;font-weight:600;">{{ countPosStatus('not_found') }} no encontrados</span>
             </div>
           </div>
-
           <div class="restock-mobile">
             <div *ngFor="let item of posItems; let i = index" style="padding:14px 16px;border-bottom:1px solid #f4f4f4;">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
@@ -588,10 +582,9 @@ declare const lucide: any;
               </div>
             </div>
           </div>
-
           <div class="restock-desktop" style="overflow-x:auto;">
             <table class="restock-table">
-              <thead><tr><th>Producto del POS</th><th>Cant. vendida</th><th>Planta encontrada</th><th>Stock actual</th><th>Stock después</th><th>Estado</th><th>Omitir</th></tr></thead>
+              <thead><tr><th>Producto del POS</th><th>Cant. vendida</th><th>Producto encontrado</th><th>Stock actual</th><th>Stock después</th><th>Estado</th><th>Omitir</th></tr></thead>
               <tbody>
                 <tr *ngFor="let item of posItems; let i = index" [style.opacity]="item.skip?'0.4':'1'">
                   <td style="font-weight:600;color:#102319;">{{ item.product_name }}</td>
@@ -605,7 +598,6 @@ declare const lucide: any;
               </tbody>
             </table>
           </div>
-
           <div style="padding:14px 18px 16px;display:flex;flex-wrap:wrap;gap:10px;">
             <button (click)="confirmPosImport()" class="btn-primary" style="flex:1;min-width:160px;display:flex;align-items:center;justify-content:center;gap:7px;">
               <i data-lucide="check" style="width:16px;height:16px;"></i>
@@ -621,8 +613,8 @@ declare const lucide: any;
 })
 export class AdminComponent implements OnInit, AfterViewInit {
   readonly PLANT_CATEGORIES = PLANT_CATEGORIES;
+  readonly CATEGORY_GROUPS = CATEGORY_GROUPS;
 
-  // ✅ CAMBIO 1: slug dinámico desde sessionStorage
   clientSlug = sessionStorage.getItem('admin_slug') || 'demo-garden';
   client?: Client;
   plants: Plant[] = [];
