@@ -108,19 +108,16 @@ const CATEGORIES_ES = [
       display: flex; flex-direction: column; gap: 6px;
     }
     .cat-card:hover { box-shadow: 0 6px 20px rgba(16,35,25,0.08); transform: translateY(-2px); }
-    .cat-card.active { border-color: #14452F; background: #f0faf4; }
     .cat-emoji { font-size: 1.6rem; line-height: 1; }
     .cat-name { font-weight: 700; color: #102319; font-size: 0.88rem; }
     .cat-desc { font-size: 0.74rem; color: #516052; line-height: 1.4; }
     .cat-ideal { font-size: 0.7rem; color: #1f7a4d; font-weight: 600; }
     .cat-btn {
       margin-top: 6px; background: none; border: 1px solid #dfe7dd;
-      color: #14452F; border-radius: 8px; padding: 5px 10px;
+      border-radius: 8px; padding: 5px 10px;
       font-size: 0.72rem; font-weight: 700; cursor: pointer;
       transition: all 0.2s; width: fit-content;
     }
-    .cat-card.active .cat-btn { background: #14452F; color: white; border-color: #14452F; }
-    .cat-card:hover .cat-btn { background: #14452F; color: white; border-color: #14452F; }
     .filter-pill {
       border: 1px solid transparent; padding: 7px 14px; border-radius: 20px;
       font-size: 0.85rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.2s;
@@ -133,8 +130,8 @@ const CATEGORIES_ES = [
   `],
   template: `
     <!-- HEADER -->
-    <header style="background:#14452F;color:white;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(20,69,47,0.18);">
-      <button (click)="toggleLanguage()" style="background:none;border:1px solid #A3C4B3;color:white;border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:bold;font-size:0.8rem;">
+    <header [style.background]="primaryColor" style="color:white;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.18);">
+      <button (click)="toggleLanguage()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:bold;font-size:0.8rem;">
         {{ isEnglish ? 'ES' : 'EN' }}
       </button>
       <div style="display:flex;align-items:center;gap:8px;">
@@ -143,7 +140,7 @@ const CATEGORIES_ES = [
         <span *ngIf="!client?.logo_url" style="font-size:1.4rem;">🌿</span>
         <div style="text-align:center;">
           <h1 style="margin:0;font-size:1.1rem;font-weight:700;color:white;">{{ client?.business_name || t.heroTitle }}</h1>
-          <p style="margin:0;font-size:0.68rem;color:#A3C4B3;">{{ t.tagline }}</p>
+          <p style="margin:0;font-size:0.68rem;color:rgba(255,255,255,0.7);">{{ t.tagline }}</p>
         </div>
       </div>
       <button (click)="goToAdmin()" style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:0.75rem;font-weight:500;">
@@ -156,25 +153,22 @@ const CATEGORIES_ES = [
       <div style="display:flex;align-items:center;background:#F0F2F0;border-radius:25px;padding:9px 14px;margin-bottom:11px;">
         <svg viewBox="0 0 24 24" width="17" height="17" stroke="#888" stroke-width="2" fill="none" style="margin-right:9px;min-width:17px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" [(ngModel)]="search" [placeholder]="t.search" style="flex:1;border:none;background:transparent;font-size:0.92rem;outline:none;color:#333;">
-        <a [href]="getGeneralWhatsappLink()" target="_blank" style="color:#2B7A3E;border:none;background:none;padding:0;cursor:pointer;display:flex;align-items:center;margin-left:10px;">
+        <a [href]="getGeneralWhatsappLink()" target="_blank" [style.color]="primaryColor" style="border:none;background:none;padding:0;cursor:pointer;display:flex;align-items:center;margin-left:10px;">
           <svg viewBox="0 0 24 24" width="19" height="19" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
         </a>
       </div>
-      <!-- Pills separadas por grupo -->
       <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;align-items:center;">
         <button class="filter-pill" (click)="setCategory('Todas')"
-          [style.backgroundColor]="selectedCategory === 'Todas' ? '#14452F' : '#F0F2F0'"
+          [style.backgroundColor]="selectedCategory === 'Todas' ? primaryColor : '#F0F2F0'"
           [style.color]="selectedCategory === 'Todas' ? 'white' : '#666'">
           {{ t.all }}
         </button>
-        <!-- Plantas -->
         <span style="font-size:0.68rem;color:#9ca3af;font-weight:700;padding:0 4px;white-space:nowrap;">— Plantas</span>
         <button *ngFor="let cat of PLANT_CATS" class="filter-pill" (click)="setCategory(cat.name)"
-          [style.backgroundColor]="selectedCategory === cat.name ? '#14452F' : '#F0F2F0'"
+          [style.backgroundColor]="selectedCategory === cat.name ? primaryColor : '#F0F2F0'"
           [style.color]="selectedCategory === cat.name ? 'white' : '#666'">
           {{ cat.emoji }} {{ getFilterLabel(cat) }}
         </button>
-        <!-- Productos -->
         <span style="font-size:0.68rem;color:#9ca3af;font-weight:700;padding:0 4px;white-space:nowrap;">— Productos</span>
         <button *ngFor="let cat of PRODUCT_CATS" class="filter-pill" (click)="setCategory(cat.name)"
           [style.backgroundColor]="selectedCategory === cat.name ? '#8B5E3C' : '#FFF3E8'"
@@ -188,7 +182,7 @@ const CATEGORIES_ES = [
     <section style="background:#fafdf8;padding:14px 20px 0;">
       <div style="display:flex;gap:14px;max-width:1200px;width:100%;flex-wrap:wrap;margin:0 auto;">
         <div style="flex:1 1 260px;background:white;border-radius:20px;padding:18px 20px;box-shadow:0 6px 20px rgba(16,35,25,0.04);border:1px solid #eef1ec;">
-          <span style="color:#1f7a4d;font-weight:700;font-size:0.75rem;letter-spacing:1px;">{{ t.available }}</span>
+          <span [style.color]="primaryColor" style="font-weight:700;font-size:0.75rem;letter-spacing:1px;">{{ t.available }}</span>
           <h1 style="font-size:1.7rem;margin:6px 0 8px;color:#102319;letter-spacing:-0.5px;line-height:1.1;">{{ client?.business_name || t.heroTitle }}</h1>
           <p style="font-size:0.85rem;margin-bottom:14px;color:#516052;">{{ t.heroSub }}</p>
           <div style="display:flex;gap:8px;">
@@ -206,7 +200,7 @@ const CATEGORIES_ES = [
             </div>
           </div>
         </div>
-        <div style="flex:1 1 200px;background:linear-gradient(135deg,#1f7a4d,#145635);border-radius:20px;padding:18px 22px;color:white;display:flex;flex-direction:column;justify-content:center;box-shadow:0 8px 24px rgba(31,122,77,0.2);">
+        <div [style.background]="heroGradient" style="flex:1 1 200px;border-radius:20px;padding:18px 22px;color:white;display:flex;flex-direction:column;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.15);">
           <span style="background:rgba(255,255,255,0.15);padding:4px 11px;border-radius:99px;font-size:0.68rem;font-weight:800;width:fit-content;margin-bottom:10px;letter-spacing:1px;">{{ t.quickOrder }}</span>
           <h2 style="font-size:1.4rem;line-height:1.2;margin:0 0 7px;font-weight:900;white-space:pre-line;">{{ t.ctaTitle }}</h2>
           <p style="font-size:0.8rem;color:rgba(255,255,255,0.8);line-height:1.4;margin:0;">{{ t.ctaSub }}</p>
@@ -223,14 +217,21 @@ const CATEGORIES_ES = [
 
       <!-- Sección Plantas -->
       <div style="margin-bottom:8px;">
-        <p style="font-size:0.7rem;font-weight:800;color:#1f7a4d;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 10px;">🌿 Plantas</p>
+        <p [style.color]="primaryColor" style="font-size:0.7rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 10px;">🌿 Plantas</p>
         <div class="cat-grid" style="margin-bottom:16px;">
-          <div *ngFor="let cat of PLANT_CATS" class="cat-card" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
+          <div *ngFor="let cat of PLANT_CATS" class="cat-card"
+            [style.borderColor]="selectedCategory === cat.name ? primaryColor : '#eef1ec'"
+            [style.background]="selectedCategory === cat.name ? primaryColorLight : 'white'"
+            (click)="setCategory(cat.name)">
             <div class="cat-emoji">{{ cat.emoji }}</div>
             <div class="cat-name">{{ isEnglish ? cat.nameEn : cat.name }}</div>
             <div class="cat-desc">{{ isEnglish ? cat.descEn : cat.desc }}</div>
-            <div class="cat-ideal">{{ t.catIdeal }} {{ isEnglish ? cat.idealEn : cat.ideal }}</div>
-            <button class="cat-btn" (click)="$event.stopPropagation(); setCategory(cat.name)">{{ t.viewPlants }}</button>
+            <div class="cat-ideal" [style.color]="primaryColor">{{ t.catIdeal }} {{ isEnglish ? cat.idealEn : cat.ideal }}</div>
+            <button class="cat-btn"
+              [style.background]="selectedCategory === cat.name ? primaryColor : 'none'"
+              [style.color]="selectedCategory === cat.name ? 'white' : primaryColor"
+              [style.borderColor]="selectedCategory === cat.name ? primaryColor : '#dfe7dd'"
+              (click)="$event.stopPropagation(); setCategory(cat.name)">{{ t.viewPlants }}</button>
           </div>
         </div>
       </div>
@@ -276,7 +277,7 @@ const CATEGORIES_ES = [
         <div style="font-size:2rem;margin-bottom:10px;">🌱</div>
         <div style="font-weight:700;color:#102319;margin-bottom:8px;">{{ t.noPlants }}</div>
         <p style="color:#516052;font-size:0.88rem;margin-bottom:16px;">{{ t.noPlantsSub }}</p>
-        <a [href]="getGeneralWhatsappLink()" target="_blank" style="background:#14452F;color:white;padding:11px 22px;border-radius:10px;text-decoration:none;font-weight:600;font-size:0.88rem;display:inline-flex;align-items:center;gap:7px;">
+        <a [href]="getGeneralWhatsappLink()" target="_blank" [style.background]="primaryColor" style="color:white;padding:11px 22px;border-radius:10px;text-decoration:none;font-weight:600;font-size:0.88rem;display:inline-flex;align-items:center;gap:7px;">
           <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
           {{ t.consultWA }}
         </a>
@@ -294,7 +295,7 @@ const CATEGORIES_ES = [
           <input type="text" [placeholder]="t.username" [(ngModel)]="loginUsername" style="padding:13px 15px;border-radius:12px;border:1px solid #dfe7dd;font-size:0.95rem;outline:none;width:100%;box-sizing:border-box;">
           <input type="password" [placeholder]="t.password" [(ngModel)]="loginPassword" (keyup.enter)="submitLogin()" style="padding:13px 15px;border-radius:12px;border:1px solid #dfe7dd;font-size:0.95rem;outline:none;width:100%;box-sizing:border-box;">
           <div *ngIf="loginError" style="color:#c5221f;font-size:0.88rem;font-weight:600;">{{ t.wrongCredentials }}</div>
-          <button (click)="submitLogin()" [disabled]="loginLoading" style="background:#14452F;color:white;padding:13px;border:none;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;">
+          <button (click)="submitLogin()" [disabled]="loginLoading" [style.background]="primaryColor" style="color:white;padding:13px;border:none;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;">
             {{ loginLoading ? t.verifying : t.enter }}
           </button>
         </div>
@@ -322,11 +323,25 @@ export class CatalogComponent implements OnInit {
 
   get t() { return this.isEnglish ? T.en : T.es; }
 
+  // ── Color helpers ─────────────────────────────────────────
+  get primaryColor(): string {
+    return this.client?.primary_color || '#14452F';
+  }
+
+  get primaryColorLight(): string {
+    return this.primaryColor + '18'; // hex opacity ~10%
+  }
+
+  get heroGradient(): string {
+    const c = this.primaryColor;
+    // Darken the color slightly for gradient end
+    return `linear-gradient(135deg, ${c}dd, ${c})`;
+  }
+
   constructor(private plantService: PlantService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.clientSlug = this.plantService.getSlug();
-
     if (window.location.search.includes('login=true')) {
       this.showLoginModal = true;
       window.history.replaceState({}, '', '/');
