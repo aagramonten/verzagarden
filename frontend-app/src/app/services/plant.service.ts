@@ -93,6 +93,31 @@ export class PlantService {
 
   constructor(private http: HttpClient) {}
 
+  // ✅ NUEVO: extrae el slug desde el subdominio automáticamente
+  // Ejemplos:
+  //   demo-jardin.verzagarden.com  → "demo-jardin"
+  //   verzagarden.com              → sessionStorage (admin logged in) o 'demo'
+  //   localhost                    → sessionStorage o 'demo'
+  getSlug(): string {
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+
+    // subdominio real: tiene 3+ partes y la primera NO es 'www'
+    if (parts.length >= 3 && parts[0] !== 'www') {
+      return parts[0];
+    }
+
+    // fallback: slug guardado al hacer login admin, o 'demo' si no hay nada
+    return sessionStorage.getItem('admin_slug') || 'demo';
+  }
+
+  // ✅ NUEVO: verifica si estamos en un subdominio de cliente (no el dominio raíz)
+  isSubdomain(): boolean {
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+    return parts.length >= 3 && parts[0] !== 'www';
+  }
+
   getClient(slug: string): Observable<Client> {
     return this.http.get<Client>(`${this.apiUrl}/clients/${slug}`);
   }
@@ -123,7 +148,6 @@ export class PlantService {
   analyzeInvoice(slug: string, file: File): Observable<InvoiceAnalysisResponse> {
     const formData = new FormData();
     formData.append('invoice', file);
-
     return this.http.post<InvoiceAnalysisResponse>(
       `${this.apiUrl}/clients/${slug}/invoices/analyze`,
       formData
@@ -140,7 +164,6 @@ export class PlantService {
   uploadImage(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('image', file);
-
     return this.http.post(`${this.apiUrl}/upload`, formData);
   }
 
@@ -154,10 +177,7 @@ export class PlantService {
   confirmPosImport(slug: string, items: PosImportItem[], filename: string): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/clients/${slug}/pos-import/confirm`,
-      {
-        items,
-        filename
-      }
+      { items, filename }
     );
   }
 
