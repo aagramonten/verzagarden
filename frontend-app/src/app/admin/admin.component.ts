@@ -147,7 +147,7 @@ declare const lucide: any;
           <div class="header-actions">
             <button class="btn-outline" (click)="goToPublic()"><i data-lucide="external-link"></i> Ver Tienda</button>
             <button *ngIf="activeTab==='inventario'" class="btn-primary" (click)="showForm = !showForm">
-              <i data-lucide="plus"></i> {{ showForm ? 'Cerrar' : 'Agregar Producto' }}
+              <i [attr.data-lucide]="showForm ? 'x' : 'plus'"></i> {{ showForm ? 'Cerrar' : 'Agregar Producto' }}
             </button>
             <button *ngIf="activeTab==='ventas'" class="btn-primary"><i data-lucide="download"></i> Exportar</button>
           </div>
@@ -237,9 +237,19 @@ declare const lucide: any;
               <div class="form-group"><label class="form-label">Stock Inicial</label><input type="number" [(ngModel)]="plantForm.stock" class="form-input"></div>
               <div class="form-group">
                 <label class="form-label">Imagen</label>
-                <div style="border:2px dashed var(--border); border-radius:10px; padding:10px; text-align:center; position:relative; cursor:pointer;">
-                  <input type="file" (change)="uploadPlantImage($event)" accept="image/*" style="opacity:0; position:absolute; inset:0; width:100%; height:100%;">
-                  <span style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">{{ imageUploading ? 'Subiendo...' : plantForm.image_url ? 'Imagen ✅' : 'Subir foto' }}</span>
+                <label style="display:flex; align-items:center; gap:8px; background:white; border:1px solid var(--border); border-radius:10px; padding:10px 14px; cursor:pointer; transition:border-color 0.2s; font-size:0.9rem; font-weight:600; color:var(--text-main);" 
+                  [style.border-color]="plantForm.image_url ? '#10B981' : 'var(--border)'">
+                  <i [attr.data-lucide]="imageUploading ? 'loader-2' : plantForm.image_url ? 'check-circle' : 'upload'" 
+                    [style.color]="plantForm.image_url ? '#10B981' : 'var(--text-muted)'"
+                    style="width:18px;height:18px;flex-shrink:0;"></i>
+                  <span [style.color]="plantForm.image_url ? '#10B981' : 'var(--text-muted)'">
+                    {{ imageUploading ? 'Subiendo...' : plantForm.image_url ? 'Foto cargada ✓' : 'Subir foto' }}
+                  </span>
+                  <input type="file" (change)="uploadPlantImage($event)" accept="image/*" style="display:none;">
+                </label>
+                <div *ngIf="plantForm.image_url && !imageUploading" style="margin-top:8px; display:flex; align-items:center; gap:8px;">
+                  <img [src]="plantForm.image_url" style="width:48px; height:48px; object-fit:cover; border-radius:8px; border:1px solid var(--border);">
+                  <button type="button" (click)="plantForm.image_url = ''" style="background:none; border:none; color:#9b1c1c; cursor:pointer; font-size:0.8rem; font-weight:600;">Quitar</button>
                 </div>
               </div>
               <div class="form-group" style="grid-column: 1 / -1;"><label class="form-label">Descripción</label><textarea [(ngModel)]="plantForm.description" class="form-input" style="min-height:80px;"></textarea></div>
