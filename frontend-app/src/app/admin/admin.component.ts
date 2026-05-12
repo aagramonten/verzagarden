@@ -35,7 +35,6 @@ declare const lucide: any;
     
     .layout { display: flex; min-height: 100vh; background: var(--bg); }
     
-    /* SIDEBAR (FIGMA STYLE) */
     .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
     .brand { padding: 30px 24px; display: flex; align-items: center; gap: 12px; }
     .brand-icon { font-size: 24px; }
@@ -50,13 +49,11 @@ declare const lucide: any;
     .nav-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 16px 0; }
     .sidebar-footer { padding: 24px; font-size: 0.75rem; opacity: 0.6; display: flex; justify-content: space-between; align-items: center; }
     
-    /* MAIN CONTENT */
     .main { flex: 1; margin-left: 260px; padding: 40px; overflow-x: hidden; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
     .page-title { font-size: 1.75rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 12px; margin: 0; }
     .header-actions { display: flex; gap: 12px; }
     
-    /* CARDS & METRICS */
     .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
     .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid var(--border); }
     .metric-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
@@ -64,12 +61,10 @@ declare const lucide: any;
     .metric-val { font-size: 1.75rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
     .metric-lab { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
     
-    /* CHARTS */
     .chart-box { min-height: 300px; margin-bottom: 30px; }
     .chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .chart-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
     
-    /* BUTTONS & FORMS */
     .btn-primary { background: #10B981; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: background 0.2s; }
     .btn-primary:hover { background: #059669; }
     .btn-outline { background: white; color: var(--text-main); border: 1px solid var(--border); padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: background 0.2s; }
@@ -80,7 +75,6 @@ declare const lucide: any;
     .form-input { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
     .form-input:focus { border-color: #10B981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
     
-    /* TABLES */
     .table-container { overflow-x: auto; background: white; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
     table { width: 100%; border-collapse: collapse; }
     th { background: #F9FAFB; padding: 14px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border); }
@@ -88,7 +82,6 @@ declare const lucide: any;
     tr:last-child td { border-bottom: none; }
     .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
     
-    /* UTILS */
     .admin-inventory { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
     .period-pill { padding:6px 14px; border-radius:99px; font-size:0.8rem; font-weight:600; cursor:pointer; border:1px solid var(--border); background:white; color:var(--text-muted); transition:all 0.15s; }
     .period-pill.active { background:#10B981; color:white; border-color:#10B981; }
@@ -122,7 +115,7 @@ declare const lucide: any;
             <i data-lucide="shopping-cart"></i> <span>Stock</span>
           </button>
           <button class="nav-item" [class.active]="activeTab==='ventas'" (click)="setTab('ventas')">
-            <i data-lucide="trending-up"></i> <span>Ventas & Ganancias</span>
+            <i data-lucide="trending-up"></i> <span>Ventas &amp; Ganancias</span>
           </button>
           
           <div class="nav-divider"></div>
@@ -160,6 +153,7 @@ declare const lucide: any;
           </div>
         </header>
 
+        <!-- DASHBOARD -->
         <div *ngIf="activeTab==='dashboard'">
           <div class="metrics-grid">
             <div class="card" (click)="setTab('ventas')" style="cursor:pointer;">
@@ -173,7 +167,7 @@ declare const lucide: any;
               <div class="metric-top">
                 <div class="metric-icon" style="background:#EFF6FF; color:#3B82F6;"><i data-lucide="trending-up"></i></div>
               </div>
-              <div class="metric-val">\${{ salesReport?.summary?.total_profit || 0 | number:'1.0-0' }}</div>
+              <div class="metric-val">\${{ (salesReport?.summary?.total_profit || 0) | number:'1.0-0' }}</div>
               <div class="metric-lab">Ganancia del Mes</div>
             </div>
             <div class="card" (click)="setTab('inventario')" style="cursor:pointer;">
@@ -224,6 +218,7 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- INVENTARIO -->
         <div *ngIf="activeTab==='inventario'">
           <div *ngIf="showForm" class="card" style="margin-bottom:24px;">
             <h3 style="margin:0 0 20px; font-size:1.2rem;">{{ editingId ? 'Editar Producto' : 'Crear Nuevo Producto' }}</h3>
@@ -267,6 +262,7 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- STOCK -->
         <div *ngIf="activeTab==='stock'">
           <div class="metrics-grid">
              <div class="card" style="border-left: 5px solid #EF4444;">
@@ -282,7 +278,7 @@ declare const lucide: any;
           <div class="card" style="background:#FEF2F2; border-color:#FCA5A5; margin-bottom:30px;" *ngIf="outOfStockPlants.length > 0">
              <h3 style="color:#991B1B; margin:0 0 8px; display:flex; align-items:center; gap:8px;"><i data-lucide="alert-triangle"></i> Alerta de Stock Crítico</h3>
              <p style="color:#7F1D1D; font-size:0.9rem; margin:0;">Los siguientes productos necesitan reabastecimiento urgente: 
-               <strong>{{ outOfStockPlants.map(p => p.name).join(', ') }}</strong>.
+               <strong>{{ getOutOfStockNames() }}</strong>.
              </p>
           </div>
 
@@ -345,6 +341,7 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- VENTAS -->
         <div *ngIf="activeTab==='ventas'">
           <div style="display:flex; gap:8px; margin-bottom:24px;">
             <button *ngFor="let p of salesPeriods" class="period-pill" [class.active]="selectedSalesPeriod===p.value" (click)="changeSalesPeriod(p.value)">{{ p.label }}</button>
@@ -385,13 +382,14 @@ declare const lucide: any;
                   <td style="font-weight:600;">{{ item.plant_name }}</td>
                   <td>{{ item.qty_sold }}</td>
                   <td style="font-weight:700;">\${{ (item.qty_sold * item.price) | number:'1.2-2' }}</td>
-                  <td style="font-weight:700; color:#10B981;">\${{ (item.qty_sold * (item.price - (item.cost_price||0))) | number:'1.2-2' }}</td>
+                  <td style="font-weight:700; color:#10B981;">\${{ (item.qty_sold * (item.price - (item.cost_price || 0))) | number:'1.2-2' }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
+        <!-- POS -->
         <div *ngIf="activeTab==='pos'">
           <div class="card" style="text-align:center; padding:60px 20px;">
             <i data-lucide="upload-cloud" style="width:64px; height:64px; color:#10B981; margin-bottom:20px;"></i>
@@ -435,15 +433,17 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- AJUSTES -->
         <div *ngIf="activeTab==='ajustes'">
           <div class="card" style="max-width: 600px;">
             <h3 style="margin:0 0 20px; display:flex; align-items:center; gap:8px;"><i data-lucide="message-circle" style="color:#10B981;"></i> Mensaje Predefinido de WhatsApp</h3>
             <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px;">Usa las variables para que el sistema las reemplace automáticamente por la información del producto.</p>
             
+            <!-- ✅ FIX: se usan entidades HTML para evitar error ICU de Angular con llaves { } -->
             <div style="display:flex; gap:8px; margin-bottom:16px;">
-              <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar('{planta}')">{planta}</button>
-              <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar('{precio}')">{precio}</button>
-              <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar('{categoria}')">{categoria}</button>
+              <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar(VAR_PLANTA)">&#123;planta&#125;</button>
+              <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar(VAR_PRECIO)">&#123;precio&#125;</button>
+              <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar(VAR_CATEGORIA)">&#123;categoria&#125;</button>
             </div>
 
             <textarea id="wa-message-input" [(ngModel)]="waMessage" class="form-input" style="min-height:120px; margin-bottom:16px;"></textarea>
@@ -476,6 +476,11 @@ declare const lucide: any;
 export class AdminComponent implements OnInit, AfterViewInit {
   readonly PLANT_CATEGORIES = PLANT_CATEGORIES;
   readonly CATEGORY_GROUPS = CATEGORY_GROUPS;
+
+  // ✅ Variables como constantes del componente para evitar strings con llaves en template
+  readonly VAR_PLANTA    = '{planta}';
+  readonly VAR_PRECIO    = '{precio}';
+  readonly VAR_CATEGORIA = '{categoria}';
 
   clientSlug = sessionStorage.getItem('admin_slug') || 'demo-garden';
   client?: Client;
@@ -540,13 +545,13 @@ export class AdminComponent implements OnInit, AfterViewInit {
   }
 
   getTabTitle() {
-    const titles: any = { 
-      'dashboard': 'Dashboard', 
-      'inventario': 'Inventario', 
-      'stock': 'Stock', 
-      'ventas': 'Ventas & Ganancias', 
-      'pos': 'Importar POS', 
-      'ajustes': 'Ajustes' 
+    const titles: any = {
+      'dashboard': 'Dashboard',
+      'inventario': 'Inventario',
+      'stock': 'Stock',
+      'ventas': 'Ventas & Ganancias',
+      'pos': 'Importar POS',
+      'ajustes': 'Ajustes'
     };
     return titles[this.activeTab];
   }
@@ -575,6 +580,11 @@ export class AdminComponent implements OnInit, AfterViewInit {
       },
       error: err => console.error(err)
     });
+  }
+
+  // ✅ Método helper para evitar .map() directo en template (causa error en algunos builds)
+  getOutOfStockNames(): string {
+    return this.outOfStockPlants.map(p => p.name).join(', ');
   }
 
   getWaPreview(): string {
