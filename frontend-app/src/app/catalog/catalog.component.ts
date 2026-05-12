@@ -226,15 +226,20 @@ const CATEGORIES_ES = [
     .footer-copy { font-size: 10px; color: var(--muted); text-align: center; }
 
     /* MODAL */
-    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .modal { background: white; border-radius: 20px; padding: 28px; width: 100%; max-width: 380px; }
-    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .modal-title { font-size: 18px; font-weight: 700; color: var(--text); }
-    .modal-close { background: var(--bg); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 14px; color: var(--muted); }
-    .modal-fields { display: flex; flex-direction: column; gap: 12px; }
-    .modal-input { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px; outline: none; width: 100%; color: var(--text); background: var(--bg); }
-    .modal-error { font-size: 12px; color: #c5221f; font-weight: 500; }
-    .modal-btn { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+    .modal { background: #FFFFFF; border-radius: 24px; padding: 32px; width: 100%; max-width: 380px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-title { font-size: 1.3rem; font-weight: 800; color: #102319; margin: 0; }
+    .modal-close { background: #F4F8F1; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; color: #516052; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .modal-close:hover { background: #E2E5DA; }
+    .modal-fields { display: flex; flex-direction: column; gap: 16px; }
+    .modal-input { padding: 14px 16px; border-radius: 12px; border: 1px solid #E2E5DA; font-size: 0.95rem; outline: none; width: 100%; color: #102319; background: #FAFDF8; font-family: inherit; }
+    .modal-input::placeholder { color: #9CA3AF; }
+    .modal-input:focus { border-color: #14452F; }
+    .modal-error { font-size: 0.85rem; color: #DC2626; font-weight: 600; text-align: center; }
+    .modal-btn { background: #14452F; color: white; border: none; border-radius: 12px; padding: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s; }
+    .modal-btn:hover { background: #0A2E1F; }
+    .modal-btn:disabled { opacity: 0.7; cursor: not-allowed; }
     .loading-state { display:flex; align-items:center; justify-content:center; gap:8px; padding: 40px; color: var(--muted); font-size: 14px; }
     
     @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -447,14 +452,18 @@ const CATEGORIES_ES = [
   <div class="modal-bg" *ngIf="showLoginModal" (click)="showLoginModal = false">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-head">
-        <div class="modal-title">{{ t.adminAccess }}</div>
+        <h3 class="modal-title">{{ t.adminAccess }}</h3>
         <button class="modal-close" (click)="showLoginModal = false">✕</button>
       </div>
       <div class="modal-fields">
         <input class="modal-input" type="text" [placeholder]="t.username" [(ngModel)]="loginUsername">
         <input class="modal-input" type="password" [placeholder]="t.password" [(ngModel)]="loginPassword" (keyup.enter)="submitLogin()">
+        
         <div class="modal-error" *ngIf="loginError">{{ t.wrongCredentials }}</div>
-        <button class="modal-btn" (click)="submitLogin()" [disabled]="loginLoading">{{ loginLoading ? t.verifying : t.enter }}</button>
+        
+        <button class="modal-btn" (click)="submitLogin()" [disabled]="loginLoading">
+          {{ loginLoading ? t.verifying : t.enter }}
+        </button>
       </div>
     </div>
   </div>
