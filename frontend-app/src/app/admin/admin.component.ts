@@ -820,8 +820,15 @@ export class AdminComponent implements OnInit, AfterViewInit {
   }
 
   editPlant(plant: Plant) {
-    this.editingId = plant.id; this.plantForm = { ...plant }; this.showForm = true;
-    setTimeout(() => { document.querySelector('.main')?.scrollTo({top: 0, behavior: 'smooth'}); this.renderIcons(); }, 50);
+    this.editingId = plant.id;
+    this.plantForm = { ...plant };
+    this.showForm = true;
+    this.activeTab = 'inventario'; // ✅ asegura que estás en la tab correcta
+    this.cdr.detectChanges();      // ✅ fuerza render inmediato
+    setTimeout(() => {
+      document.querySelector('.main')?.scrollTo({ top: 0, behavior: 'smooth' });
+      this.renderIcons();
+    }, 100);
   }
 
   removePlant(plant: Plant) {
