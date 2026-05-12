@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface Client {
   id: number;
@@ -124,7 +125,14 @@ export class PlantService {
   }
 
   getPlants(slug: string): Observable<Plant[]> {
-    return this.http.get<Plant[]>(`${this.apiUrl}/clients/${slug}/plants`);
+    return this.http.get<Plant[]>(`${this.apiUrl}/clients/${slug}/plants`).pipe(
+      map(plants => plants.map(p => ({
+        ...p,
+        price: p.price != null ? Number(p.price) : p.price,
+        cost_price: p.cost_price != null ? Number(p.cost_price) : null,
+        stock: p.stock != null ? Number(p.stock) : 0,
+      })))
+    );
   }
 
   createPlant(slug: string, plant: Plant): Observable<any> {

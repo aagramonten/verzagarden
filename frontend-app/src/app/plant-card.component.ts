@@ -99,7 +99,7 @@ declare const lucide: any;
         <div class="card-body">
           <h3 class="plant-name">{{ plant.name }}</h3>
           <div class="plant-price" [class.no-price]="!plant.price">
-            {{ plant.price ? '$' + plant.price : (isEnglish ? 'Ask for price' : 'Consultar precio') }}
+            {{ plant.price ? '$' + toNum(plant.price).toFixed(2) : (isEnglish ? 'Ask for price' : 'Consultar precio') }}
           </div>
           <p class="plant-desc">{{ plant.description || (isEnglish ? 'Ask about availability and details via WhatsApp.' : 'Consulta disponibilidad y detalles por WhatsApp.') }}</p>
           <div class="care-row">
@@ -136,11 +136,11 @@ declare const lucide: any;
         <div class="price-col">
           <div class="price-row">
             <span class="price-label">Venta</span>
-            <span class="price-value" style="color:#1f7a4d;">{{ plant.price ? '$' + plant.price : '—' }}</span>
+            <span class="price-value" style="color:#1f7a4d;">{{ plant.price ? '$' + toNum(plant.price).toFixed(2) : '—' }}</span>
           </div>
           <div class="price-row" *ngIf="plant.cost_price">
             <span class="price-label">Costo</span>
-            <span class="price-value" style="color:#516052;">\${{ plant.cost_price }}</span>
+            <span class="price-value" style="color:#516052;">\${{ toNum(plant.cost_price!).toFixed(2) }}</span>
           </div>
           <div *ngIf="plant.price && plant.cost_price" class="margin-badge"
             [style.background]="getMarginBg()"
@@ -175,6 +175,11 @@ export class PlantCardComponent implements AfterViewInit {
     setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 50);
   }
 
+  /** Convierte cualquier valor a número de forma segura */
+  toNum(val: any): number {
+    return Number(val) || 0;
+  }
+
   openLightbox() { this.lightboxOpen = true; }
 
   closeLightbox(event: MouseEvent) {
@@ -187,8 +192,10 @@ export class PlantCardComponent implements AfterViewInit {
   onEscape() { this.lightboxOpen = false; }
 
   getMarginPct(): number {
-    if (!this.plant.price || !this.plant.cost_price) return 0;
-    return ((this.plant.price - this.plant.cost_price) / this.plant.price) * 100;
+    const price = this.toNum(this.plant.price);
+    const cost = this.toNum(this.plant.cost_price);
+    if (!price || !cost) return 0;
+    return ((price - cost) / price) * 100;
   }
 
   getMarginBg(): string {
@@ -207,19 +214,20 @@ export class PlantCardComponent implements AfterViewInit {
 
   getWhatsappLink(): string {
     const number = this.client?.whatsapp_number || '19392360534';
-    
-    // Fallback de idioma si no hay mensaje personalizado
+
     const defaultMsg = this.isEnglish
       ? "Hello! I'm interested in {planta} at {precio}. Is it available?"
       : "Hola! Me interesa {planta} a {precio}. ¿Está disponible?";
-      
-    // Leemos el mensaje desde los settings del cliente (o usamos default)
+
     let template = (this.client as any)?.whatsapp_message || defaultMsg;
-    
-    // Reemplazamos las variables
-    const priceStr = this.plant.price ? '$' + this.plant.price.toFixed(2) : (this.isEnglish ? 'TBD' : 'por confirmar');
+
+    const price = this.toNum(this.plant.price);
+    const priceStr = price
+      ? '$' + price.toFixed(2)
+      : (this.isEnglish ? 'TBD' : 'por confirmar');
+
     const catStr = this.plant.category || '';
-    
+
     const message = template
       .replace(/{planta}/g, this.plant.name)
       .replace(/{precio}/g, priceStr)
