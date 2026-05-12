@@ -67,7 +67,28 @@ async function ensureCostPriceColumn() {
     console.warn('cost_price migration warning:', err.message);
   }
 }
+
+async function ensureWhatsappMessage() {
+  try {
+    const [rows] = await pool.query(`
+      SELECT COUNT(*) as cnt FROM information_schema.COLUMNS 
+      WHERE TABLE_SCHEMA = DATABASE() 
+      AND TABLE_NAME = 'clients' 
+      AND COLUMN_NAME = 'whatsapp_message'
+    `);
+    if (rows[0].cnt === 0) {
+      await pool.query(`ALTER TABLE clients ADD COLUMN whatsapp_message TEXT NULL DEFAULT NULL`);
+      console.log('✅ whatsapp_message column added');
+    } else {
+      console.log('✅ whatsapp_message column already exists');
+    }
+  } catch (err) {
+    console.warn('whatsapp_message migration warning:', err.message);
+  }
+}
+
 ensureCostPriceColumn();
+ensureWhatsappMessage();
 
 // =======================
 
@@ -131,6 +152,23 @@ app.put('/api/clients/:slug/logo', async (req, res) => {
     res.json({ message: 'Logo actualizado', logo_url });
   } catch (error) {
     res.status(500).json({ message: 'Error actualizando logo', error: error.message });
+  }
+});
+
+// =======================
+// ⚙️ UPDATE CLIENT SETTINGS
+// =======================
+app.put('/api/clients/:slug/settings', async (req, res) => {
+  try {
+    const { whatsapp_message } = req.body;
+    const [result] = await pool.query(
+      'UPDATE clients SET whatsapp_message = ? WHERE slug = ?',
+      [whatsapp_message ?? null, req.params.slug]
+    );
+    if (result.affectedRows === 0) return res.status(404).json({ message: 'Cliente no encontrado' });
+    res.json({ message: 'Settings actualizados', whatsapp_message });
+  } catch (error) {
+    res.status(500).json({ message: 'Error actualizando settings', error: error.message });
   }
 });
 
