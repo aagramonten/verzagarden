@@ -1,6 +1,8 @@
-import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Plant, Client } from './services/plant.service';
+
+declare const lucide: any;
 
 @Component({
   selector: 'app-plant-card',
@@ -21,7 +23,7 @@ import { Plant, Client } from './services/plant.service';
     }
     .card-img-wrap img { width:100%; height:100%; object-fit:cover; transition: transform 0.3s ease; display:block; }
     .plant-card:hover .card-img-wrap img { transform: scale(1.04); }
-    .no-img { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:default; }
+    .no-img { width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#9CAF96; cursor:default; }
     .stock-badge {
       position:absolute; bottom:10px; right:10px;
       font-weight:700; padding:4px 10px; border-radius:10px; font-size:0.72rem;
@@ -40,11 +42,11 @@ import { Plant, Client } from './services/plant.service';
     }
     .care-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
     .chip { background:#f4f8f1; border:1px solid #eef1ec; padding:4px 9px;
-      border-radius:20px; font-size:0.7rem; color:#516052; display:flex; align-items:center; gap:4px; }
+      border-radius:20px; font-size:0.7rem; color:#516052; display:flex; align-items:center; gap:6px; }
     .wa-btn {
       background:#14452F; color:white; padding:11px; border-radius:10px;
       text-align:center; font-weight:600; font-size:0.82rem;
-      display:flex; justify-content:center; align-items:center;
+      display:flex; justify-content:center; align-items:center; gap: 6px;
       margin-top:auto; text-decoration:none; transition:background 0.2s;
       cursor:pointer; border:none; width:100%; flex-shrink:0;
     }
@@ -70,7 +72,7 @@ import { Plant, Client } from './services/plant.service';
       border:1px solid #eef1ec; transition:box-shadow 0.2s; flex-wrap:wrap;
     }
     .admin-row:hover { box-shadow:0 4px 12px rgba(16,35,25,0.07); }
-    .admin-thumb { width:52px; height:52px; border-radius:10px; overflow:hidden; background:#f4f8f1; flex-shrink:0; }
+    .admin-thumb { width:52px; height:52px; border-radius:10px; overflow:hidden; background:#f4f8f1; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
     .admin-thumb img { width:100%; height:100%; object-fit:cover; }
     .admin-badge { font-size:0.68rem; font-weight:700; padding:3px 8px; border-radius:8px; white-space:nowrap; }
     .btn-edit { background:#f4f8f1; border:1px solid #dfe7dd; color:#102319; border-radius:9px; padding:7px 13px; font-weight:600; cursor:pointer; font-size:0.8rem; white-space:nowrap; }
@@ -82,12 +84,11 @@ import { Plant, Client } from './services/plant.service';
     .margin-badge { font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:6px; margin-top:2px; }
   `],
   template: `
-    <!-- PUBLIC CARD -->
     <ng-container *ngIf="!adminMode">
       <article class="plant-card">
         <div class="card-img-wrap" (click)="plant.image_url ? openLightbox() : null">
           <img *ngIf="plant.image_url" [src]="plant.image_url" [alt]="plant.name" loading="lazy">
-          <div *ngIf="!plant.image_url" class="no-img">🪴</div>
+          <div *ngIf="!plant.image_url" class="no-img"><i data-lucide="sprout" style="width:40px;height:40px;"></i></div>
           <span class="stock-badge"
             [class.badge-ok]="plant.stock > 5"
             [class.badge-low]="plant.stock > 0 && plant.stock <= 5"
@@ -102,32 +103,31 @@ import { Plant, Client } from './services/plant.service';
           </div>
           <p class="plant-desc">{{ plant.description || (isEnglish ? 'Ask about availability and details via WhatsApp.' : 'Consulta disponibilidad y detalles por WhatsApp.') }}</p>
           <div class="care-row">
-            <span class="chip">☀️ {{ plant.light || (isEnglish ? 'Ask about light' : 'Consultar luz') }}</span>
-            <span class="chip">💧 {{ plant.water || (isEnglish ? 'Ask about watering' : 'Consultar riego') }}</span>
+            <span class="chip"><i data-lucide="sun" style="width:12px;height:12px;"></i> {{ plant.light || (isEnglish ? 'Ask about light' : 'Consultar luz') }}</span>
+            <span class="chip"><i data-lucide="droplet" style="width:12px;height:12px;"></i> {{ plant.water || (isEnglish ? 'Ask about watering' : 'Consultar riego') }}</span>
           </div>
           <a *ngIf="plant.stock > 0" class="wa-btn" [href]="getWhatsappLink()" target="_blank">
-            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="margin-right:7px;flex-shrink:0;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-            {{ isEnglish ? 'Ask on WhatsApp' : 'Consultar por WhatsApp' }}
+            <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
+            {{ isEnglish ? "I'm interested" : 'Me interesa' }}
           </a>
           <a *ngIf="plant.stock <= 0" class="wa-btn" [href]="getWhatsappLink()" target="_blank" style="opacity:0.75;">
+            <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
             {{ isEnglish ? 'Check availability' : 'Consultar disponibilidad' }}
           </a>
         </div>
       </article>
 
-      <!-- Lightbox -->
       <div *ngIf="lightboxOpen" class="lightbox-overlay" (click)="closeLightbox($event)">
         <button class="lightbox-close" (click)="lightboxOpen = false">✕</button>
         <img class="lightbox-img" [src]="plant.image_url" [alt]="plant.name">
       </div>
     </ng-container>
 
-    <!-- ADMIN ROW -->
     <ng-container *ngIf="adminMode">
       <div class="admin-row">
         <div class="admin-thumb">
           <img *ngIf="plant.image_url" [src]="plant.image_url" [alt]="plant.name">
-          <div *ngIf="!plant.image_url" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🪴</div>
+          <i *ngIf="!plant.image_url" data-lucide="sprout" style="width:24px;height:24px;color:#9ca3af;"></i>
         </div>
         <div style="flex:1;min-width:0;">
           <div style="font-weight:700;color:#102319;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ plant.name }}</div>
@@ -141,8 +141,6 @@ import { Plant, Client } from './services/plant.service';
           <div class="price-row" *ngIf="plant.cost_price">
             <span class="price-label">Costo</span>
             <span class="price-value" style="color:#516052;">\${{ plant.cost_price }}</span>
-
-
           </div>
           <div *ngIf="plant.price && plant.cost_price" class="margin-badge"
             [style.background]="getMarginBg()"
@@ -163,7 +161,7 @@ import { Plant, Client } from './services/plant.service';
     </ng-container>
   `
 })
-export class PlantCardComponent {
+export class PlantCardComponent implements AfterViewInit {
   @Input({ required: true }) plant!: Plant;
   @Input() adminMode = false;
   @Input() isEnglish = false;
@@ -172,6 +170,10 @@ export class PlantCardComponent {
   @Output() onRemove = new EventEmitter<Plant>();
 
   lightboxOpen = false;
+
+  ngAfterViewInit() {
+    setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 50);
+  }
 
   openLightbox() { this.lightboxOpen = true; }
 
@@ -205,9 +207,24 @@ export class PlantCardComponent {
 
   getWhatsappLink(): string {
     const number = this.client?.whatsapp_number || '19392360534';
-    const message = this.isEnglish
-      ? `Hello! I'm interested in *${this.plant.name}* from your catalog.\n\n*Price:* ${this.plant.price ? '$' + this.plant.price : 'TBD'}\n\nCould you give me more information?`
-      : `¡Hola! Me interesa la planta *${this.plant.name}* que vi en el catálogo.\n\n*Precio:* ${this.plant.price ? '$' + this.plant.price : 'por confirmar'}\n\n¿Podrían darme más información?`;
+    
+    // Fallback de idioma si no hay mensaje personalizado
+    const defaultMsg = this.isEnglish
+      ? "Hello! I'm interested in {planta} at {precio}. Is it available?"
+      : "Hola! Me interesa {planta} a {precio}. ¿Está disponible?";
+      
+    // Leemos el mensaje desde los settings del cliente (o usamos default)
+    let template = (this.client as any)?.whatsapp_message || defaultMsg;
+    
+    // Reemplazamos las variables
+    const priceStr = this.plant.price ? '$' + this.plant.price.toFixed(2) : (this.isEnglish ? 'TBD' : 'por confirmar');
+    const catStr = this.plant.category || '';
+    
+    const message = template
+      .replace(/{planta}/g, this.plant.name)
+      .replace(/{precio}/g, priceStr)
+      .replace(/{categoria}/g, catStr);
+
     return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   }
 }

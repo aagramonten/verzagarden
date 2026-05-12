@@ -1,9 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PlantService, Client, Plant } from '../services/plant.service';
-import { PlantCardComponent } from '../plant-card.component';
+
+declare const lucide: any;
 
 const T = {
   es: {
@@ -18,7 +19,7 @@ const T = {
     available2: 'Disponibles',
     viewPlants: 'Ver productos',
     viewAll: 'Ver todas',
-    loading: '🌱 Cargando catálogo...',
+    loading: 'Cargando catálogo...',
     noPlants: 'No hay productos disponibles en esta categoría por el momento.',
     noPlantsSub: 'Escríbenos por WhatsApp para consultar disponibilidad.',
     consultWA: 'Consultar por WhatsApp',
@@ -48,7 +49,7 @@ const T = {
     available2: 'Available',
     viewPlants: 'View products',
     viewAll: 'View all',
-    loading: '🌱 Loading catalog...',
+    loading: 'Loading catalog...',
     noPlants: 'No products available in this category at the moment.',
     noPlantsSub: 'Message us on WhatsApp to check availability.',
     consultWA: 'Ask on WhatsApp',
@@ -69,23 +70,23 @@ const T = {
 };
 
 const CATEGORIES_ES = [
-  { name: 'Árboles',             nameEn: 'Trees',            emoji: '🌳', desc: 'Plantas grandes con un tronco principal leñoso que se ramifica a cierta altura.', descEn: 'Large plants with a single woody trunk that branches at a certain height.', ideal: 'Sombra, estructura y jardines amplios.', idealEn: 'Shade, structure and large gardens.', group: 'plants' },
-  { name: 'Arbustos',            nameEn: 'Shrubs',           emoji: '🌿', desc: 'Plantas medianas con varios tallos leñosos que crecen desde la base.',             descEn: 'Medium-sized plants with multiple woody stems growing from the base.',       ideal: 'Bordes, divisiones naturales y jardines frondosos.', idealEn: 'Borders, natural dividers and lush gardens.', group: 'plants' },
-  { name: 'Flores de estación',  nameEn: 'Seasonal Flowers', emoji: '🌸', desc: 'Plantas que florecen en épocas específicas del año y aportan color al jardín.',   descEn: 'Plants that bloom at specific times of year and add color to the garden.',  ideal: 'Renovar espacios según la temporada.', idealEn: 'Refreshing spaces according to the season.', group: 'plants' },
-  { name: 'Plantas de interior', nameEn: 'Indoor Plants',    emoji: '🪴', desc: 'Plantas que se adaptan bien a espacios interiores con luz y humedad controladas.', descEn: 'Plants that thrive indoors with controlled light and humidity.',              ideal: 'Hogares, oficinas y decoración interior.', idealEn: 'Homes, offices and interior décor.', group: 'plants' },
-  { name: 'Trepadoras',          nameEn: 'Climbers',         emoji: '🌱', desc: 'Plantas que necesitan soporte para crecer hacia arriba.',                         descEn: 'Plants that need support to grow upward.',                                   ideal: 'Cubrir paredes, crear sombra y añadir privacidad.', idealEn: 'Covering walls, creating shade and adding privacy.', group: 'plants' },
-  { name: 'Suculentas',          nameEn: 'Succulents',       emoji: '🌵', desc: 'Plantas que almacenan agua en hojas, tallos o raíces, toleran mejor la sequía.',  descEn: 'Plants that store water in leaves, stems or roots, tolerating drought well.', ideal: 'Bajo mantenimiento y espacios soleados.', idealEn: 'Low maintenance and sunny spaces.', group: 'plants' },
-  { name: 'Palmas',              nameEn: 'Palms',            emoji: '🌴', desc: 'Plantas tropicales que aportan altura, elegancia y sensación caribeña.',          descEn: 'Tropical plants that add height, elegance and a Caribbean feel.',            ideal: 'Entradas, patios, terrazas y jardines tropicales.', idealEn: 'Entrances, patios, terraces and tropical gardens.', group: 'plants' },
-  { name: 'Tiestos y Macetas',      nameEn: 'Pots & Planters',   emoji: '🪣', desc: 'Envases de barro, plástico, cerámica y materiales reciclados para todo tipo de plantas.', descEn: 'Clay, plastic, ceramic and recycled pots for all types of plants.',       ideal: 'Interior, exterior, balcones y terrazas.', idealEn: 'Indoors, outdoors, balconies and terraces.', group: 'products' },
-  { name: 'Tierra y Sustratos',     nameEn: 'Soil & Substrates', emoji: '🌍', desc: 'Mezclas de suelo, turba, perlita y sustrato especializado para cada tipo de planta.',     descEn: 'Soil mixes, peat, perlite and specialized substrate for every plant type.', ideal: 'Siembra, trasplante y jardinería en general.', idealEn: 'Planting, transplanting and general gardening.', group: 'products' },
-  { name: 'Fertilizantes y Abonos', nameEn: 'Fertilizers',       emoji: '🧪', desc: 'Abonos orgánicos, líquidos y granulados para estimular el crecimiento y la floración.',   descEn: 'Organic, liquid and granulated fertilizers to boost growth and blooming.',  ideal: 'Nutrición, crecimiento y floración de plantas.', idealEn: 'Plant nutrition, growth and blooming.', group: 'products' },
-  { name: 'Herramientas',           nameEn: 'Tools',             emoji: '🛠️', desc: 'Palas, podadoras, guantes, regaderas y todo lo que necesitas para cuidar tu jardín.',    descEn: 'Shovels, pruners, gloves, watering cans and everything for your garden.',  ideal: 'Jardinería, poda, siembra y mantenimiento.', idealEn: 'Gardening, pruning, planting and maintenance.', group: 'products' },
+  { name: 'Árboles',             nameEn: 'Trees',            icon: 'tree-pine',     desc: 'Plantas grandes con un tronco principal leñoso que se ramifica a cierta altura.', descEn: 'Large plants with a single woody trunk that branches at a certain height.', ideal: 'Sombra, estructura y jardines amplios.', idealEn: 'Shade, structure and large gardens.', group: 'plants' },
+  { name: 'Arbustos',            nameEn: 'Shrubs',           icon: 'leaf',          desc: 'Plantas medianas con varios tallos leñosos que crecen desde la base.',             descEn: 'Medium-sized plants with multiple woody stems growing from the base.',       ideal: 'Bordes, divisiones naturales y jardines frondosos.', idealEn: 'Borders, natural dividers and lush gardens.', group: 'plants' },
+  { name: 'Flores de estación',  nameEn: 'Seasonal Flowers', icon: 'flower-2',      desc: 'Plantas que florecen en épocas específicas del año y aportan color al jardín.',   descEn: 'Plants that bloom at specific times of year and add color to the garden.',  ideal: 'Renovar espacios según la temporada.', idealEn: 'Refreshing spaces according to the season.', group: 'plants' },
+  { name: 'Plantas de interior', nameEn: 'Indoor Plants',    icon: 'home',          desc: 'Plantas que se adaptan bien a espacios interiores con luz y humedad controladas.', descEn: 'Plants that thrive indoors with controlled light and humidity.',              ideal: 'Hogares, oficinas y decoración interior.', idealEn: 'Homes, offices and interior décor.', group: 'plants' },
+  { name: 'Trepadoras',          nameEn: 'Climbers',         icon: 'sprout',        desc: 'Plantas que necesitan soporte para crecer hacia arriba.',                         descEn: 'Plants that need support to grow upward.',                                   ideal: 'Cubrir paredes, crear sombra y añadir privacidad.', idealEn: 'Covering walls, creating shade and adding privacy.', group: 'plants' },
+  { name: 'Suculentas',          nameEn: 'Succulents',       icon: 'sun',           desc: 'Plantas que almacenan agua en hojas, tallos o raíces, toleran mejor la sequía.',  descEn: 'Plants that store water in leaves, stems or roots, tolerating drought well.', ideal: 'Bajo mantenimiento y espacios soleados.', idealEn: 'Low maintenance and sunny spaces.', group: 'plants' },
+  { name: 'Palmas',              nameEn: 'Palms',            icon: 'tree-palm',     desc: 'Plantas tropicales que aportan altura, elegancia y sensación caribeña.',          descEn: 'Tropical plants that add height, elegance and a Caribbean feel.',            ideal: 'Entradas, patios, terrazas y jardines tropicales.', idealEn: 'Entrances, patios, terraces and tropical gardens.', group: 'plants' },
+  { name: 'Tiestos y Macetas',      nameEn: 'Pots & Planters',   icon: 'archive',       desc: 'Envases de barro, plástico, cerámica y materiales reciclados para todo tipo de plantas.', descEn: 'Clay, plastic, ceramic and recycled pots for all types of plants.',       ideal: 'Interior, exterior, balcones y terrazas.', idealEn: 'Indoors, outdoors, balconies and terraces.', group: 'products' },
+  { name: 'Tierra y Sustratos',     nameEn: 'Soil & Substrates', icon: 'layers',        desc: 'Mezclas de suelo, turba, perlita y sustrato especializado para cada tipo de planta.',     descEn: 'Soil mixes, peat, perlite and specialized substrate for every plant type.', ideal: 'Siembra, trasplante y jardinería en general.', idealEn: 'Planting, transplanting and general gardening.', group: 'products' },
+  { name: 'Fertilizantes y Abonos', nameEn: 'Fertilizers',       icon: 'flask-conical', desc: 'Abonos orgánicos, líquidos y granulados para estimular el crecimiento y la floración.',   descEn: 'Organic, liquid and granulated fertilizers to boost growth and blooming.',  ideal: 'Nutrición, crecimiento y floración de plantas.', idealEn: 'Plant nutrition, growth and blooming.', group: 'products' },
+  { name: 'Herramientas',           nameEn: 'Tools',             icon: 'hammer',        desc: 'Palas, podadoras, guantes, regaderas y todo lo que necesitas para cuidar tu jardín.',    descEn: 'Shovels, pruners, gloves, watering cans and everything for your garden.',  ideal: 'Jardinería, poda, siembra y mantenimiento.', idealEn: 'Gardening, pruning, planting and maintenance.', group: 'products' },
 ];
 
 @Component({
   selector: 'app-catalog',
   standalone: true,
-  imports: [CommonModule, FormsModule, PlantCardComponent],
+  imports: [CommonModule, FormsModule],
   styles: [`
     :host {
       --bg: #F7F7F2;
@@ -106,10 +107,10 @@ const CATEGORIES_ES = [
     .nav-center { display: flex; align-items: center; gap: 10px; }
     .nav-logo { width: 36px; height: 36px; border-radius: 10px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
     .nav-logo img { width: 100%; height: 100%; object-fit: cover; }
-    .nav-logo-fallback { font-size: 18px; color: white; }
+    .nav-logo-fallback { color: white; display:flex; align-items:center; justify-content:center; }
     .nav-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.2; }
     .nav-sub { font-size: 10px; color: var(--muted); }
-    .nav-admin { position: absolute; right: 20px; background: var(--primary); border: none; color: white; border-radius: 8px; padding: 6px 14px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .nav-admin { position: absolute; right: 20px; background: var(--primary); border: none; color: white; border-radius: 8px; padding: 6px 14px; font-size: 11px; font-weight: 600; cursor: pointer; display:flex; align-items:center; gap:4px; }
 
     /* HERO */
     .hero { background: var(--hero); padding: 28px 20px; border-bottom: 1px solid var(--border); }
@@ -129,7 +130,7 @@ const CATEGORIES_ES = [
     .featured-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
     .featured-img { background: linear-gradient(160deg, var(--primary), var(--primary-hover)); height: 90px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .featured-img img { width: 100%; height: 100%; object-fit: cover; }
-    .featured-img-fallback { font-size: 32px; opacity: 0.7; }
+    .featured-img-fallback { color: white; opacity: 0.7; }
     .featured-body { padding: 10px; }
     .featured-name { font-size: 10px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
     .featured-price { font-size: 14px; font-weight: 700; color: var(--text); }
@@ -143,14 +144,14 @@ const CATEGORIES_ES = [
     .search-box input::placeholder { color: var(--muted); }
     .pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
     .pills::-webkit-scrollbar { display: none; }
-    .pill { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 10px; font-weight: 500; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .pill { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 10px; font-weight: 500; cursor: pointer; white-space: nowrap; flex-shrink: 0; display:flex; align-items:center; gap:5px; }
     .pill.active { background: var(--primary); color: white; border-color: var(--primary); }
     .pill-sep { font-size: 10px; color: var(--muted); font-weight: 600; padding: 0 4px; white-space: nowrap; display: flex; align-items: center; flex-shrink: 0; }
 
     /* SECTIONS */
     .section { padding: 24px 20px 0; max-width: 1200px; margin: 0 auto; }
     .sec-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .sec-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .sec-title { font-size: 15px; font-weight: 700; color: var(--text); display:flex; align-items:center; gap:6px; }
     .sec-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .sec-link { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 5px 12px; font-size: 10px; font-weight: 600; cursor: pointer; }
     .group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--primary); display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
@@ -161,7 +162,8 @@ const CATEGORIES_ES = [
     .cat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 10px; cursor: pointer; transition: all 0.15s; text-align: left; }
     .cat-card:hover { border-color: var(--primary); background: var(--hero); }
     .cat-card.active { background: var(--primary); border-color: var(--primary); }
-    .cat-emoji { font-size: 22px; margin-bottom: 6px; display: block; }
+    .cat-emoji { margin-bottom: 8px; display: block; color: var(--primary); }
+    .cat-card.active .cat-emoji { color: white; }
     .cat-name { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
     .cat-card.active .cat-name { color: white; }
     .cat-desc { font-size: 9px; color: var(--muted); line-height: 1.4; margin-bottom: 4px; }
@@ -177,7 +179,7 @@ const CATEGORIES_ES = [
     .pcard { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
     .pcard-img { background: linear-gradient(160deg, var(--primary), var(--primary-hover)); height: 120px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
     .pcard-img img { width: 100%; height: 100%; object-fit: cover; }
-    .pcard-img-fallback { font-size: 40px; opacity: 0.5; }
+    .pcard-img-fallback { color: white; opacity: 0.5; }
     .stock-badge { position: absolute; top: 8px; right: 8px; border-radius: 8px; padding: 3px 7px; font-size: 9px; font-weight: 600; }
     .stock-badge.ok { background: var(--primary); color: white; }
     .stock-badge.low { background: #c87830; color: white; }
@@ -192,7 +194,7 @@ const CATEGORIES_ES = [
 
     /* EMPTY */
     .empty { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 40px 24px; text-align: center; margin-bottom: 24px; }
-    .empty-icon { font-size: 32px; margin-bottom: 12px; }
+    .empty-icon { color: var(--primary); display:flex; justify-content:center; margin-bottom: 12px; }
     .empty-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
     .empty-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
     .empty-btn { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 10px 20px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
@@ -220,27 +222,30 @@ const CATEGORIES_ES = [
     .modal-input { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px; outline: none; width: 100%; color: var(--text); background: var(--bg); }
     .modal-error { font-size: 12px; color: #c5221f; font-weight: 500; }
     .modal-btn { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
-    .loading-state { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+    .loading-state { display:flex; align-items:center; justify-content:center; gap:8px; padding: 40px; color: var(--muted); font-size: 14px; }
+    
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .spin { animation: spin 1s linear infinite; }
   `],
   template: `
   <div class="page">
 
-    <!-- NAV -->
     <header class="nav">
       <div class="nav-center">
         <div class="nav-logo">
           <img *ngIf="client?.logo_url" [src]="client!.logo_url" alt="logo">
-          <span *ngIf="!client?.logo_url" class="nav-logo-fallback">🌿</span>
+          <span *ngIf="!client?.logo_url" class="nav-logo-fallback"><i data-lucide="leaf" style="width:20px;height:20px;"></i></span>
         </div>
         <div>
           <div class="nav-title">{{ client?.business_name || t.heroTitle }}</div>
           <div class="nav-sub">{{ t.tagline }}</div>
         </div>
       </div>
-      <button class="nav-admin" (click)="goToAdmin()">{{ t.admin }}</button>
+      <button class="nav-admin" (click)="goToAdmin()">
+        <i data-lucide="settings" style="width:12px;height:12px;"></i>{{ t.admin }}
+      </button>
     </header>
 
-    <!-- HERO -->
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-left">
@@ -248,8 +253,8 @@ const CATEGORIES_ES = [
           <h1 class="hero-title">Plantas que <span>transforman</span> tu espacio</h1>
           <p class="hero-sub">{{ t.heroSub }}</p>
           <div class="hero-btns">
-            <button class="btn-primary" (click)="scrollToCatalog()">🌿 {{ t.viewPlants }}</button>
-            <a class="btn-secondary" [href]="getGeneralWhatsappLink()" target="_blank">💬 WhatsApp</a>
+            <button class="btn-primary" (click)="scrollToCatalog()"><i data-lucide="leaf" style="width:14px;height:14px;"></i> {{ t.viewPlants }}</button>
+            <a class="btn-secondary" [href]="getGeneralWhatsappLink()" target="_blank"><i data-lucide="message-circle" style="width:14px;height:14px;color:#9CAF96;"></i> WhatsApp</a>
           </div>
           <div class="hero-stats">
             <div><div class="stat-n">{{ plants.length }}</div><div class="stat-l">{{ t.plants }}</div></div>
@@ -261,38 +266,40 @@ const CATEGORIES_ES = [
           <div class="featured-card">
             <div class="featured-img">
               <img *ngIf="featuredPlant.image_url" [src]="featuredPlant.image_url" [alt]="featuredPlant.name">
-              <span *ngIf="!featuredPlant.image_url" class="featured-img-fallback">🌱</span>
+              <span *ngIf="!featuredPlant.image_url" class="featured-img-fallback"><i data-lucide="sprout" style="width:36px;height:36px;"></i></span>
             </div>
             <div class="featured-body">
               <div class="featured-name">{{ featuredPlant.name }}</div>
-              <div class="featured-price">\${{ featuredPlant.price?.toFixed(2) }}</div>
+              <div class="featured-price">\${{ featuredPlant.price.toFixed(2) }}</div>
               <div class="featured-stock">{{ featuredPlant.stock }} {{ t.inStock }}</div>
-              <button class="featured-btn" (click)="orderPlant(featuredPlant)">💬 {{ t.order }}</button>
+              <button class="featured-btn" (click)="orderPlant(featuredPlant)"><i data-lucide="message-circle" style="width:12px;height:12px;"></i> {{ t.order }}</button>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SEARCH + PILLS -->
     <div class="search-wrap">
       <div class="search-box">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6F786E" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <i data-lucide="search" style="width:16px;height:16px;color:#6F786E;"></i>
         <input type="text" [(ngModel)]="search" [placeholder]="t.search">
         <a [href]="getGeneralWhatsappLink()" target="_blank" style="color:#9CAF96;display:flex;align-items:center;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <i data-lucide="message-circle" style="width:18px;height:18px;"></i>
         </a>
       </div>
       <div class="pills">
         <button class="pill" [class.active]="selectedCategory === 'Todas'" (click)="setCategory('Todas')">{{ t.all }}</button>
         <span class="pill-sep">— Plantas</span>
-        <button *ngFor="let cat of PLANT_CATS" class="pill" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">{{ cat.emoji }} {{ getFilterLabel(cat) }}</button>
+        <button *ngFor="let cat of PLANT_CATS" class="pill" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
+          <i [attr.data-lucide]="cat.icon" style="width:12px;height:12px;"></i> {{ getFilterLabel(cat) }}
+        </button>
         <span class="pill-sep">— Productos</span>
-        <button *ngFor="let cat of PRODUCT_CATS" class="pill" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">{{ cat.emoji }} {{ getFilterLabel(cat) }}</button>
+        <button *ngFor="let cat of PRODUCT_CATS" class="pill" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
+          <i [attr.data-lucide]="cat.icon" style="width:12px;height:12px;"></i> {{ getFilterLabel(cat) }}
+        </button>
       </div>
     </div>
 
-    <!-- CATEGORIES -->
     <div class="section">
       <div class="sec-head">
         <div>
@@ -300,20 +307,20 @@ const CATEGORIES_ES = [
           <div class="sec-sub">{{ t.exploreSub }}</div>
         </div>
       </div>
-      <div class="group-label">🌿 Plantas</div>
+      <div class="group-label"><i data-lucide="leaf" style="width:12px;height:12px;"></i> Plantas</div>
       <div class="cat-grid">
         <div *ngFor="let cat of PLANT_CATS" class="cat-card" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
-          <span class="cat-emoji">{{ cat.emoji }}</span>
+          <span class="cat-emoji"><i [attr.data-lucide]="cat.icon" style="width:22px;height:22px;"></i></span>
           <div class="cat-name">{{ isEnglish ? cat.nameEn : cat.name }}</div>
           <div class="cat-desc">{{ isEnglish ? cat.descEn : cat.desc }}</div>
           <div class="cat-ideal">{{ t.catIdeal }} {{ isEnglish ? cat.idealEn : cat.ideal }}</div>
           <button class="cat-btn" (click)="$event.stopPropagation(); setCategory(cat.name)">{{ t.viewPlants }}</button>
         </div>
       </div>
-      <div class="group-label" style="color:#c87830;">🛒 Productos de jardín</div>
+      <div class="group-label" style="color:#c87830;"><i data-lucide="shopping-bag" style="width:12px;height:12px;"></i> Productos de jardín</div>
       <div class="cat-grid" style="margin-bottom:24px;">
         <div *ngFor="let cat of PRODUCT_CATS" class="cat-card" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
-          <span class="cat-emoji">{{ cat.emoji }}</span>
+          <span class="cat-emoji"><i [attr.data-lucide]="cat.icon" style="width:22px;height:22px;"></i></span>
           <div class="cat-name">{{ isEnglish ? cat.nameEn : cat.name }}</div>
           <div class="cat-desc">{{ isEnglish ? cat.descEn : cat.desc }}</div>
           <div class="cat-ideal" style="color:#c87830;">{{ t.catIdeal }} {{ isEnglish ? cat.idealEn : cat.ideal }}</div>
@@ -322,24 +329,27 @@ const CATEGORIES_ES = [
       </div>
     </div>
 
-    <!-- CATALOG -->
     <div class="section" id="catalogo">
       <div class="sec-head">
         <div>
           <div class="sec-title">
-            <span *ngIf="selectedCategory !== 'Todas'">{{ getCatEmoji(selectedCategory) }} {{ getActiveCatName() }}</span>
+            <span *ngIf="selectedCategory !== 'Todas'" style="display:flex;align-items:center;gap:6px;">
+              <i [attr.data-lucide]="getCatIcon(selectedCategory)" style="width:16px;height:16px;"></i> {{ getActiveCatName() }}
+            </span>
             <span *ngIf="selectedCategory === 'Todas'">Plantas disponibles</span>
           </div>
           <div class="sec-sub">{{ filteredPlants.length }} {{ t.plants.toLowerCase() }} disponibles</div>
         </div>
         <button *ngIf="selectedCategory !== 'Todas'" class="sec-link" (click)="setCategory('Todas')">{{ t.viewAll }} ✕</button>
       </div>
-      <div *ngIf="loading" class="loading-state">{{ t.loading }}</div>
+      <div *ngIf="loading" class="loading-state">
+        <i data-lucide="loader-2" class="spin" style="width:20px;height:20px;"></i> {{ t.loading }}
+      </div>
       <div *ngIf="!loading && filteredPlants.length > 0" class="plant-grid">
         <div *ngFor="let p of filteredPlants" class="pcard">
           <div class="pcard-img">
             <img *ngIf="p.image_url" [src]="p.image_url" [alt]="p.name">
-            <span *ngIf="!p.image_url" class="pcard-img-fallback">🌱</span>
+            <span *ngIf="!p.image_url" class="pcard-img-fallback"><i data-lucide="sprout" style="width:40px;height:40px;"></i></span>
             <div class="stock-badge" [class.ok]="p.stock > 5" [class.low]="p.stock > 0 && p.stock <= 5" [class.out]="p.stock === 0">
               <span *ngIf="p.stock > 0">{{ p.stock }} {{ t.inStock }}</span>
               <span *ngIf="p.stock === 0">{{ t.outOfStock }}</span>
@@ -352,29 +362,30 @@ const CATEGORIES_ES = [
               <span *ngIf="!p.light && !p.water">{{ p.description }}</span>
             </div>
             <div class="pcard-foot">
-              <div class="pcard-price">\${{ p.price?.toFixed(2) }}</div>
+              <div class="pcard-price">\${{ p.price.toFixed(2) }}</div>
               <button class="pcard-btn" [class.out]="p.stock === 0" (click)="orderPlant(p)" [disabled]="p.stock === 0">
-                💬 {{ p.stock === 0 ? t.outOfStock : t.order }}
+                <i data-lucide="message-circle" style="width:12px;height:12px;"></i> {{ p.stock === 0 ? t.outOfStock : t.order }}
               </button>
             </div>
           </div>
         </div>
       </div>
       <div *ngIf="!loading && filteredPlants.length === 0" class="empty">
-        <div class="empty-icon">🌱</div>
+        <div class="empty-icon"><i data-lucide="sprout" style="width:40px;height:40px;"></i></div>
         <div class="empty-title">{{ t.noPlants }}</div>
         <p class="empty-sub">{{ t.noPlantsSub }}</p>
-        <a class="empty-btn" [href]="getGeneralWhatsappLink()" target="_blank">💬 {{ t.consultWA }}</a>
+        <a class="empty-btn" [href]="getGeneralWhatsappLink()" target="_blank"><i data-lucide="message-circle" style="width:14px;height:14px;"></i> {{ t.consultWA }}</a>
       </div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-top">
           <div class="footer-logo">
             <img *ngIf="client?.logo_url" [src]="client!.logo_url" alt="logo">
-            <span *ngIf="!client?.logo_url" style="font-size:18px;color:white;">🌿</span>
+            <span *ngIf="!client?.logo_url" style="color:white;display:flex;align-items:center;justify-content:center;">
+              <i data-lucide="leaf" style="width:20px;height:20px;"></i>
+            </span>
           </div>
           <div>
             <div class="footer-biz">{{ client?.business_name || t.heroTitle }}</div>
@@ -382,19 +393,18 @@ const CATEGORIES_ES = [
           </div>
         </div>
         <div class="footer-grid">
-          <div class="f-item">📍 <span>Puerto Rico</span></div>
-          <div class="f-item">🕐 <span>Lun–Sáb 8am–5pm</span></div>
-          <div class="f-item">📱 <span>{{ client?.whatsapp_number || '' }}</span></div>
-          <div class="f-item">💬 <span>Consultas por WhatsApp</span></div>
+          <div class="f-item"><i data-lucide="map-pin" style="width:14px;height:14px;color:#9CAF96;"></i> <span>Puerto Rico</span></div>
+          <div class="f-item"><i data-lucide="clock" style="width:14px;height:14px;color:#9CAF96;"></i> <span>Lun–Sáb 8am–5pm</span></div>
+          <div class="f-item"><i data-lucide="smartphone" style="width:14px;height:14px;color:#9CAF96;"></i> <span>{{ client?.whatsapp_number || '' }}</span></div>
+          <div class="f-item"><i data-lucide="message-circle" style="width:14px;height:14px;color:#9CAF96;"></i> <span>Consultas por WhatsApp</span></div>
         </div>
-        <button class="footer-wa" (click)="openWhatsapp()">💬 {{ t.consultWA }}</button>
+        <button class="footer-wa" (click)="openWhatsapp()"><i data-lucide="message-circle" style="width:14px;height:14px;"></i> {{ t.consultWA }}</button>
         <div class="footer-copy">© 2026 {{ client?.business_name || t.heroTitle }} · Verzagarden</div>
       </div>
     </footer>
 
   </div>
 
-  <!-- LOGIN MODAL -->
   <div class="modal-bg" *ngIf="showLoginModal" (click)="showLoginModal = false">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-head">
@@ -411,7 +421,7 @@ const CATEGORIES_ES = [
   </div>
   `
 })
-export class CatalogComponent implements OnInit {
+export class CatalogComponent implements OnInit, AfterViewInit {
   readonly CATEGORIES = CATEGORIES_ES;
   readonly PLANT_CATS = CATEGORIES_ES.filter(c => c.group === 'plants');
   readonly PRODUCT_CATS = CATEGORIES_ES.filter(c => c.group === 'products');
@@ -461,9 +471,17 @@ export class CatalogComponent implements OnInit {
     this.loadData();
   }
 
+  ngAfterViewInit() {
+    this.renderIcons();
+  }
+
+  renderIcons() {
+    setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 50);
+  }
+
   loadData() {
     this.plantService.getPlants(this.clientSlug).subscribe({
-      next: plants => { this.plants = [...plants]; this.loading = false; this.cdr.detectChanges(); },
+      next: plants => { this.plants = [...plants]; this.loading = false; this.cdr.detectChanges(); this.renderIcons(); },
       error: () => { this.loading = false; }
     });
     this.plantService.getClient(this.clientSlug).subscribe({
@@ -476,6 +494,7 @@ export class CatalogComponent implements OnInit {
     this.selectedCategory = cat;
     setTimeout(() => {
       document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      this.renderIcons();
     }, 50);
   }
 
@@ -499,8 +518,8 @@ export class CatalogComponent implements OnInit {
     return cat.name;
   }
 
-  getCatEmoji(name: string): string {
-    return CATEGORIES_ES.find(c => c.name === name)?.emoji || '';
+  getCatIcon(name: string): string {
+    return CATEGORIES_ES.find(c => c.name === name)?.icon || 'leaf';
   }
 
   getActiveCatName(): string {
@@ -511,9 +530,24 @@ export class CatalogComponent implements OnInit {
 
   orderPlant(plant: Plant) {
     const phone = this.client?.whatsapp_number || '19392360534';
-    const msg = this.isEnglish
-      ? `Hello, I'm interested in: ${plant.name} ($${plant.price})`
-      : `Hola, me interesa: ${plant.name} ($${plant.price})`;
+    
+    // Fallback de idioma si no hay custom template
+    const defaultMsg = this.isEnglish
+      ? "Hello! I'm interested in {planta} at {precio}. Is it available?"
+      : "Hola! Me interesa {planta} a {precio}. ¿Está disponible?";
+      
+    // Leemos el settings del backend
+    let template = (this.client as any)?.whatsapp_message || defaultMsg;
+    
+    // Reemplazamos tags dinámicos
+    const priceStr = plant.price ? '$' + plant.price.toFixed(2) : (this.isEnglish ? 'TBD' : 'por confirmar');
+    const catStr = plant.category || '';
+    
+    const msg = template
+      .replace(/{planta}/g, plant.name)
+      .replace(/{precio}/g, priceStr)
+      .replace(/{categoria}/g, catStr);
+
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   }
 

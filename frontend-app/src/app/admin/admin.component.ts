@@ -6,17 +6,14 @@ import { PlantService, Client, Plant, SalesReport } from '../services/plant.serv
 import { PlantCardComponent } from '../plant-card.component';
 
 export const PLANT_CATEGORIES = [
-  // Plantas
   'Árboles', 'Arbustos', 'Flores de estación', 'Plantas de interior',
   'Trepadoras', 'Suculentas', 'Palmas',
-  // Productos
   'Tiestos y Macetas', 'Tierra y Sustratos', 'Fertilizantes y Abonos', 'Herramientas',
 ];
 
-// Separador visual en el select del formulario
 export const CATEGORY_GROUPS = [
-  { label: '🌿 Plantas', items: ['Árboles', 'Arbustos', 'Flores de estación', 'Plantas de interior', 'Trepadoras', 'Suculentas', 'Palmas'] },
-  { label: '🛒 Productos de jardín', items: ['Tiestos y Macetas', 'Tierra y Sustratos', 'Fertilizantes y Abonos', 'Herramientas'] },
+  { label: 'Plantas', items: ['Árboles', 'Arbustos', 'Flores de estación', 'Plantas de interior', 'Trepadoras', 'Suculentas', 'Palmas'] },
+  { label: 'Productos de jardín', items: ['Tiestos y Macetas', 'Tierra y Sustratos', 'Fertilizantes y Abonos', 'Herramientas'] },
 ];
 
 const CHART_COLORS = ['#14452F','#4caf78','#f5c842','#9ecfb0','#e07b54','#6b8f71','#a78bfa','#38bdf8','#8B5E3C','#f0a070','#d4a017','#b0c4de'];
@@ -73,9 +70,15 @@ declare const lucide: any;
     .nav-tab.active { color:white;border-bottom-color:white; }
     .nav-tab:hover { color:white; }
     optgroup { font-weight:700; color:#516052; }
+    .settings-card { background:white;border:1px solid #eef1ec;border-radius:20px;padding:24px;box-shadow:0 4px 12px rgba(16,35,25,0.04);margin-bottom:16px; }
+    .settings-card h3 { margin:0 0 4px;color:#102319;font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px; }
+    .settings-card p { margin:0 0 16px;color:#516052;font-size:0.82rem; }
+    .var-chip { display:inline-flex;align-items:center;gap:4px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:8px;padding:3px 10px;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s; }
+    .var-chip:hover { background:#dcfce7; }
+    .save-feedback { display:inline-flex;align-items:center;gap:6px;color:#15803d;font-size:0.82rem;font-weight:600;opacity:0;transition:opacity 0.3s; }
+    .save-feedback.show { opacity:1; }
   `],
   template: `
-    <!-- HEADER con tabs -->
     <header style="background:#14452F;color:white;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(20,69,47,0.18);">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 0;">
         <button (click)="goToPublic()" style="background:none;border:none;color:rgba(255,255,255,0.75);cursor:pointer;font-size:0.82rem;font-weight:500;display:flex;align-items:center;gap:5px;padding:0;">
@@ -103,12 +106,14 @@ declare const lucide: any;
         <button class="nav-tab" [class.active]="activeTab==='pos'" (click)="setTab('pos')">
           <i data-lucide="upload" style="width:15px;height:15px;"></i>Importar POS
         </button>
+        <button class="nav-tab" [class.active]="activeTab==='ajustes'" (click)="setTab('ajustes')">
+          <i data-lucide="settings" style="width:15px;height:15px;"></i>Ajustes
+        </button>
       </nav>
     </header>
 
     <div style="max-width:1100px;margin:0 auto;padding:20px 16px 60px;">
 
-      <!-- ── TAB: DASHBOARD ── -->
       <div *ngIf="activeTab==='dashboard'">
         <h2 class="section-title">Dashboard</h2>
         <p class="section-sub">Resumen del inventario en tiempo real.</p>
@@ -180,7 +185,7 @@ declare const lucide: any;
               Productos con bajo stock
             </h3>
             <p style="margin:0 0 12px 0;color:#516052;font-size:0.75rem;">≤5 unidades disponibles</p>
-            <div *ngIf="lowStockPlants.length===0" style="text-align:center;padding:14px;color:#aaa;font-size:0.85rem;">✅ Inventario bien surtido</div>
+            <div *ngIf="lowStockPlants.length===0" style="text-align:center;padding:14px;color:#aaa;font-size:0.85rem;">Inventario bien surtido</div>
             <div *ngFor="let p of lowStockPlants" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f4f4f4;cursor:pointer;" (click)="goToInventory('low')">
               <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;background:#f4f8f1;flex-shrink:0;">
                 <img *ngIf="p.image_url" [src]="p.image_url" style="width:100%;height:100%;object-fit:cover;">
@@ -215,7 +220,6 @@ declare const lucide: any;
         </div>
       </div>
 
-      <!-- ── TAB: VENTAS ── -->
       <div *ngIf="activeTab==='ventas'">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
           <div>
@@ -227,7 +231,7 @@ declare const lucide: any;
           </div>
         </div>
 
-        <div *ngIf="salesLoading" style="text-align:center;padding:30px;color:#516052;">📊 Cargando reporte...</div>
+        <div *ngIf="salesLoading" style="text-align:center;padding:30px;color:#516052;">Cargando reporte...</div>
 
         <ng-container *ngIf="!salesLoading && salesReport">
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;">
@@ -259,7 +263,7 @@ declare const lucide: any;
           </div>
 
           <div *ngIf="salesReport.summary.total_units===0" style="text-align:center;padding:28px;background:#f9fdf9;border-radius:14px;color:#9ca3af;font-size:0.88rem;margin-bottom:18px;">
-            📦 No hay ventas registradas para este período.
+            No hay ventas registradas para este período.
           </div>
 
           <ng-container *ngIf="salesReport.summary.total_units > 0">
@@ -332,10 +336,7 @@ declare const lucide: any;
         </ng-container>
       </div>
 
-      <!-- ── TAB: INVENTARIO ── -->
       <div *ngIf="activeTab==='inventario'">
-
-        <!-- AI Restock -->
         <div style="background:linear-gradient(135deg,#0d3320,#1a5c38 60%,#236b45);border-radius:22px;padding:26px;margin-bottom:22px;box-shadow:0 16px 48px rgba(15,50,30,0.2);position:relative;overflow:hidden;">
           <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,0.04);border-radius:50%;pointer-events:none;"></div>
           <div style="position:relative;z-index:1;">
@@ -358,12 +359,12 @@ declare const lucide: any;
                   Subir factura
                   <input type="file" (change)="onInvoiceSelected($event)" accept="image/*,.pdf" style="display:none;">
                 </label>
-                <span style="color:rgba(255,255,255,0.55);font-size:0.8rem;flex:1;min-width:90px;">{{ selectedInvoice ? '📎 '+selectedInvoice.name : 'JPG, PNG o PDF' }}</span>
+                <span style="color:rgba(255,255,255,0.55);font-size:0.8rem;flex:1;min-width:90px;">{{ selectedInvoice ? selectedInvoice.name : 'JPG, PNG o PDF' }}</span>
                 <button [disabled]="!selectedInvoice||invoiceLoading" (click)="analyzeInvoice()"
                   style="padding:10px 20px;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.85rem;"
                   [style.background]="(!selectedInvoice||invoiceLoading)?'rgba(255,255,255,0.12)':'#4ade80'"
                   [style.color]="(!selectedInvoice||invoiceLoading)?'rgba(255,255,255,0.35)':'#052e16'">
-                  {{ invoiceLoading ? '⏳ Analizando...' : '🤖 Analizar con AI' }}
+                  {{ invoiceLoading ? 'Analizando...' : 'Analizar con AI' }}
                 </button>
               </div>
             </div>
@@ -418,14 +419,13 @@ declare const lucide: any;
                 <span style="font-size:0.8rem;color:#516052;"><span style="font-weight:700;color:#102319;">Costo total:</span> \${{ totalInvoiceCost|number:'1.2-2' }}</span>
               </div>
               <div style="padding:14px 20px 18px;display:flex;flex-wrap:wrap;gap:10px;">
-                <button (click)="confirmRestock()" class="btn-primary" style="flex:1;min-width:160px;">✅ Confirmar actualización</button>
+                <button (click)="confirmRestock()" class="btn-primary" style="flex:1;min-width:160px;display:flex;align-items:center;justify-content:center;gap:7px;"><i data-lucide="check" style="width:16px;height:16px;"></i>Confirmar actualización</button>
                 <button (click)="cancelInvoice()" class="btn-secondary" style="flex:1;min-width:130px;">Cancelar</button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Header inventario + filtros -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
           <div>
             <h2 class="section-title">Inventario</h2>
@@ -438,37 +438,16 @@ declare const lucide: any;
         </div>
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-          <button class="inv-filter-pill"
-            [style.background]="inventoryFilter==='all' ? '#14452F' : '#f4f8f1'"
-            [style.color]="inventoryFilter==='all' ? 'white' : '#516052'"
-            [style.borderColor]="inventoryFilter==='all' ? '#14452F' : '#dfe7dd'"
-            (click)="inventoryFilter='all'">
-            Todos ({{ plants.length }})
-          </button>
-          <button class="inv-filter-pill"
-            [style.background]="inventoryFilter==='low' ? '#d97706' : '#fef3c7'"
-            [style.color]="inventoryFilter==='low' ? 'white' : '#92400e'"
-            [style.borderColor]="inventoryFilter==='low' ? '#d97706' : '#fde68a'"
-            (click)="inventoryFilter='low'">
-            ⚠️ Bajo stock ({{ lowStockPlants.length }})
-          </button>
-          <button class="inv-filter-pill"
-            [style.background]="inventoryFilter==='out' ? '#dc2626' : '#fee2e2'"
-            [style.color]="inventoryFilter==='out' ? 'white' : '#991b1b'"
-            [style.borderColor]="inventoryFilter==='out' ? '#dc2626' : '#fecaca'"
-            (click)="inventoryFilter='out'">
-            ❌ Sin stock ({{ outOfStockPlants.length }})
-          </button>
+          <button class="inv-filter-pill" [style.background]="inventoryFilter==='all'?'#14452F':'#f4f8f1'" [style.color]="inventoryFilter==='all'?'white':'#516052'" [style.borderColor]="inventoryFilter==='all'?'#14452F':'#dfe7dd'" (click)="inventoryFilter='all'">Todos ({{ plants.length }})</button>
+          <button class="inv-filter-pill" [style.background]="inventoryFilter==='low'?'#d97706':'#fef3c7'" [style.color]="inventoryFilter==='low'?'white':'#92400e'" [style.borderColor]="inventoryFilter==='low'?'#d97706':'#fde68a'" (click)="inventoryFilter='low'">Bajo stock ({{ lowStockPlants.length }})</button>
+          <button class="inv-filter-pill" [style.background]="inventoryFilter==='out'?'#dc2626':'#fee2e2'" [style.color]="inventoryFilter==='out'?'white':'#991b1b'" [style.borderColor]="inventoryFilter==='out'?'#dc2626':'#fecaca'" (click)="inventoryFilter='out'">Sin stock ({{ outOfStockPlants.length }})</button>
         </div>
 
-        <!-- Formulario colapsable -->
         <div *ngIf="showForm" id="plant-form" style="background:white;border-radius:22px;padding:24px;border:1px solid #eef1ec;box-shadow:0 4px 16px rgba(16,35,25,0.04);margin-bottom:18px;">
-          <h2 class="section-title">{{ editingId ? '✏️ Editar Producto' : '🌱 Nuevo Producto' }}</h2>
+          <h2 class="section-title" style="display:flex;align-items:center;gap:8px;"><i [attr.data-lucide]="editingId ? 'pencil' : 'sprout'" style="width:20px;height:20px;"></i>{{ editingId ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
           <p class="section-sub">{{ editingId ? 'Modifica los datos.' : 'Agrega un nuevo producto al catálogo.' }}</p>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:13px;">
             <div class="form-group"><label class="form-label">Nombre</label><input type="text" [(ngModel)]="plantForm.name" class="form-input" placeholder="Ej. Monstera Deliciosa"></div>
-
-            <!-- ✅ Select con optgroup para separar plantas y productos -->
             <div class="form-group">
               <label class="form-label">Categoría</label>
               <select [(ngModel)]="plantForm.category" class="form-input">
@@ -478,7 +457,6 @@ declare const lucide: any;
                 </optgroup>
               </select>
             </div>
-
             <div class="form-group"><label class="form-label">Precio de venta</label><input type="number" [(ngModel)]="plantForm.price" class="form-input" placeholder="Precio público"></div>
             <div class="form-group"><label class="form-label">Costo de compra</label><input type="number" [(ngModel)]="plantForm.cost_price" class="form-input" placeholder="Costo mayorista"></div>
             <div class="form-group"><label class="form-label">Cantidad disponible</label><input type="number" [(ngModel)]="plantForm.stock" class="form-input" placeholder="Stock"></div>
@@ -486,45 +464,35 @@ declare const lucide: any;
               <label class="form-label">Imagen</label>
               <div style="position:relative;border:2px dashed #dfe7dd;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:46px;background:#fafdf8;cursor:pointer;">
                 <input type="file" accept="image/*" (change)="uploadPlantImage($event)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;">
-                <span style="color:#516052;font-weight:600;font-size:0.85rem;pointer-events:none;">{{ imageUploading ? '⏳ Subiendo...' : plantForm.image_url ? '✅ Imagen subida' : '📷 Subir imagen' }}</span>
+                <span style="color:#516052;font-weight:600;font-size:0.85rem;pointer-events:none;">{{ imageUploading ? 'Subiendo...' : plantForm.image_url ? 'Imagen subida' : 'Subir imagen' }}</span>
               </div>
             </div>
-            <div class="form-group"><label class="form-label">Luz</label><input type="text" [(ngModel)]="plantForm.light" class="form-input" placeholder="Ej. Sol parcial (plantas)"></div>
-            <div class="form-group"><label class="form-label">Agua / Riego</label><input type="text" [(ngModel)]="plantForm.water" class="form-input" placeholder="Ej. Moderada, N/A"></div>
+            <div class="form-group"><label class="form-label">Luz</label><input type="text" [(ngModel)]="plantForm.light" class="form-input" placeholder="Ej. Sol parcial"></div>
+            <div class="form-group"><label class="form-label">Agua / Riego</label><input type="text" [(ngModel)]="plantForm.water" class="form-input" placeholder="Ej. Moderada"></div>
             <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Descripción</label><textarea [(ngModel)]="plantForm.description" class="form-input" style="min-height:76px;resize:vertical;" placeholder="Descripción breve..."></textarea></div>
             <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;">
               <input type="checkbox" [(ngModel)]="plantForm.is_featured" id="featured" style="width:17px;height:17px;accent-color:#14452F;">
               <label for="featured" style="color:#102319;font-weight:500;cursor:pointer;font-size:0.9rem;">Destacar producto</label>
             </div>
             <div style="grid-column:1/-1;display:flex;gap:11px;flex-wrap:wrap;margin-top:4px;">
-              <button (click)="savePlant()" class="btn-primary" style="flex:1;min-width:130px;">{{ editingId ? '✅ Actualizar' : '➕ Crear Producto' }}</button>
+              <button (click)="savePlant()" class="btn-primary" style="flex:1;min-width:130px;">{{ editingId ? 'Actualizar' : 'Crear Producto' }}</button>
               <button (click)="resetForm()" class="btn-secondary" style="flex:1;min-width:130px;">Limpiar</button>
             </div>
           </div>
         </div>
 
-        <div *ngIf="inventoryFilter==='low' && lowStockPlants.length===0" style="text-align:center;padding:28px;background:#fef3c7;border-radius:14px;color:#92400e;font-size:0.88rem;">
-          ✅ No hay productos con bajo stock en este momento.
-        </div>
-        <div *ngIf="inventoryFilter==='out' && outOfStockPlants.length===0" style="text-align:center;padding:28px;background:#fee2e2;border-radius:14px;color:#991b1b;font-size:0.88rem;">
-          ✅ No hay productos sin stock en este momento.
-        </div>
-
-        <div *ngIf="loading" style="text-align:center;padding:40px;color:#516052;">🌱 Cargando...</div>
+        <div *ngIf="inventoryFilter==='low' && lowStockPlants.length===0" style="text-align:center;padding:28px;background:#fef3c7;border-radius:14px;color:#92400e;font-size:0.88rem;">No hay productos con bajo stock.</div>
+        <div *ngIf="inventoryFilter==='out' && outOfStockPlants.length===0" style="text-align:center;padding:28px;background:#fee2e2;border-radius:14px;color:#991b1b;font-size:0.88rem;">No hay productos sin stock.</div>
+        <div *ngIf="loading" style="text-align:center;padding:40px;color:#516052;">Cargando...</div>
         <div class="admin-inventory" *ngIf="!loading">
-          <app-plant-card *ngFor="let p of filteredInventory" [plant]="p" [adminMode]="true" [client]="client"
-            (onEdit)="editPlant($event)" (onRemove)="removePlant($event)">
-          </app-plant-card>
+          <app-plant-card *ngFor="let p of filteredInventory" [plant]="p" [adminMode]="true" [client]="client" (onEdit)="editPlant($event)" (onRemove)="removePlant($event)"></app-plant-card>
           <div *ngIf="filteredInventory.length===0 && inventoryFilter==='all'" style="text-align:center;padding:28px;color:#888;font-size:0.9rem;">No hay productos aún.</div>
         </div>
       </div>
 
-      <!-- ── TAB: IMPORTAR POS ── -->
       <div *ngIf="activeTab==='pos'">
         <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;">
-          <div style="background:#f4f8f1;border-radius:14px;padding:12px;flex-shrink:0;">
-            <i data-lucide="file-up" style="width:24px;height:24px;color:#14452F;"></i>
-          </div>
+          <div style="background:#f4f8f1;border-radius:14px;padding:12px;flex-shrink:0;"><i data-lucide="file-up" style="width:24px;height:24px;color:#14452F;"></i></div>
           <div>
             <h2 class="section-title">Importar ventas del día</h2>
             <p style="margin:4px 0 0;color:#516052;font-size:0.85rem;">Sube el reporte diario de ventas de tu POS para descontar inventario automáticamente.</p>
@@ -539,20 +507,19 @@ declare const lucide: any;
               Subir archivo
               <input type="file" (change)="onPosFileSelected($event)" accept=".csv,.xlsx,.xls" style="display:none;">
             </label>
-            <span style="color:#516052;font-size:0.82rem;flex:1;min-width:100px;">{{ posFile ? '📎 '+posFile.name : 'CSV o Excel del POS' }}</span>
+            <span style="color:#516052;font-size:0.82rem;flex:1;min-width:100px;">{{ posFile ? posFile.name : 'CSV o Excel del POS' }}</span>
             <button [disabled]="!posFile||posLoading" (click)="analyzePosFile()"
               style="padding:9px 18px;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.85rem;"
               [style.background]="(!posFile||posLoading)?'#e5e7e5':'#1f7a4d'"
               [style.color]="(!posFile||posLoading)?'#9ca3af':'white'">
-              {{ posLoading ? '⏳ Analizando...' : '📊 Analizar ventas' }}
+              {{ posLoading ? 'Analizando...' : 'Analizar ventas' }}
             </button>
           </div>
         </div>
 
-        <div *ngIf="posError" style="background:#fff0f0;border:1px solid #fad5d5;border-radius:12px;padding:12px 16px;margin-bottom:14px;color:#9b1c1c;font-size:0.85rem;">⚠️ {{ posError }}</div>
+        <div *ngIf="posError" style="background:#fff0f0;border:1px solid #fad5d5;border-radius:12px;padding:12px 16px;margin-bottom:14px;color:#9b1c1c;font-size:0.85rem;">{{ posError }}</div>
         <div *ngIf="posImportSuccessMsg" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:14px;color:#15803d;font-size:0.88rem;font-weight:600;display:flex;align-items:center;gap:8px;">
-          <i data-lucide="check-circle" style="width:18px;height:18px;"></i>
-          {{ posImportSuccessMsg }}
+          <i data-lucide="check-circle" style="width:18px;height:18px;"></i>{{ posImportSuccessMsg }}
         </div>
 
         <div *ngIf="posItems.length" style="overflow:hidden;border-radius:14px;border:1px solid #eef1ec;">
@@ -573,7 +540,7 @@ declare const lucide: any;
               <div *ngIf="item.matched_plant_name" style="background:#f4f8f1;border-radius:10px;padding:10px;font-size:0.8rem;">
                 <div style="color:#102319;font-weight:600;">→ {{ item.matched_plant_name }}</div>
                 <div style="color:#516052;margin-top:3px;">Stock: {{ item.current_stock }} → <strong [style.color]="item.over_stock?'#dc2626':'#15803d'">{{ item.stock_after }}</strong></div>
-                <div *ngIf="item.over_stock" style="color:#dc2626;font-size:0.72rem;margin-top:4px;">⚠️ Venta supera el stock actual</div>
+                <div *ngIf="item.over_stock" style="color:#dc2626;font-size:0.72rem;margin-top:4px;">Venta supera el stock actual</div>
               </div>
               <div *ngIf="!item.matched_plant_name" style="font-size:0.78rem;color:#9ca3af;margin-top:4px;">No se encontró en el catálogo</div>
               <div style="margin-top:8px;display:flex;align-items:center;gap:6px;">
@@ -591,7 +558,7 @@ declare const lucide: any;
                   <td style="font-weight:700;color:#516052;">{{ item.qty_sold }}</td>
                   <td><span *ngIf="item.matched_plant_name" style="color:#102319;">{{ item.matched_plant_name }}</span><span *ngIf="!item.matched_plant_name" style="color:#aaa;font-size:0.78rem;">—</span></td>
                   <td style="color:#516052;">{{ item.current_stock??'—' }}</td>
-                  <td><span *ngIf="item.stock_after!==null" [style.color]="item.over_stock?'#dc2626':'#15803d'" style="font-weight:700;">{{ item.stock_after }}</span><span *ngIf="item.stock_after===null" style="color:#aaa;">—</span><div *ngIf="item.over_stock" style="font-size:0.65rem;color:#dc2626;">⚠️ supera stock</div></td>
+                  <td><span *ngIf="item.stock_after!==null" [style.color]="item.over_stock?'#dc2626':'#15803d'" style="font-weight:700;">{{ item.stock_after }}</span><span *ngIf="item.stock_after===null" style="color:#aaa;">—</span><div *ngIf="item.over_stock" style="font-size:0.65rem;color:#dc2626;">supera stock</div></td>
                   <td><span [style.background]="getPosBadgeBg(item.status)" [style.color]="getPosBadgeColor(item.status)" style="font-size:0.7rem;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;">{{ getPosBadgeLabel(item.status) }}</span></td>
                   <td style="text-align:center;"><input type="checkbox" [(ngModel)]="item.skip" style="width:15px;height:15px;accent-color:#14452F;cursor:pointer;"></td>
                 </tr>
@@ -600,12 +567,77 @@ declare const lucide: any;
           </div>
           <div style="padding:14px 18px 16px;display:flex;flex-wrap:wrap;gap:10px;">
             <button (click)="confirmPosImport()" class="btn-primary" style="flex:1;min-width:160px;display:flex;align-items:center;justify-content:center;gap:7px;">
-              <i data-lucide="check" style="width:16px;height:16px;"></i>
-              Confirmar descuento
+              <i data-lucide="check" style="width:16px;height:16px;"></i>Confirmar descuento
             </button>
             <button (click)="cancelPosImport()" class="btn-secondary" style="flex:1;min-width:130px;">Cancelar</button>
           </div>
         </div>
+      </div>
+
+      <div *ngIf="activeTab==='ajustes'">
+        <h2 class="section-title" style="display:flex;align-items:center;gap:8px;">
+          <i data-lucide="settings" style="width:20px;height:20px;"></i>
+          Ajustes
+        </h2>
+        <p class="section-sub">Personaliza la experiencia de tu tienda.</p>
+
+        <div class="settings-card">
+          <h3>
+            <i data-lucide="message-circle" style="width:18px;height:18px;color:#14452F;"></i>
+            Mensaje predeterminado de WhatsApp
+          </h3>
+          <p>Este mensaje se envía automáticamente cuando un cliente toca "Me interesa" en un producto. Puedes usar variables para personalizar el mensaje.</p>
+
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+            <span style="font-size:0.72rem;color:#516052;font-weight:600;align-self:center;">Variables disponibles:</span>
+            <button class="var-chip" (click)="insertVar('{planta}')"><i data-lucide="package" style="width:13px;height:13px;"></i>{{ '{' }}planta{{ '}' }}</button>
+            <button class="var-chip" (click)="insertVar('{precio}')"><i data-lucide="dollar-sign" style="width:13px;height:13px;"></i>{{ '{' }}precio{{ '}' }}</button>
+            <button class="var-chip" (click)="insertVar('{categoria}')"><i data-lucide="tag" style="width:13px;height:13px;"></i>{{ '{' }}categoria{{ '}' }}</button>
+          </div>
+
+          <textarea
+            id="wa-message-input"
+            [(ngModel)]="waMessage"
+            class="form-input"
+            style="min-height:100px;resize:vertical;font-size:0.92rem;line-height:1.6;margin-bottom:10px;"
+            placeholder="Ej: Hola! Me interesa {{ '{' }}planta{{ '}' }} a {{ '{' }}precio{{ '}' }}. ¿Está disponible?">
+          </textarea>
+
+          <div style="background:#f4f8f1;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:0.82rem;color:#516052;">
+            <strong style="color:#102319;">Vista previa:</strong><br>
+            <span style="color:#102319;">{{ getWaPreview() }}</span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <button (click)="saveSettings()" class="btn-primary" style="display:flex;align-items:center;gap:6px;padding:10px 20px;">
+              <i data-lucide="save" style="width:15px;height:15px;"></i>
+              {{ settingsSaving ? 'Guardando...' : 'Guardar mensaje' }}
+            </button>
+            <button (click)="resetWaMessage()" class="btn-secondary" style="padding:10px 18px;">
+              Restaurar default
+            </button>
+            <span class="save-feedback" [class.show]="settingsSaved">
+              <i data-lucide="check-circle" style="width:15px;height:15px;"></i>
+              ¡Guardado!
+            </span>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>
+            <i data-lucide="store" style="width:18px;height:18px;color:#14452F;"></i>
+            Tu tienda pública
+          </h3>
+          <p>Comparte este enlace con tus clientes para que vean tu catálogo.</p>
+          <div style="display:flex;align-items:center;gap:10px;background:#f4f8f1;border-radius:12px;padding:12px 16px;flex-wrap:wrap;">
+            <span style="flex:1;font-size:0.88rem;color:#102319;font-weight:600;word-break:break-all;">{{ storeUrl }}</span>
+            <button (click)="copyStoreUrl()" style="background:#14452F;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;flex-shrink:0;">
+              <i data-lucide="copy" style="width:13px;height:13px;"></i>
+              {{ urlCopied ? 'Copiado' : 'Copiar' }}
+            </button>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -624,7 +656,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   imageUploading = false;
   showForm = false;
 
-  activeTab: 'dashboard' | 'ventas' | 'inventario' | 'pos' = 'dashboard';
+  activeTab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'ajustes' = 'dashboard';
   inventoryFilter: 'all' | 'low' | 'out' = 'all';
 
   selectedInvoice: File | null = null;
@@ -649,6 +681,17 @@ export class AdminComponent implements OnInit, AfterViewInit {
     { label: 'Todo',     value: 'all'   },
   ];
 
+  // ── Ajustes ──
+  waMessage = '';
+  settingsSaving = false;
+  settingsSaved = false;
+  urlCopied = false;
+  readonly DEFAULT_WA_MESSAGE = 'Hola! Me interesa {planta} a {precio}. ¿Está disponible?';
+
+  get storeUrl(): string {
+    return `https://${this.clientSlug}.verzagarden.com`;
+  }
+
   constructor(private plantService: PlantService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
@@ -663,7 +706,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 50);
   }
 
-  setTab(tab: 'dashboard' | 'ventas' | 'inventario' | 'pos') {
+  setTab(tab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'ajustes') {
     this.activeTab = tab;
     this.cdr.detectChanges();
     this.renderIcons();
@@ -686,11 +729,61 @@ export class AdminComponent implements OnInit, AfterViewInit {
       error: () => { this.loading = false; }
     });
     this.plantService.getClient(this.clientSlug).subscribe({
-      next: client => { this.client = { ...client }; this.cdr.detectChanges(); },
+      next: client => {
+        this.client = { ...client };
+        this.waMessage = (client as any).whatsapp_message || this.DEFAULT_WA_MESSAGE;
+        this.cdr.detectChanges();
+      },
       error: err => console.error(err)
     });
   }
 
+  // ── Settings ──
+  getWaPreview(): string {
+    return this.waMessage
+      .replace('{planta}', 'Monstera Deliciosa')
+      .replace('{precio}', '$50.00')
+      .replace('{categoria}', 'Plantas de interior');
+  }
+
+  insertVar(variable: string) {
+    const el = document.getElementById('wa-message-input') as HTMLTextAreaElement;
+    if (el) {
+      const start = el.selectionStart ?? this.waMessage.length;
+      const end = el.selectionEnd ?? this.waMessage.length;
+      this.waMessage = this.waMessage.slice(0, start) + variable + this.waMessage.slice(end);
+      setTimeout(() => { el.focus(); el.setSelectionRange(start + variable.length, start + variable.length); }, 0);
+    } else {
+      this.waMessage += variable;
+    }
+  }
+
+  resetWaMessage() {
+    this.waMessage = this.DEFAULT_WA_MESSAGE;
+  }
+
+  saveSettings() {
+    this.settingsSaving = true;
+    this.plantService.updateClientSettings(this.clientSlug, this.waMessage).subscribe({
+      next: () => {
+        this.settingsSaving = false;
+        this.settingsSaved = true;
+        this.cdr.detectChanges();
+        setTimeout(() => { this.settingsSaved = false; this.cdr.detectChanges(); }, 3000);
+      },
+      error: (err) => { console.error(err); this.settingsSaving = false; this.cdr.detectChanges(); }
+    });
+  }
+
+  copyStoreUrl() {
+    navigator.clipboard.writeText(this.storeUrl).then(() => {
+      this.urlCopied = true;
+      this.cdr.detectChanges();
+      setTimeout(() => { this.urlCopied = false; this.cdr.detectChanges(); }, 2000);
+    });
+  }
+
+  // ── Sales ──
   loadSalesReport(period: string) {
     this.salesLoading = true;
     this.salesReport = null;
@@ -700,10 +793,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     });
   }
 
-  changeSalesPeriod(period: string) {
-    this.selectedSalesPeriod = period;
-    this.loadSalesReport(period);
-  }
+  changeSalesPeriod(period: string) { this.selectedSalesPeriod = period; this.loadSalesReport(period); }
 
   getDailySummary(): { date: string; units: number; revenue: number; items: number }[] {
     if (!this.salesReport?.recent_imports?.length) return [];
@@ -713,9 +803,9 @@ export class AdminComponent implements OnInit, AfterViewInit {
       const key = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear().toString().slice(2)}`;
       if (!map.has(key)) map.set(key, { date: key, units: 0, revenue: 0, items: 0 });
       const entry = map.get(key)!;
-      entry.units   += row.qty_sold  || 0;
+      entry.units += row.qty_sold || 0;
       entry.revenue += (row.qty_sold || 0) * (row.price || 0);
-      entry.items   += 1;
+      entry.items += 1;
     }
     return Array.from(map.values()).sort((a, b) => b.date.localeCompare(a.date));
   }
@@ -725,11 +815,13 @@ export class AdminComponent implements OnInit, AfterViewInit {
     const max = Math.max(...this.salesReport.chart_data.map(d => d.revenue), 1);
     return Math.max(4, Math.round((value / max) * 90));
   }
+
   getBarPxUnits(value: number): number {
     if (!this.salesReport?.chart_data?.length) return 0;
     const max = Math.max(...this.salesReport.chart_data.map(d => d.units), 1);
     return Math.max(4, Math.round((value / max) * 40));
   }
+
   formatChartDay(day: string): string {
     if (!day) return '';
     const d = new Date(day);
@@ -739,20 +831,20 @@ export class AdminComponent implements OnInit, AfterViewInit {
   logout() { sessionStorage.removeItem('admin_slug'); this.router.navigate(['/']); }
   goToPublic() { this.router.navigate(['/']); }
 
-  get totalStock() { return this.plants.reduce((s,p) => s + (p.stock||0), 0); }
+  get totalStock() { return this.plants.reduce((s, p) => s + (p.stock || 0), 0); }
   get lowStockPlants() { return this.plants.filter(p => p.stock > 0 && p.stock <= 5); }
   get outOfStockPlants() { return this.plants.filter(p => p.stock <= 0); }
-  get estimatedInventoryValue() { return this.plants.reduce((s,p) => s + ((p.price||0)*(p.stock||0)), 0); }
+  get estimatedInventoryValue() { return this.plants.reduce((s, p) => s + ((p.price || 0) * (p.stock || 0)), 0); }
 
   get donutSegments() {
     const c = 2 * Math.PI * 44;
-    const map = new Map<string,number>();
-    this.plants.forEach(p => { const k = p.category||'Sin categoría'; map.set(k,(map.get(k)||0)+1); });
+    const map = new Map<string, number>();
+    this.plants.forEach(p => { const k = p.category || 'Sin categoría'; map.set(k, (map.get(k) || 0) + 1); });
     const total = this.plants.length || 1;
     let offset = 0; let ci = 0; const segs: any[] = [];
-    map.forEach((count,category) => {
-      const pct = count/total; const dash = pct*c;
-      segs.push({ category, count, percent: Math.round(pct*100), color: CHART_COLORS[ci%CHART_COLORS.length], dashArray:`${dash} ${c}`, dashOffset:-offset });
+    map.forEach((count, category) => {
+      const pct = count / total; const dash = pct * c;
+      segs.push({ category, count, percent: Math.round(pct * 100), color: CHART_COLORS[ci % CHART_COLORS.length], dashArray: `${dash} ${c}`, dashOffset: -offset });
       offset += dash; ci++;
     });
     return segs;
@@ -781,14 +873,13 @@ export class AdminComponent implements OnInit, AfterViewInit {
   }
   getRowMarginLabel(item: RestockItem): string {
     const m = this.getRowMargin(item);
-    if (m >= 40) return '✅ Buen margen'; if (m >= 20) return '⚠️ Margen bajo'; return '🔴 Sin margen';
+    if (m >= 40) return 'Buen margen'; if (m >= 20) return 'Margen bajo'; return 'Sin margen';
   }
   getRowMarginTag(item: RestockItem): string {
     const m = this.getRowMargin(item);
     return m >= 40 ? 'tag-ok' : m >= 20 ? 'tag-suggested' : 'tag-warn';
   }
-  countApplied(): number { return this.restockItems.filter(i => i.apply_suggested_price).length; }
-  get totalInvoiceCost(): number { return this.restockItems.reduce((s,i) => s + (i.unit_cost * i.quantity), 0); }
+  get totalInvoiceCost(): number { return this.restockItems.reduce((s, i) => s + (i.unit_cost * i.quantity), 0); }
 
   onInvoiceSelected(event: any) { const f = event.target.files[0]; if (f) this.selectedInvoice = f; }
 
@@ -804,7 +895,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
         this.renderIcons();
       },
       error: (err) => {
-        console.error('Error analizando factura:', err);
+        console.error(err);
         this.invoiceLoading = false;
         this.restockItems = this.buildRestockItems([{ plant_name: 'Ficus Lyrata', quantity: 5, unit_cost: 15.0 }]);
         this.cdr.detectChanges();
@@ -815,9 +906,9 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   buildRestockItems(raw: any[]): RestockItem[] {
     return raw.map(r => {
-      const match = this.plants.find(p => p.name.toLowerCase().includes((r.plant_name||'').toLowerCase()));
+      const match = this.plants.find(p => p.name.toLowerCase().includes((r.plant_name || '').toLowerCase()));
       const hasPrice = match?.price != null && match.price > 0;
-      return { plant_name: r.plant_name||'', category: r.category||match?.category||'', quantity: r.quantity||1, unit_cost: r.unit_cost||0, total_cost: (r.unit_cost||0)*(r.quantity||1), current_sale_price: match?.price??null, row_margin: this.desiredMargin, apply_suggested_price: !hasPrice };
+      return { plant_name: r.plant_name || '', category: r.category || match?.category || '', quantity: r.quantity || 1, unit_cost: r.unit_cost || 0, total_cost: (r.unit_cost || 0) * (r.quantity || 1), current_sale_price: match?.price ?? null, row_margin: this.desiredMargin, apply_suggested_price: !hasPrice };
     });
   }
 
@@ -847,15 +938,15 @@ export class AdminComponent implements OnInit, AfterViewInit {
     const formData = new FormData();
     formData.append('file', this.posFile);
     this.plantService.analyzePosFile(this.clientSlug, formData).subscribe({
-      next: (res) => { this.posItems = res.items.map((i: any) => ({ ...i, skip: i.status==='not_found' })); this.posLoading = false; this.cdr.detectChanges(); this.renderIcons(); },
-      error: (err) => { this.posError = err.error?.message||'Error analizando el archivo.'; this.posLoading = false; this.cdr.detectChanges(); }
+      next: (res) => { this.posItems = res.items.map((i: any) => ({ ...i, skip: i.status === 'not_found' })); this.posLoading = false; this.cdr.detectChanges(); this.renderIcons(); },
+      error: (err) => { this.posError = err.error?.message || 'Error analizando el archivo.'; this.posLoading = false; this.cdr.detectChanges(); }
     });
   }
 
   confirmPosImport() {
     const toImport = this.posItems.filter(i => !i.skip && i.matched_plant_id);
     if (!toImport.length) { alert('No hay productos válidos para importar.'); return; }
-    this.plantService.confirmPosImport(this.clientSlug, toImport, this.posFile?.name||'import').subscribe({
+    this.plantService.confirmPosImport(this.clientSlug, toImport, this.posFile?.name || 'import').subscribe({
       next: (res) => {
         const totalItems = res.summary?.total_items ?? toImport.length;
         const totalUnits = res.summary?.total_units ?? 0;
@@ -872,10 +963,10 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   cancelPosImport() { this.posFile = null; this.posItems = []; this.posError = ''; }
 
-  countPosStatus(status: string): number { return this.posItems.filter(i => i.status===status).length; }
-  getPosBadgeBg(s: string) { return s==='found'?'#dcfce7':s==='review'?'#fef3c7':'#fee2e2'; }
-  getPosBadgeColor(s: string) { return s==='found'?'#15803d':s==='review'?'#92400e':'#991b1b'; }
-  getPosBadgeLabel(s: string) { return s==='found'?'✅ Encontrado':s==='review'?'⚠️ Revisar':'❌ No encontrado'; }
+  countPosStatus(status: string): number { return this.posItems.filter(i => i.status === status).length; }
+  getPosBadgeBg(s: string) { return s === 'found' ? '#dcfce7' : s === 'review' ? '#fef3c7' : '#fee2e2'; }
+  getPosBadgeColor(s: string) { return s === 'found' ? '#15803d' : s === 'review' ? '#92400e' : '#991b1b'; }
+  getPosBadgeLabel(s: string) { return s === 'found' ? 'Encontrado' : s === 'review' ? 'Revisar' : 'No encontrado'; }
 
   savePlant() {
     if (!this.plantForm.name) return;
@@ -898,7 +989,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   resetForm() { this.editingId = undefined; this.plantForm = this.emptyPlant(); }
 
   emptyPlant(): Plant {
-    return { name:'', category:'', description:'', price: undefined as any, cost_price: undefined as any, stock: undefined as any, image_url:'', light:'', water:'', is_featured:false, is_active:true };
+    return { name: '', category: '', description: '', price: undefined as any, cost_price: undefined as any, stock: undefined as any, image_url: '', light: '', water: '', is_featured: false, is_active: true };
   }
 
   uploadPlantImage(event: any) {
