@@ -16,17 +16,11 @@ export const CATEGORY_GROUPS = [
   { label: 'Productos de jardín', items: ['Tiestos y Macetas', 'Tierra y Sustratos', 'Fertilizantes y Abonos', 'Herramientas'] },
 ];
 
-const CHART_COLORS = ['#14452F','#4caf78','#f5c842','#9ecfb0','#e07b54','#6b8f71','#a78bfa','#38bdf8','#8B5E3C','#f0a070','#d4a017','#b0c4de'];
+const CHART_COLORS = ['#10B981','#34D399','#6EE7B7','#059669','#047857','#14452F','#f5c842','#38bdf8','#8B5E3C'];
 
 interface RestockItem {
-  plant_name: string;
-  category: string;
-  quantity: number;
-  unit_cost: number;
-  total_cost: number;
-  current_sale_price: number | null;
-  row_margin: number;
-  apply_suggested_price: boolean;
+  plant_name: string; category: string; quantity: number; unit_cost: number;
+  total_cost: number; current_sale_price: number | null; row_margin: number; apply_suggested_price: boolean;
 }
 
 declare const lucide: any;
@@ -36,610 +30,446 @@ declare const lucide: any;
   standalone: true,
   imports: [CommonModule, FormsModule, PlantCardComponent],
   styles: [`
-    .metric-card { background:white;border:1px solid #eef1ec;border-radius:20px;padding:20px;text-align:center;box-shadow:0 4px 12px rgba(16,35,25,0.04); }
-    .metric-card.clickable { cursor:pointer;transition:all 0.15s; }
-    .metric-card.clickable:hover { transform:translateY(-2px);box-shadow:0 8px 20px rgba(16,35,25,0.1);border-color:#14452F; }
-    .section-title { margin:0 0 4px 0;color:#102319;font-size:1.25rem;font-weight:700; }
-    .section-sub { margin:0 0 16px 0;color:#516052;font-size:0.85rem; }
-    .form-input { padding:12px 14px;border-radius:12px;border:1px solid #dfe7dd;font-size:0.92rem;outline:none;width:100%;box-sizing:border-box; }
-    .form-label { display:block;font-size:0.75rem;font-weight:700;color:#516052;margin-bottom:5px;letter-spacing:0.3px; }
-    .form-group { display:flex;flex-direction:column; }
-    .btn-primary { background:#14452F;color:white;padding:12px 20px;border:none;border-radius:99px;cursor:pointer;font-weight:700;font-size:0.92rem; }
-    .btn-primary:hover { background:#0d3320; }
-    .btn-secondary { background:#f4f8f1;color:#102319;padding:12px 20px;border:1px solid #dfe7dd;border-radius:99px;cursor:pointer;font-weight:600;font-size:0.92rem; }
-    .admin-inventory { display:flex;flex-direction:column;gap:10px; }
-    select.form-input { appearance:auto; }
-    .restock-mobile { display: block; }
-    .restock-desktop { display: none; }
-    @media (min-width: 768px) { .restock-mobile { display: none; } .restock-desktop { display: block; } }
-    .profit-positive { color:#15803d; font-weight:700; }
-    .profit-negative { color:#dc2626; font-weight:700; }
-    .profit-neutral  { color:#516052; font-weight:600; }
-    .restock-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
-    .restock-table th { background:#f4f8f1; color:#516052; font-weight:700; padding:10px 12px; text-align:left; font-size:0.72rem; letter-spacing:0.3px; }
-    .restock-table td { padding:10px 12px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
-    .restock-table tr:last-child td { border-bottom:none; }
-    .restock-table input[type=number] { width:80px; padding:6px 8px; border:1px solid #dfe7dd; border-radius:8px; font-size:0.82rem; outline:none; }
-    .tag-suggested { background:#fef3c7; color:#92400e; font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:6px; }
-    .tag-ok { background:#dcfce7; color:#15803d; font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:6px; }
-    .tag-warn { background:#fee2e2; color:#991b1b; font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:6px; }
-    .period-pill { padding:6px 14px;border-radius:99px;font-size:0.8rem;font-weight:600;cursor:pointer;border:1px solid #dfe7dd;background:#f4f8f1;color:#516052;transition:all 0.15s; }
-    .period-pill.active { background:#14452F;color:white;border-color:#14452F; }
-    .inv-filter-pill { padding:7px 14px;border-radius:99px;font-size:0.8rem;font-weight:600;cursor:pointer;border:1px solid #dfe7dd;background:#f4f8f1;color:#516052;transition:all 0.15s; }
-    .nav-tab { display:flex;align-items:center;gap:6px;padding:10px 16px;border:none;background:none;color:rgba(255,255,255,0.6);font-size:0.85rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap; }
-    .nav-tab.active { color:white;border-bottom-color:white; }
-    .nav-tab:hover { color:white; }
-    optgroup { font-weight:700; color:#516052; }
-    .settings-card { background:white;border:1px solid #eef1ec;border-radius:20px;padding:24px;box-shadow:0 4px 12px rgba(16,35,25,0.04);margin-bottom:16px; }
-    .settings-card h3 { margin:0 0 4px;color:#102319;font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px; }
-    .settings-card p { margin:0 0 16px;color:#516052;font-size:0.82rem; }
-    .var-chip { display:inline-flex;align-items:center;gap:4px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:8px;padding:3px 10px;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s; }
-    .var-chip:hover { background:#dcfce7; }
-    .save-feedback { display:inline-flex;align-items:center;gap:6px;color:#15803d;font-size:0.82rem;font-weight:600;opacity:0;transition:opacity 0.3s; }
-    .save-feedback.show { opacity:1; }
+    :host { --sidebar-bg: #0A5C36; --sidebar-hover: #0E794A; --bg: #F4F7F6; --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB; }
+    * { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    
+    .layout { display: flex; min-height: 100vh; background: var(--bg); }
+    
+    /* SIDEBAR (FIGMA STYLE) */
+    .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+    .brand { padding: 30px 24px; display: flex; align-items: center; gap: 12px; }
+    .brand-icon { font-size: 24px; }
+    .brand-text { display: flex; flex-direction: column; }
+    .brand-title { font-weight: 700; font-size: 1.1rem; line-height: 1.2; }
+    .brand-sub { font-size: 0.75rem; opacity: 0.7; }
+    
+    .nav-menu { padding: 0 16px; flex: 1; display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; color: rgba(255,255,255,0.7); cursor: pointer; border: none; background: transparent; font-size: 0.95rem; font-weight: 500; text-align: left; transition: all 0.2s; width: 100%; }
+    .nav-item:hover { background: var(--sidebar-hover); color: white; }
+    .nav-item.active { background: var(--sidebar-hover); color: white; font-weight: 600; border-left: 4px solid #10B981; }
+    .nav-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 16px 0; }
+    .sidebar-footer { padding: 24px; font-size: 0.75rem; opacity: 0.6; display: flex; justify-content: space-between; align-items: center; }
+    
+    /* MAIN CONTENT */
+    .main { flex: 1; margin-left: 260px; padding: 40px; overflow-x: hidden; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .page-title { font-size: 1.75rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 12px; margin: 0; }
+    .header-actions { display: flex; gap: 12px; }
+    
+    /* CARDS & METRICS */
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid var(--border); }
+    .metric-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .metric-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+    .metric-val { font-size: 1.75rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+    .metric-lab { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+    
+    /* CHARTS */
+    .chart-box { min-height: 300px; margin-bottom: 30px; }
+    .chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .chart-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+    
+    /* BUTTONS & FORMS */
+    .btn-primary { background: #10B981; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: background 0.2s; }
+    .btn-primary:hover { background: #059669; }
+    .btn-outline { background: white; color: var(--text-main); border: 1px solid var(--border); padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: background 0.2s; }
+    .btn-outline:hover { background: #F9FAFB; }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    .form-input:focus { border-color: #10B981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+    
+    /* TABLES */
+    .table-container { overflow-x: auto; background: white; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #F9FAFB; padding: 14px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+    td { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text-main); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    
+    /* UTILS */
+    .admin-inventory { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+    .period-pill { padding:6px 14px; border-radius:99px; font-size:0.8rem; font-weight:600; cursor:pointer; border:1px solid var(--border); background:white; color:var(--text-muted); transition:all 0.15s; }
+    .period-pill.active { background:#10B981; color:white; border-color:#10B981; }
+    
+    @media (max-width: 768px) {
+      .sidebar { width: 70px; }
+      .brand-text, .nav-item span { display: none; }
+      .main { margin-left: 70px; padding: 20px; }
+      .nav-item { justify-content: center; padding: 14px 0; }
+    }
   `],
   template: `
-    <header style="background:#14452F;color:white;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(20,69,47,0.18);">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 0;">
-        <button (click)="goToPublic()" style="background:none;border:none;color:rgba(255,255,255,0.75);cursor:pointer;font-size:0.82rem;font-weight:500;display:flex;align-items:center;gap:5px;padding:0;">
-          <i data-lucide="arrow-left" style="width:15px;height:15px;"></i>
-          Ver tienda
-        </button>
-        <div style="text-align:center;">
-          <div style="font-size:0.95rem;font-weight:700;color:white;">{{ client?.business_name || 'Admin' }}</div>
-        </div>
-        <button (click)="logout()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:0.78rem;display:flex;align-items:center;gap:5px;">
-          <i data-lucide="log-out" style="width:13px;height:13px;"></i>
-          Salir
-        </button>
-      </div>
-      <nav style="display:flex;overflow-x:auto;padding:0 12px;scrollbar-width:none;gap:2px;">
-        <button class="nav-tab" [class.active]="activeTab==='dashboard'" (click)="setTab('dashboard')">
-          <i data-lucide="layout-dashboard" style="width:15px;height:15px;"></i>Dashboard
-        </button>
-        <button class="nav-tab" [class.active]="activeTab==='ventas'" (click)="setTab('ventas')">
-          <i data-lucide="bar-chart-2" style="width:15px;height:15px;"></i>Ventas
-        </button>
-        <button class="nav-tab" [class.active]="activeTab==='inventario'" (click)="setTab('inventario')">
-          <i data-lucide="package" style="width:15px;height:15px;"></i>Inventario
-        </button>
-        <button class="nav-tab" [class.active]="activeTab==='pos'" (click)="setTab('pos')">
-          <i data-lucide="upload" style="width:15px;height:15px;"></i>Importar POS
-        </button>
-        <button class="nav-tab" [class.active]="activeTab==='ajustes'" (click)="setTab('ajustes')">
-          <i data-lucide="settings" style="width:15px;height:15px;"></i>Ajustes
-        </button>
-      </nav>
-    </header>
-
-    <div style="max-width:1100px;margin:0 auto;padding:20px 16px 60px;">
-
-      <div *ngIf="activeTab==='dashboard'">
-        <h2 class="section-title">Dashboard</h2>
-        <p class="section-sub">Resumen del inventario en tiempo real.</p>
-
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:11px;margin-bottom:14px;">
-          <div class="metric-card clickable" (click)="goToInventory('all')">
-            <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="leaf" style="width:20px;height:20px;color:#1f7a4d;"></i></div>
-            <div style="font-size:1.8rem;font-weight:800;color:#102319;line-height:1;">{{ plants.length }}</div>
-            <div style="font-size:0.72rem;color:#516052;font-weight:600;margin-top:5px;">Total Productos</div>
-            <div style="font-size:0.65rem;color:#9ca3af;margin-top:3px;">Ver todos →</div>
-          </div>
-          <div class="metric-card clickable" (click)="goToInventory('all')">
-            <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="boxes" style="width:20px;height:20px;color:#1f7a4d;"></i></div>
-            <div style="font-size:1.8rem;font-weight:800;color:#1f7a4d;line-height:1;">{{ totalStock }}</div>
-            <div style="font-size:0.72rem;color:#516052;font-weight:600;margin-top:5px;">Total en Stock</div>
-            <div style="font-size:0.65rem;color:#9ca3af;margin-top:3px;">Ver inventario →</div>
-          </div>
-          <div class="metric-card clickable" style="border-color:#fef3c7;" (click)="goToInventory('low')">
-            <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="alert-triangle" style="width:20px;height:20px;color:#d97706;"></i></div>
-            <div style="font-size:1.8rem;font-weight:800;color:#d97706;line-height:1;">{{ lowStockPlants.length }}</div>
-            <div style="font-size:0.72rem;color:#516052;font-weight:600;margin-top:5px;">Bajo Stock</div>
-            <div style="font-size:0.65rem;color:#d97706;margin-top:3px;">Ver productos →</div>
-          </div>
-          <div class="metric-card clickable" style="border-color:#fee2e2;" (click)="goToInventory('out')">
-            <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="x-circle" style="width:20px;height:20px;color:#dc2626;"></i></div>
-            <div style="font-size:1.8rem;font-weight:800;color:#dc2626;line-height:1;">{{ outOfStockPlants.length }}</div>
-            <div style="font-size:0.72rem;color:#516052;font-weight:600;margin-top:5px;">Sin Stock</div>
-            <div style="font-size:0.65rem;color:#dc2626;margin-top:3px;">Ver productos →</div>
-          </div>
-          <div class="metric-card clickable" style="background:linear-gradient(135deg,#102319,#1f7a4d);border:none;" (click)="setTab('ventas')">
-            <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="trending-up" style="width:20px;height:20px;color:rgba(255,255,255,0.8);"></i></div>
-            <div style="font-size:1.3rem;font-weight:800;color:white;line-height:1;">\${{ estimatedInventoryValue | number:'1.0-0' }}</div>
-            <div style="font-size:0.72rem;color:rgba(255,255,255,0.75);font-weight:600;margin-top:5px;">Valor Estimado</div>
-            <div style="font-size:0.65rem;color:rgba(255,255,255,0.5);margin-top:3px;">Ver ventas →</div>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand">
+          <i data-lucide="leaf" class="brand-icon"></i>
+          <div class="brand-text">
+            <span class="brand-title">Jardín Esmeralda</span>
+            <span class="brand-sub">Sistema de Gestión</span>
           </div>
         </div>
-
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-bottom:14px;">
-          <div style="background:white;border:1px solid #eef1ec;border-radius:20px;padding:20px;box-shadow:0 4px 12px rgba(16,35,25,0.04);">
-            <h3 style="margin:0 0 16px 0;color:#102319;font-size:0.9rem;font-weight:700;display:flex;align-items:center;gap:7px;">
-              <i data-lucide="pie-chart" style="width:16px;height:16px;color:#14452F;"></i>
-              Inventario por categoría
-            </h3>
-            <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
-              <svg width="130" height="130" viewBox="0 0 130 130" style="flex-shrink:0;">
-                <ng-container *ngFor="let seg of donutSegments">
-                  <circle cx="65" cy="65" r="44" fill="none" [attr.stroke]="seg.color" stroke-width="22"
-                    [attr.stroke-dasharray]="seg.dashArray" [attr.stroke-dashoffset]="seg.dashOffset"
-                    style="transform:rotate(-90deg);transform-origin:65px 65px;"></circle>
-                </ng-container>
-                <text x="65" y="61" text-anchor="middle" style="font-size:18px;font-weight:800;fill:#102319;">{{ plants.length }}</text>
-                <text x="65" y="76" text-anchor="middle" style="font-size:9px;fill:#516052;">Total</text>
-              </svg>
-              <div style="flex:1;min-width:120px;display:flex;flex-direction:column;gap:7px;">
-                <div *ngFor="let seg of donutSegments" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <span style="width:9px;height:9px;border-radius:50%;flex-shrink:0;" [style.background]="seg.color"></span>
-                    <span style="font-size:0.78rem;color:#102319;">{{ seg.category }}</span>
-                  </div>
-                  <span style="font-size:0.74rem;color:#516052;font-weight:600;">{{ seg.count }} ({{ seg.percent }}%)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style="background:white;border:1px solid #eef1ec;border-radius:20px;padding:20px;box-shadow:0 4px 12px rgba(16,35,25,0.04);">
-            <h3 style="margin:0 0 4px 0;color:#102319;font-size:0.9rem;font-weight:700;display:flex;align-items:center;gap:7px;">
-              <i data-lucide="alert-triangle" style="width:16px;height:16px;color:#d97706;"></i>
-              Productos con bajo stock
-            </h3>
-            <p style="margin:0 0 12px 0;color:#516052;font-size:0.75rem;">≤5 unidades disponibles</p>
-            <div *ngIf="lowStockPlants.length===0" style="text-align:center;padding:14px;color:#aaa;font-size:0.85rem;">Inventario bien surtido</div>
-            <div *ngFor="let p of lowStockPlants" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f4f4f4;cursor:pointer;" (click)="goToInventory('low')">
-              <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;background:#f4f8f1;flex-shrink:0;">
-                <img *ngIf="p.image_url" [src]="p.image_url" style="width:100%;height:100%;object-fit:cover;">
-                <div *ngIf="!p.image_url" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i data-lucide="sprout" style="width:18px;height:18px;color:#9ca3af;"></i></div>
-              </div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-weight:700;color:#102319;font-size:0.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.name }}</div>
-                <div style="color:#dc2626;font-size:0.74rem;font-weight:600;">{{ p.stock }} {{ p.stock===1?'unidad':'unidades' }}</div>
-              </div>
-              <div style="font-weight:700;color:#1f7a4d;font-size:0.88rem;">\${{ p.price }}</div>
-            </div>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
-          <button (click)="setTab('ventas')" style="background:white;border:1px solid #eef1ec;border-radius:16px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.15s;" onmouseover="this.style.borderColor='#14452F'" onmouseout="this.style.borderColor='#eef1ec'">
-            <div style="background:#f0fdf4;border-radius:10px;padding:8px;flex-shrink:0;"><i data-lucide="bar-chart-2" style="width:18px;height:18px;color:#14452F;"></i></div>
-            <div><div style="font-weight:700;color:#102319;font-size:0.85rem;">Ver ventas</div><div style="font-size:0.72rem;color:#9ca3af;">Reporte POS</div></div>
+        
+        <nav class="nav-menu">
+          <button class="nav-item" [class.active]="activeTab==='dashboard'" (click)="setTab('dashboard')">
+            <i data-lucide="layout-dashboard"></i> <span>Dashboard</span>
           </button>
-          <button (click)="goToInventory('all')" style="background:white;border:1px solid #eef1ec;border-radius:16px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.15s;" onmouseover="this.style.borderColor='#14452F'" onmouseout="this.style.borderColor='#eef1ec'">
-            <div style="background:#f0fdf4;border-radius:10px;padding:8px;flex-shrink:0;"><i data-lucide="package" style="width:18px;height:18px;color:#14452F;"></i></div>
-            <div><div style="font-weight:700;color:#102319;font-size:0.85rem;">Inventario</div><div style="font-size:0.72rem;color:#9ca3af;">{{ plants.length }} productos</div></div>
+          <button class="nav-item" [class.active]="activeTab==='inventario'" (click)="setTab('inventario')">
+            <i data-lucide="package"></i> <span>Inventario</span>
           </button>
-          <button (click)="setTab('pos')" style="background:white;border:1px solid #eef1ec;border-radius:16px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.15s;" onmouseover="this.style.borderColor='#14452F'" onmouseout="this.style.borderColor='#eef1ec'">
-            <div style="background:#f0fdf4;border-radius:10px;padding:8px;flex-shrink:0;"><i data-lucide="upload" style="width:18px;height:18px;color:#14452F;"></i></div>
-            <div><div style="font-weight:700;color:#102319;font-size:0.85rem;">Importar POS</div><div style="font-size:0.72rem;color:#9ca3af;">Subir ventas</div></div>
+          <button class="nav-item" [class.active]="activeTab==='stock'" (click)="setTab('stock')">
+            <i data-lucide="shopping-cart"></i> <span>Stock</span>
           </button>
-          <button (click)="goToInventory('all'); showForm=true" style="background:#14452F;border:none;border-radius:16px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:10px;">
-            <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:8px;flex-shrink:0;"><i data-lucide="plus-circle" style="width:18px;height:18px;color:white;"></i></div>
-            <div><div style="font-weight:700;color:white;font-size:0.85rem;">Nuevo producto</div><div style="font-size:0.72rem;color:rgba(255,255,255,0.6);">Agregar al catálogo</div></div>
+          <button class="nav-item" [class.active]="activeTab==='ventas'" (click)="setTab('ventas')">
+            <i data-lucide="trending-up"></i> <span>Ventas & Ganancias</span>
+          </button>
+          
+          <div class="nav-divider"></div>
+          
+          <button class="nav-item" [class.active]="activeTab==='pos'" (click)="setTab('pos')">
+            <i data-lucide="upload-cloud"></i> <span>Importar POS</span>
+          </button>
+          <button class="nav-item" [class.active]="activeTab==='ajustes'" (click)="setTab('ajustes')">
+            <i data-lucide="settings"></i> <span>Ajustes</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <span>© 2026 Jardín Esmeralda</span>
+          <button (click)="logout()" style="background:none; border:none; color:white; cursor:pointer;" title="Cerrar Sesión">
+            <i data-lucide="log-out" style="width:16px;"></i>
           </button>
         </div>
-      </div>
+      </aside>
 
-      <div *ngIf="activeTab==='ventas'">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
-          <div>
-            <h2 class="section-title">Reporte de Ventas</h2>
-            <p style="margin:4px 0 0;color:#516052;font-size:0.85rem;">Ventas importadas desde el POS.</p>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button *ngFor="let p of salesPeriods" class="period-pill" [class.active]="selectedSalesPeriod===p.value" (click)="changeSalesPeriod(p.value)">{{ p.label }}</button>
-          </div>
-        </div>
-
-        <div *ngIf="salesLoading" style="text-align:center;padding:30px;color:#516052;">Cargando reporte...</div>
-
-        <ng-container *ngIf="!salesLoading && salesReport">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;">
-            <div class="metric-card" style="border-color:#dcfce7;">
-              <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="dollar-sign" style="width:18px;height:18px;color:#15803d;"></i></div>
-              <div style="font-size:1.5rem;font-weight:800;color:#15803d;line-height:1;">\${{ salesReport.summary.total_revenue | number:'1.0-0' }}</div>
-              <div style="font-size:0.7rem;color:#516052;font-weight:600;margin-top:5px;">Ventas Totales</div>
-            </div>
-            <div class="metric-card">
-              <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="trending-up" style="width:18px;height:18px;color:#1f7a4d;"></i></div>
-              <div style="font-size:1.5rem;font-weight:800;color:#1f7a4d;line-height:1;">\${{ salesReport.summary.total_profit | number:'1.0-0' }}</div>
-              <div style="font-size:0.7rem;color:#516052;font-weight:600;margin-top:5px;">Ganancia Neta</div>
-            </div>
-            <div class="metric-card" style="border-color:#fef3c7;">
-              <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="percent" style="width:18px;height:18px;color:#d97706;"></i></div>
-              <div style="font-size:1.5rem;font-weight:800;color:#d97706;line-height:1;">{{ salesReport.summary.margin_pct | number:'1.0-0' }}%</div>
-              <div style="font-size:0.7rem;color:#516052;font-weight:600;margin-top:5px;">Margen</div>
-            </div>
-            <div class="metric-card">
-              <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="shopping-bag" style="width:18px;height:18px;color:#102319;"></i></div>
-              <div style="font-size:1.5rem;font-weight:800;color:#102319;line-height:1;">{{ salesReport.summary.total_units }}</div>
-              <div style="font-size:0.7rem;color:#516052;font-weight:600;margin-top:5px;">Unidades Vendidas</div>
-            </div>
-            <div class="metric-card">
-              <div style="display:flex;justify-content:center;margin-bottom:8px;"><i data-lucide="file-check" style="width:18px;height:18px;color:#516052;"></i></div>
-              <div style="font-size:1.5rem;font-weight:800;color:#516052;line-height:1;">{{ salesReport.summary.total_transactions }}</div>
-              <div style="font-size:0.7rem;color:#516052;font-weight:600;margin-top:5px;">Archivos importados</div>
-            </div>
-          </div>
-
-          <div *ngIf="salesReport.summary.total_units===0" style="text-align:center;padding:28px;background:#f9fdf9;border-radius:14px;color:#9ca3af;font-size:0.88rem;margin-bottom:18px;">
-            No hay ventas registradas para este período.
-          </div>
-
-          <ng-container *ngIf="salesReport.summary.total_units > 0">
-            <div style="background:#f9fdf9;border-radius:16px;padding:18px;margin-bottom:18px;" *ngIf="salesReport.chart_data.length > 0">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-                <h3 style="margin:0;color:#102319;font-size:0.88rem;font-weight:700;display:flex;align-items:center;gap:6px;">
-                  <i data-lucide="bar-chart-2" style="width:15px;height:15px;color:#14452F;"></i>
-                  Ventas diarias — últimos 14 días
-                </h3>
-                <div style="display:flex;gap:12px;">
-                  <div style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#14452F;display:inline-block;"></span><span style="font-size:0.72rem;color:#516052;">Ingresos ($)</span></div>
-                  <div style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#4caf78;display:inline-block;"></span><span style="font-size:0.72rem;color:#516052;">Unidades</span></div>
-                </div>
-              </div>
-              <div style="display:flex;align-items:flex-end;gap:6px;height:140px;overflow-x:auto;padding-bottom:4px;">
-                <div *ngFor="let d of salesReport.chart_data" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;flex:1;min-width:32px;height:100%;">
-                  <div [style.height.px]="getBarPxRevenue(d.revenue)" style="width:100%;background:#14452F;border-radius:5px 5px 0 0;opacity:0.85;" [title]="'$'+d.revenue"></div>
-                  <div [style.height.px]="getBarPxUnits(d.units)" style="width:100%;background:#4caf78;border-radius:5px 5px 0 0;" [title]="d.units+' u.'"></div>
-                  <div style="font-size:0.6rem;color:#9ca3af;white-space:nowrap;margin-top:3px;">{{ formatChartDay(d.day) }}</div>
-                </div>
-              </div>
-              <div style="display:flex;gap:6px;margin-top:6px;overflow-x:auto;">
-                <div *ngFor="let d of salesReport.chart_data" style="flex:1;min-width:32px;text-align:center;">
-                  <div style="font-size:0.62rem;color:#14452F;font-weight:700;">\${{ d.revenue | number:'1.0-0' }}</div>
-                  <div style="font-size:0.58rem;color:#4caf78;font-weight:600;">{{ d.units }}u</div>
-                </div>
-              </div>
-            </div>
-
-            <div style="margin-bottom:18px;" *ngIf="salesReport.top_plants.length > 0">
-              <h3 style="margin:0 0 12px 0;color:#102319;font-size:0.88rem;font-weight:700;display:flex;align-items:center;gap:6px;">
-                <i data-lucide="trophy" style="width:15px;height:15px;color:#d97706;"></i>
-                Top productos más vendidos
-              </h3>
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
-                <div *ngFor="let p of salesReport.top_plants; let i = index" style="display:flex;align-items:center;gap:10px;padding:12px;background:#f9fdf9;border-radius:14px;border:1px solid #eef1ec;">
-                  <div style="font-size:1rem;font-weight:800;color:#9ca3af;width:20px;text-align:center;flex-shrink:0;">#{{ i+1 }}</div>
-                  <div style="width:38px;height:38px;border-radius:10px;overflow:hidden;background:#f4f8f1;flex-shrink:0;">
-                    <img *ngIf="p.image_url" [src]="p.image_url" style="width:100%;height:100%;object-fit:cover;">
-                    <div *ngIf="!p.image_url" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i data-lucide="sprout" style="width:16px;height:16px;color:#9ca3af;"></i></div>
-                  </div>
-                  <div style="flex:1;min-width:0;">
-                    <div style="font-weight:700;color:#102319;font-size:0.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.name }}</div>
-                    <div style="font-size:0.72rem;color:#516052;">{{ p.units_sold }} u. · <span style="color:#15803d;font-weight:600;">\${{ p.revenue | number:'1.0-0' }}</span></div>
-                    <div style="font-size:0.68rem;color:#1f7a4d;font-weight:600;" *ngIf="p.profit > 0">gan. \${{ p.profit | number:'1.0-0' }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div *ngIf="getDailySummary().length > 0">
-              <h3 style="margin:0 0 12px 0;color:#102319;font-size:0.88rem;font-weight:700;display:flex;align-items:center;gap:6px;">
-                <i data-lucide="calendar" style="width:15px;height:15px;color:#14452F;"></i>
-                Historial por día
-              </h3>
-              <div style="display:flex;flex-direction:column;gap:8px;">
-                <div *ngFor="let day of getDailySummary()" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f9fdf9;border-radius:12px;border:1px solid #eef1ec;flex-wrap:wrap;gap:8px;">
-                  <div style="font-weight:700;color:#102319;font-size:0.88rem;display:flex;align-items:center;gap:6px;">
-                    <i data-lucide="calendar-days" style="width:14px;height:14px;color:#9ca3af;"></i>{{ day.date }}
-                  </div>
-                  <div style="display:flex;gap:20px;flex-wrap:wrap;">
-                    <div style="text-align:center;"><div style="font-size:0.68rem;color:#9ca3af;font-weight:600;text-transform:uppercase;">Unidades</div><div style="font-weight:700;color:#102319;">{{ day.units }}</div></div>
-                    <div style="text-align:center;"><div style="font-size:0.68rem;color:#9ca3af;font-weight:600;text-transform:uppercase;">Ingresos</div><div style="font-weight:700;color:#15803d;">\${{ day.revenue | number:'1.0-0' }}</div></div>
-                    <div style="text-align:center;"><div style="font-size:0.68rem;color:#9ca3af;font-weight:600;text-transform:uppercase;">Productos</div><div style="font-weight:700;color:#516052;">{{ day.items }}</div></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-        </ng-container>
-      </div>
-
-      <div *ngIf="activeTab==='inventario'">
-        <div style="background:linear-gradient(135deg,#0d3320,#1a5c38 60%,#236b45);border-radius:22px;padding:26px;margin-bottom:22px;box-shadow:0 16px 48px rgba(15,50,30,0.2);position:relative;overflow:hidden;">
-          <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,0.04);border-radius:50%;pointer-events:none;"></div>
-          <div style="position:relative;z-index:1;">
-            <span style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:white;font-size:0.68rem;font-weight:800;letter-spacing:1.5px;padding:4px 11px;border-radius:99px;display:inline-flex;align-items:center;gap:5px;margin-bottom:12px;">
-              <i data-lucide="sparkles" style="width:12px;height:12px;"></i> ACTUALIZAR INVENTARIO
-            </span>
-            <h2 style="color:white;font-size:1.45rem;font-weight:800;margin:0 0 7px;">Actualizar con Factura</h2>
-            <p style="color:rgba(255,255,255,0.7);font-size:0.82rem;margin:0 0 16px;">Sube una factura del suplidor y el AI detecta plantas y productos, cantidades y costos.</p>
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
-              <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:10px;">
-                <span style="color:rgba(255,255,255,0.75);font-size:0.8rem;font-weight:600;white-space:nowrap;">Margen deseado:</span>
-                <input type="number" [(ngModel)]="desiredMargin" min="1" max="99" style="width:60px;padding:5px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:white;font-size:0.88rem;font-weight:700;text-align:center;outline:none;">
-                <span style="color:rgba(255,255,255,0.75);font-size:0.8rem;">%</span>
-              </div>
-            </div>
-            <div style="background:rgba(255,255,255,0.08);border:2px dashed rgba(255,255,255,0.2);border-radius:14px;padding:16px;">
-              <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-                <label style="display:flex;align-items:center;gap:7px;background:white;color:#102319;border-radius:10px;padding:9px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;">
-                  <i data-lucide="upload" style="width:15px;height:15px;"></i>
-                  Subir factura
-                  <input type="file" (change)="onInvoiceSelected($event)" accept="image/*,.pdf" style="display:none;">
-                </label>
-                <span style="color:rgba(255,255,255,0.55);font-size:0.8rem;flex:1;min-width:90px;">{{ selectedInvoice ? selectedInvoice.name : 'JPG, PNG o PDF' }}</span>
-                <button [disabled]="!selectedInvoice||invoiceLoading" (click)="analyzeInvoice()"
-                  style="padding:10px 20px;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.85rem;"
-                  [style.background]="(!selectedInvoice||invoiceLoading)?'rgba(255,255,255,0.12)':'#4ade80'"
-                  [style.color]="(!selectedInvoice||invoiceLoading)?'rgba(255,255,255,0.35)':'#052e16'">
-                  {{ invoiceLoading ? 'Analizando...' : 'Analizar con AI' }}
-                </button>
-              </div>
-            </div>
-
-            <div *ngIf="restockItems.length" style="background:white;border-radius:16px;margin-top:16px;overflow:hidden;">
-              <div style="padding:16px 20px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                <h3 style="margin:0;color:#102319;font-size:0.95rem;font-weight:700;">Productos detectados</h3>
-                <span style="font-size:0.75rem;color:#516052;">{{ restockItems.length }} item(s)</span>
-              </div>
-              <div class="restock-mobile">
-                <div *ngFor="let item of restockItems; let i = index" style="padding:16px;border-bottom:1px solid #f4f4f4;">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                    <input type="text" [(ngModel)]="item.plant_name" style="flex:1;padding:8px 10px;border:1px solid #dfe7dd;border-radius:10px;font-size:0.88rem;outline:none;font-weight:600;">
-                    <button (click)="removeRestockItem(i)" style="background:#fff0f0;border:none;color:#9b1c1c;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;flex-shrink:0;">✕</button>
-                  </div>
-                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
-                    <div><div style="font-size:0.65rem;font-weight:700;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;">Cantidad</div><input type="number" [(ngModel)]="item.quantity" min="1" style="width:100%;padding:7px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.88rem;outline:none;box-sizing:border-box;"></div>
-                    <div><div style="font-size:0.65rem;font-weight:700;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;">Costo unit.</div><div style="display:flex;align-items:center;gap:2px;"><span style="color:#9ca3af;font-size:0.78rem;">$</span><input type="number" [(ngModel)]="item.unit_cost" step="0.01" min="0" style="width:100%;padding:7px 6px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.88rem;outline:none;box-sizing:border-box;"></div></div>
-                    <div><div style="font-size:0.65rem;font-weight:700;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;">Total</div><div style="padding:7px 8px;background:#f4f8f1;border-radius:8px;font-size:0.88rem;font-weight:600;color:#516052;">\${{ (item.unit_cost*item.quantity)|number:'1.2-2' }}</div></div>
-                  </div>
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-                    <div><div style="font-size:0.65rem;font-weight:700;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;">Precio venta</div><div style="display:flex;align-items:center;gap:2px;"><span style="color:#9ca3af;font-size:0.78rem;">$</span><input type="number" [(ngModel)]="item.current_sale_price" step="0.01" min="0" placeholder="0.00" style="width:100%;padding:7px 6px;border-radius:8px;font-size:0.88rem;outline:none;box-sizing:border-box;" [style.border]="'1px solid '+(!item.current_sale_price&&!item.apply_suggested_price?'#fca5a5':'#dfe7dd')"></div></div>
-                    <div><div style="font-size:0.65rem;font-weight:700;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;">Margen deseado</div><div style="display:flex;align-items:center;gap:4px;"><input type="number" [(ngModel)]="item.row_margin" min="1" max="99" style="width:60px;padding:7px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.88rem;outline:none;text-align:center;"><span style="color:#9ca3af;font-size:0.82rem;">%</span></div></div>
-                  </div>
-                  <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px;background:#f9fdf9;border-radius:10px;">
-                    <div style="flex:1;min-width:100px;"><div style="font-size:0.65rem;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:2px;">Precio sugerido</div><div style="font-weight:700;color:#1f7a4d;font-size:0.95rem;">\${{ getRowSuggestedPrice(item)|number:'1.2-2' }}</div><div class="tag-suggested" style="display:inline-block;margin-top:2px;">{{ item.row_margin }}% margen</div></div>
-                    <div *ngIf="getEffectivePrice(item)>0" style="flex:1;min-width:100px;"><div style="font-size:0.65rem;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:2px;">Ganancia</div><div [class]="getRowProfitClass(item)" style="font-size:0.95rem;">\${{ getRowProfit(item)|number:'1.2-2' }}</div><div style="font-size:0.72rem;color:#516052;">{{ getRowMargin(item)|number:'1.0-1' }}%</div><span [class]="getRowMarginTag(item)">{{ getRowMarginLabel(item) }}</span></div>
-                    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;"><input type="checkbox" [(ngModel)]="item.apply_suggested_price" [id]="'chk-'+i" style="width:18px;height:18px;accent-color:#14452F;cursor:pointer;"><label [for]="'chk-'+i" style="font-size:0.78rem;color:#102319;font-weight:600;cursor:pointer;">Usar sugerido</label></div>
-                  </div>
-                </div>
-              </div>
-              <div class="restock-desktop" style="overflow-x:auto;">
-                <table class="restock-table">
-                  <thead><tr><th>Producto</th><th>Cant.</th><th>Costo unit.</th><th>Costo total</th><th>Precio venta</th><th>Margen</th><th>Precio sugerido</th><th>Ganancia</th><th>Usar sugerido</th><th></th></tr></thead>
-                  <tbody>
-                    <tr *ngFor="let item of restockItems; let i = index">
-                      <td><input type="text" [(ngModel)]="item.plant_name" style="width:130px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;"></td>
-                      <td><input type="number" [(ngModel)]="item.quantity" min="1" style="width:55px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;"></td>
-                      <td><div style="display:flex;align-items:center;gap:3px;"><span style="color:#9ca3af;font-size:0.78rem;">$</span><input type="number" [(ngModel)]="item.unit_cost" step="0.01" min="0" style="width:65px;padding:6px 8px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;"></div></td>
-                      <td style="color:#516052;font-weight:600;white-space:nowrap;">\${{ (item.unit_cost*item.quantity)|number:'1.2-2' }}</td>
-                      <td><div style="display:flex;align-items:center;gap:3px;"><span style="color:#9ca3af;font-size:0.78rem;">$</span><input type="number" [(ngModel)]="item.current_sale_price" step="0.01" min="0" placeholder="Precio venta" style="width:70px;padding:6px 8px;border-radius:8px;font-size:0.82rem;outline:none;" [style.border]="'1px solid '+(!item.current_sale_price&&!item.apply_suggested_price?'#fca5a5':'#dfe7dd')"></div></td>
-                      <td><div style="display:flex;align-items:center;gap:3px;"><input type="number" [(ngModel)]="item.row_margin" min="1" max="99" style="width:46px;padding:6px;border:1px solid #dfe7dd;border-radius:8px;font-size:0.82rem;outline:none;text-align:center;"><span style="color:#9ca3af;font-size:0.78rem;">%</span></div></td>
-                      <td style="white-space:nowrap;"><span style="font-weight:700;color:#1f7a4d;">\${{ getRowSuggestedPrice(item)|number:'1.2-2' }}</span><div class="tag-suggested" style="margin-top:2px;display:inline-block;">{{ item.row_margin }}% margen</div></td>
-                      <td style="white-space:nowrap;"><ng-container *ngIf="getEffectivePrice(item)>0"><div [class]="getRowProfitClass(item)">\${{ getRowProfit(item)|number:'1.2-2' }}</div><div style="font-size:0.72rem;color:#516052;">{{ getRowMargin(item)|number:'1.0-1' }}%</div><span [class]="getRowMarginTag(item)">{{ getRowMarginLabel(item) }}</span></ng-container><span *ngIf="getEffectivePrice(item)<=0" style="color:#aaa;font-size:0.78rem;">—</span></td>
-                      <td style="text-align:center;"><input type="checkbox" [(ngModel)]="item.apply_suggested_price" style="width:16px;height:16px;accent-color:#14452F;cursor:pointer;"></td>
-                      <td><button (click)="removeRestockItem(i)" style="background:#fff0f0;border:none;color:#9b1c1c;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:700;font-size:0.8rem;">✕</button></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div style="padding:14px 20px;background:#f9fdf9;border-top:1px solid #eef1ec;">
-                <span style="font-size:0.8rem;color:#516052;"><span style="font-weight:700;color:#102319;">Costo total:</span> \${{ totalInvoiceCost|number:'1.2-2' }}</span>
-              </div>
-              <div style="padding:14px 20px 18px;display:flex;flex-wrap:wrap;gap:10px;">
-                <button (click)="confirmRestock()" class="btn-primary" style="flex:1;min-width:160px;display:flex;align-items:center;justify-content:center;gap:7px;"><i data-lucide="check" style="width:16px;height:16px;"></i>Confirmar actualización</button>
-                <button (click)="cancelInvoice()" class="btn-secondary" style="flex:1;min-width:130px;">Cancelar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-          <div>
-            <h2 class="section-title">Inventario</h2>
-            <p class="section-sub">{{ filteredInventory.length }} de {{ plants.length }} productos</p>
-          </div>
-          <button (click)="showForm=!showForm" class="btn-primary" style="display:flex;align-items:center;gap:6px;padding:10px 18px;">
-            <i data-lucide="plus" style="width:16px;height:16px;"></i>
-            {{ showForm ? 'Cerrar' : 'Nuevo producto' }}
-          </button>
-        </div>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-          <button class="inv-filter-pill" [style.background]="inventoryFilter==='all'?'#14452F':'#f4f8f1'" [style.color]="inventoryFilter==='all'?'white':'#516052'" [style.borderColor]="inventoryFilter==='all'?'#14452F':'#dfe7dd'" (click)="inventoryFilter='all'">Todos ({{ plants.length }})</button>
-          <button class="inv-filter-pill" [style.background]="inventoryFilter==='low'?'#d97706':'#fef3c7'" [style.color]="inventoryFilter==='low'?'white':'#92400e'" [style.borderColor]="inventoryFilter==='low'?'#d97706':'#fde68a'" (click)="inventoryFilter='low'">Bajo stock ({{ lowStockPlants.length }})</button>
-          <button class="inv-filter-pill" [style.background]="inventoryFilter==='out'?'#dc2626':'#fee2e2'" [style.color]="inventoryFilter==='out'?'white':'#991b1b'" [style.borderColor]="inventoryFilter==='out'?'#dc2626':'#fecaca'" (click)="inventoryFilter='out'">Sin stock ({{ outOfStockPlants.length }})</button>
-        </div>
-
-        <div *ngIf="showForm" id="plant-form" style="background:white;border-radius:22px;padding:24px;border:1px solid #eef1ec;box-shadow:0 4px 16px rgba(16,35,25,0.04);margin-bottom:18px;">
-          <h2 class="section-title" style="display:flex;align-items:center;gap:8px;"><i [attr.data-lucide]="editingId ? 'pencil' : 'sprout'" style="width:20px;height:20px;"></i>{{ editingId ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
-          <p class="section-sub">{{ editingId ? 'Modifica los datos.' : 'Agrega un nuevo producto al catálogo.' }}</p>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:13px;">
-            <div class="form-group"><label class="form-label">Nombre</label><input type="text" [(ngModel)]="plantForm.name" class="form-input" placeholder="Ej. Monstera Deliciosa"></div>
-            <div class="form-group">
-              <label class="form-label">Categoría</label>
-              <select [(ngModel)]="plantForm.category" class="form-input">
-                <option value="" disabled>Selecciona una categoría</option>
-                <optgroup *ngFor="let group of CATEGORY_GROUPS" [label]="group.label">
-                  <option *ngFor="let cat of group.items" [value]="cat">{{ cat }}</option>
-                </optgroup>
-              </select>
-            </div>
-            <div class="form-group"><label class="form-label">Precio de venta</label><input type="number" [(ngModel)]="plantForm.price" class="form-input" placeholder="Precio público"></div>
-            <div class="form-group"><label class="form-label">Costo de compra</label><input type="number" [(ngModel)]="plantForm.cost_price" class="form-input" placeholder="Costo mayorista"></div>
-            <div class="form-group"><label class="form-label">Cantidad disponible</label><input type="number" [(ngModel)]="plantForm.stock" class="form-input" placeholder="Stock"></div>
-            <div class="form-group">
-              <label class="form-label">Imagen</label>
-              <div style="position:relative;border:2px dashed #dfe7dd;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:46px;background:#fafdf8;cursor:pointer;">
-                <input type="file" accept="image/*" (change)="uploadPlantImage($event)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;">
-                <span style="color:#516052;font-weight:600;font-size:0.85rem;pointer-events:none;">{{ imageUploading ? 'Subiendo...' : plantForm.image_url ? 'Imagen subida' : 'Subir imagen' }}</span>
-              </div>
-            </div>
-            <div class="form-group"><label class="form-label">Luz</label><input type="text" [(ngModel)]="plantForm.light" class="form-input" placeholder="Ej. Sol parcial"></div>
-            <div class="form-group"><label class="form-label">Agua / Riego</label><input type="text" [(ngModel)]="plantForm.water" class="form-input" placeholder="Ej. Moderada"></div>
-            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Descripción</label><textarea [(ngModel)]="plantForm.description" class="form-input" style="min-height:76px;resize:vertical;" placeholder="Descripción breve..."></textarea></div>
-            <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;">
-              <input type="checkbox" [(ngModel)]="plantForm.is_featured" id="featured" style="width:17px;height:17px;accent-color:#14452F;">
-              <label for="featured" style="color:#102319;font-weight:500;cursor:pointer;font-size:0.9rem;">Destacar producto</label>
-            </div>
-            <div style="grid-column:1/-1;display:flex;gap:11px;flex-wrap:wrap;margin-top:4px;">
-              <button (click)="savePlant()" class="btn-primary" style="flex:1;min-width:130px;">{{ editingId ? 'Actualizar' : 'Crear Producto' }}</button>
-              <button (click)="resetForm()" class="btn-secondary" style="flex:1;min-width:130px;">Limpiar</button>
-            </div>
-          </div>
-        </div>
-
-        <div *ngIf="inventoryFilter==='low' && lowStockPlants.length===0" style="text-align:center;padding:28px;background:#fef3c7;border-radius:14px;color:#92400e;font-size:0.88rem;">No hay productos con bajo stock.</div>
-        <div *ngIf="inventoryFilter==='out' && outOfStockPlants.length===0" style="text-align:center;padding:28px;background:#fee2e2;border-radius:14px;color:#991b1b;font-size:0.88rem;">No hay productos sin stock.</div>
-        <div *ngIf="loading" style="text-align:center;padding:40px;color:#516052;">Cargando...</div>
-        <div class="admin-inventory" *ngIf="!loading">
-          <app-plant-card *ngFor="let p of filteredInventory" [plant]="p" [adminMode]="true" [client]="client" (onEdit)="editPlant($event)" (onRemove)="removePlant($event)"></app-plant-card>
-          <div *ngIf="filteredInventory.length===0 && inventoryFilter==='all'" style="text-align:center;padding:28px;color:#888;font-size:0.9rem;">No hay productos aún.</div>
-        </div>
-      </div>
-
-      <div *ngIf="activeTab==='pos'">
-        <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;">
-          <div style="background:#f4f8f1;border-radius:14px;padding:12px;flex-shrink:0;"><i data-lucide="file-up" style="width:24px;height:24px;color:#14452F;"></i></div>
-          <div>
-            <h2 class="section-title">Importar ventas del día</h2>
-            <p style="margin:4px 0 0;color:#516052;font-size:0.85rem;">Sube el reporte diario de ventas de tu POS para descontar inventario automáticamente.</p>
-            <p style="margin:6px 0 0;color:#9ca3af;font-size:0.78rem;">Exporta las ventas desde tu POS, súbelas aquí y el sistema descuenta las cantidades del inventario.</p>
-          </div>
-        </div>
-
-        <div style="border:2px dashed #dfe7dd;border-radius:14px;padding:16px;background:#fafdf8;margin-bottom:16px;">
-          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-            <label style="display:flex;align-items:center;gap:7px;background:#14452F;color:white;border-radius:10px;padding:9px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;">
-              <i data-lucide="upload" style="width:15px;height:15px;"></i>
-              Subir archivo
-              <input type="file" (change)="onPosFileSelected($event)" accept=".csv,.xlsx,.xls" style="display:none;">
-            </label>
-            <span style="color:#516052;font-size:0.82rem;flex:1;min-width:100px;">{{ posFile ? posFile.name : 'CSV o Excel del POS' }}</span>
-            <button [disabled]="!posFile||posLoading" (click)="analyzePosFile()"
-              style="padding:9px 18px;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.85rem;"
-              [style.background]="(!posFile||posLoading)?'#e5e7e5':'#1f7a4d'"
-              [style.color]="(!posFile||posLoading)?'#9ca3af':'white'">
-              {{ posLoading ? 'Analizando...' : 'Analizar ventas' }}
+      <main class="main">
+        <header class="page-header">
+          <h1 class="page-title">
+            <button *ngIf="activeTab!=='dashboard'" (click)="setTab('dashboard')" style="background:none; border:none; cursor:pointer; color:var(--text-muted); display:flex; align-items:center;">
+              <i data-lucide="arrow-left" style="margin-right:10px;"></i>
             </button>
+            {{ getTabTitle() }}
+          </h1>
+          <div class="header-actions">
+            <button class="btn-outline" (click)="goToPublic()"><i data-lucide="external-link"></i> Ver Tienda</button>
+            <button *ngIf="activeTab==='inventario'" class="btn-primary" (click)="showForm = !showForm">
+              <i data-lucide="plus"></i> {{ showForm ? 'Cerrar' : 'Agregar Producto' }}
+            </button>
+            <button *ngIf="activeTab==='ventas'" class="btn-primary"><i data-lucide="download"></i> Exportar</button>
+          </div>
+        </header>
+
+        <div *ngIf="activeTab==='dashboard'">
+          <div class="metrics-grid">
+            <div class="card" (click)="setTab('ventas')" style="cursor:pointer;">
+              <div class="metric-top">
+                <div class="metric-icon" style="background:#ECFDF5; color:#10B981;"><i data-lucide="dollar-sign"></i></div>
+              </div>
+              <div class="metric-val">\${{ estimatedInventoryValue | number:'1.0-0' }}</div>
+              <div class="metric-lab">Valor Total Inventario</div>
+            </div>
+            <div class="card" (click)="setTab('ventas')" style="cursor:pointer;">
+              <div class="metric-top">
+                <div class="metric-icon" style="background:#EFF6FF; color:#3B82F6;"><i data-lucide="trending-up"></i></div>
+              </div>
+              <div class="metric-val">\${{ salesReport?.summary?.total_profit || 0 | number:'1.0-0' }}</div>
+              <div class="metric-lab">Ganancia del Mes</div>
+            </div>
+            <div class="card" (click)="setTab('inventario')" style="cursor:pointer;">
+              <div class="metric-top">
+                <div class="metric-icon" style="background:#F3F4F6; color:#6B7280;"><i data-lucide="package"></i></div>
+              </div>
+              <div class="metric-val">{{ plants.length }}</div>
+              <div class="metric-lab">Productos en Catálogo</div>
+            </div>
+            <div class="card" (click)="setTab('stock')" style="cursor:pointer; border-bottom: 4px solid #F59E0B;">
+              <div class="metric-top">
+                <div class="metric-icon" style="background:#FEF3C7; color:#F59E0B;"><i data-lucide="alert-circle"></i></div>
+              </div>
+              <div class="metric-val">{{ lowStockPlants.length + outOfStockPlants.length }}</div>
+              <div class="metric-lab">Alertas de Stock</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+            <div class="card chart-box">
+              <div class="chart-head"><span class="chart-title">Ventas vs Ganancias (14 días)</span></div>
+              <div style="height: 250px; display:flex; align-items:flex-end; gap:8px; overflow-x:auto;">
+                 <div *ngFor="let d of salesReport?.chart_data" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;flex:1;min-width:40px;height:100%;">
+                    <div [style.height.px]="getBarPxRevenue(d.revenue)" style="width:100%;background:rgba(16,185,129,0.2);border-radius:6px 6px 0 0; position:relative;">
+                      <div [style.height.px]="getBarPxUnits(d.units)" style="position:absolute; bottom:0; width:100%; background:#10B981; border-radius:6px 6px 0 0;"></div>
+                    </div>
+                    <div style="font-size:0.65rem;color:var(--text-muted);">{{ formatChartDay(d.day) }}</div>
+                 </div>
+              </div>
+            </div>
+            <div class="card chart-box">
+              <div class="chart-head"><span class="chart-title">Distribución por Categoría</span></div>
+              <div style="display:flex; justify-content:center; margin-top:20px;">
+                <svg width="150" height="150" viewBox="0 0 130 130">
+                  <ng-container *ngFor="let seg of donutSegments">
+                    <circle cx="65" cy="65" r="44" fill="none" [attr.stroke]="seg.color" stroke-width="22" [attr.stroke-dasharray]="seg.dashArray" [attr.stroke-dashoffset]="seg.dashOffset" style="transform:rotate(-90deg);transform-origin:65px 65px;"></circle>
+                  </ng-container>
+                  <text x="65" y="70" text-anchor="middle" style="font-size:20px;font-weight:800;fill:var(--text-main);">{{ plants.length }}</text>
+                </svg>
+              </div>
+              <div style="margin-top:20px;">
+                <div *ngFor="let seg of donutSegments | slice:0:3" style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:8px;">
+                  <span style="display:flex; align-items:center; gap:6px;"><span style="width:10px;height:10px;border-radius:50%;" [style.background]="seg.color"></span>{{ seg.category }}</span>
+                  <span style="font-weight:600;">{{ seg.count }}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div *ngIf="posError" style="background:#fff0f0;border:1px solid #fad5d5;border-radius:12px;padding:12px 16px;margin-bottom:14px;color:#9b1c1c;font-size:0.85rem;">{{ posError }}</div>
-        <div *ngIf="posImportSuccessMsg" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:14px;color:#15803d;font-size:0.88rem;font-weight:600;display:flex;align-items:center;gap:8px;">
-          <i data-lucide="check-circle" style="width:18px;height:18px;"></i>{{ posImportSuccessMsg }}
+        <div *ngIf="activeTab==='inventario'">
+          <div *ngIf="showForm" class="card" style="margin-bottom:24px;">
+            <h3 style="margin:0 0 20px; font-size:1.2rem;">{{ editingId ? 'Editar Producto' : 'Crear Nuevo Producto' }}</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
+              <div class="form-group"><label class="form-label">Nombre</label><input type="text" [(ngModel)]="plantForm.name" class="form-input"></div>
+              <div class="form-group">
+                <label class="form-label">Categoría</label>
+                <select [(ngModel)]="plantForm.category" class="form-input">
+                  <optgroup *ngFor="let group of CATEGORY_GROUPS" [label]="group.label">
+                    <option *ngFor="let cat of group.items" [value]="cat">{{ cat }}</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">Precio de Venta ($)</label><input type="number" [(ngModel)]="plantForm.price" class="form-input"></div>
+              <div class="form-group"><label class="form-label">Costo de Compra ($)</label><input type="number" [(ngModel)]="plantForm.cost_price" class="form-input"></div>
+              <div class="form-group"><label class="form-label">Stock Inicial</label><input type="number" [(ngModel)]="plantForm.stock" class="form-input"></div>
+              <div class="form-group">
+                <label class="form-label">Imagen</label>
+                <div style="border:2px dashed var(--border); border-radius:10px; padding:10px; text-align:center; position:relative; cursor:pointer;">
+                  <input type="file" (change)="uploadPlantImage($event)" accept="image/*" style="opacity:0; position:absolute; inset:0; width:100%; height:100%;">
+                  <span style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">{{ imageUploading ? 'Subiendo...' : plantForm.image_url ? 'Imagen ✅' : 'Subir foto' }}</span>
+                </div>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;"><label class="form-label">Descripción</label><textarea [(ngModel)]="plantForm.description" class="form-input" style="min-height:80px;"></textarea></div>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:10px;">
+              <button class="btn-primary" (click)="savePlant()">{{ editingId ? 'Actualizar' : 'Guardar' }}</button>
+              <button class="btn-outline" (click)="resetForm(); showForm=false;">Cancelar</button>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; margin-bottom:16px;">
+            <button class="period-pill" [class.active]="inventoryFilter==='all'" (click)="inventoryFilter='all'">Todos</button>
+            <button class="period-pill" [class.active]="inventoryFilter==='low'" (click)="inventoryFilter='low'">Bajo Stock</button>
+            <button class="period-pill" [class.active]="inventoryFilter==='out'" (click)="inventoryFilter='out'">Agotados</button>
+          </div>
+
+          <div *ngIf="loading" style="text-align:center; padding:40px;">Cargando...</div>
+          <div class="admin-inventory" *ngIf="!loading">
+            <app-plant-card *ngFor="let p of filteredInventory" [plant]="p" [adminMode]="true" [client]="client" (onEdit)="editPlant($event)" (onRemove)="removePlant($event)"></app-plant-card>
+          </div>
         </div>
 
-        <div *ngIf="posItems.length" style="overflow:hidden;border-radius:14px;border:1px solid #eef1ec;">
-          <div style="padding:14px 16px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-            <span style="font-weight:700;color:#102319;font-size:0.9rem;">Ventas detectadas — {{ posItems.length }} productos</span>
-            <div style="display:flex;gap:8px;font-size:0.75rem;">
-              <span style="background:#dcfce7;color:#15803d;padding:3px 8px;border-radius:6px;font-weight:600;">{{ countPosStatus('found') }} encontrados</span>
-              <span style="background:#fef3c7;color:#92400e;padding:3px 8px;border-radius:6px;font-weight:600;">{{ countPosStatus('review') }} revisar</span>
-              <span style="background:#fee2e2;color:#991b1b;padding:3px 8px;border-radius:6px;font-weight:600;">{{ countPosStatus('not_found') }} no encontrados</span>
+        <div *ngIf="activeTab==='stock'">
+          <div class="metrics-grid">
+             <div class="card" style="border-left: 5px solid #EF4444;">
+                <div class="metric-val" style="color:#EF4444;">{{ outOfStockPlants.length }}</div>
+                <div class="metric-lab">Stock Crítico (Agotados)</div>
+             </div>
+             <div class="card" style="border-left: 5px solid #F59E0B;">
+                <div class="metric-val" style="color:#F59E0B;">{{ lowStockPlants.length }}</div>
+                <div class="metric-lab">Stock Bajo (≤ 5)</div>
+             </div>
+          </div>
+
+          <div class="card" style="background:#FEF2F2; border-color:#FCA5A5; margin-bottom:30px;" *ngIf="outOfStockPlants.length > 0">
+             <h3 style="color:#991B1B; margin:0 0 8px; display:flex; align-items:center; gap:8px;"><i data-lucide="alert-triangle"></i> Alerta de Stock Crítico</h3>
+             <p style="color:#7F1D1D; font-size:0.9rem; margin:0;">Los siguientes productos necesitan reabastecimiento urgente: 
+               <strong>{{ outOfStockPlants.map(p => p.name).join(', ') }}</strong>.
+             </p>
+          </div>
+
+          <div class="card" style="margin-bottom:30px; background:linear-gradient(to right, #0A5C36, #10B981); color:white; border:none;">
+            <h3 style="margin:0 0 8px; display:flex; align-items:center; gap:8px;"><i data-lucide="sparkles"></i> Actualizar con Factura (IA)</h3>
+            <p style="font-size:0.9rem; opacity:0.9; margin-bottom:16px;">Sube la factura de tu proveedor y la Inteligencia Artificial actualizará cantidades y costos automáticamente.</p>
+            <div style="display:flex; gap:16px; align-items:center;">
+              <label class="btn-outline" style="background:rgba(255,255,255,0.2); border:none; color:white;">
+                <i data-lucide="upload"></i> Subir PDF/Imagen
+                <input type="file" (change)="onInvoiceSelected($event)" accept="image/*,.pdf" style="display:none;">
+              </label>
+              <span *ngIf="selectedInvoice">{{ selectedInvoice.name }}</span>
+              <button *ngIf="selectedInvoice" class="btn-primary" style="background:white; color:#0A5C36;" (click)="analyzeInvoice()" [disabled]="invoiceLoading">
+                {{ invoiceLoading ? 'Analizando...' : 'Procesar Factura' }}
+              </button>
             </div>
           </div>
-          <div class="restock-mobile">
-            <div *ngFor="let item of posItems; let i = index" style="padding:14px 16px;border-bottom:1px solid #f4f4f4;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-                <div><div style="font-weight:700;color:#102319;font-size:0.88rem;">{{ item.product_name }}</div><div style="font-size:0.76rem;color:#516052;margin-top:2px;">Cant. vendida: {{ item.qty_sold }}</div></div>
-                <span [style.background]="getPosBadgeBg(item.status)" [style.color]="getPosBadgeColor(item.status)" style="font-size:0.68rem;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;">{{ getPosBadgeLabel(item.status) }}</span>
-              </div>
-              <div *ngIf="item.matched_plant_name" style="background:#f4f8f1;border-radius:10px;padding:10px;font-size:0.8rem;">
-                <div style="color:#102319;font-weight:600;">→ {{ item.matched_plant_name }}</div>
-                <div style="color:#516052;margin-top:3px;">Stock: {{ item.current_stock }} → <strong [style.color]="item.over_stock?'#dc2626':'#15803d'">{{ item.stock_after }}</strong></div>
-                <div *ngIf="item.over_stock" style="color:#dc2626;font-size:0.72rem;margin-top:4px;">Venta supera el stock actual</div>
-              </div>
-              <div *ngIf="!item.matched_plant_name" style="font-size:0.78rem;color:#9ca3af;margin-top:4px;">No se encontró en el catálogo</div>
-              <div style="margin-top:8px;display:flex;align-items:center;gap:6px;">
-                <input type="checkbox" [id]="'skip-'+i" [(ngModel)]="item.skip" style="width:15px;height:15px;accent-color:#14452F;">
-                <label [for]="'skip-'+i" style="font-size:0.75rem;color:#516052;cursor:pointer;">Omitir esta fila</label>
+
+          <div class="table-container" *ngIf="restockItems.length" style="margin-bottom:30px;">
+            <div style="padding:16px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="margin:0; font-size:1.1rem;">Productos Detectados</h3>
+              <div style="display:flex; gap:10px;">
+                <button class="btn-outline" (click)="cancelInvoice()">Cancelar</button>
+                <button class="btn-primary" (click)="confirmRestock()">Confirmar Ingreso</button>
               </div>
             </div>
-          </div>
-          <div class="restock-desktop" style="overflow-x:auto;">
-            <table class="restock-table">
-              <thead><tr><th>Producto del POS</th><th>Cant. vendida</th><th>Producto encontrado</th><th>Stock actual</th><th>Stock después</th><th>Estado</th><th>Omitir</th></tr></thead>
+            <table>
+              <thead><tr><th>Producto</th><th>Cant.</th><th>Costo Unit.</th><th>Precio Sugerido</th><th>Confirmar</th></tr></thead>
               <tbody>
-                <tr *ngFor="let item of posItems; let i = index" [style.opacity]="item.skip?'0.4':'1'">
-                  <td style="font-weight:600;color:#102319;">{{ item.product_name }}</td>
-                  <td style="font-weight:700;color:#516052;">{{ item.qty_sold }}</td>
-                  <td><span *ngIf="item.matched_plant_name" style="color:#102319;">{{ item.matched_plant_name }}</span><span *ngIf="!item.matched_plant_name" style="color:#aaa;font-size:0.78rem;">—</span></td>
-                  <td style="color:#516052;">{{ item.current_stock??'—' }}</td>
-                  <td><span *ngIf="item.stock_after!==null" [style.color]="item.over_stock?'#dc2626':'#15803d'" style="font-weight:700;">{{ item.stock_after }}</span><span *ngIf="item.stock_after===null" style="color:#aaa;">—</span><div *ngIf="item.over_stock" style="font-size:0.65rem;color:#dc2626;">supera stock</div></td>
-                  <td><span [style.background]="getPosBadgeBg(item.status)" [style.color]="getPosBadgeColor(item.status)" style="font-size:0.7rem;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;">{{ getPosBadgeLabel(item.status) }}</span></td>
-                  <td style="text-align:center;"><input type="checkbox" [(ngModel)]="item.skip" style="width:15px;height:15px;accent-color:#14452F;cursor:pointer;"></td>
+                <tr *ngFor="let item of restockItems; let i = index">
+                  <td><input type="text" [(ngModel)]="item.plant_name" class="form-input" style="padding:6px; height:auto;"></td>
+                  <td><input type="number" [(ngModel)]="item.quantity" class="form-input" style="padding:6px; width:70px; height:auto;"></td>
+                  <td><input type="number" [(ngModel)]="item.unit_cost" class="form-input" style="padding:6px; width:90px; height:auto;"></td>
+                  <td>
+                    <div style="font-weight:700; color:#10B981;">\${{ getRowSuggestedPrice(item) | number:'1.2-2' }}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">Margen: {{ item.row_margin }}%</div>
+                  </td>
+                  <td><input type="checkbox" [(ngModel)]="item.apply_suggested_price" style="width:18px;height:18px;accent-color:#10B981;"></td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div style="padding:14px 18px 16px;display:flex;flex-wrap:wrap;gap:10px;">
-            <button (click)="confirmPosImport()" class="btn-primary" style="flex:1;min-width:160px;display:flex;align-items:center;justify-content:center;gap:7px;">
-              <i data-lucide="check" style="width:16px;height:16px;"></i>Confirmar descuento
-            </button>
-            <button (click)="cancelPosImport()" class="btn-secondary" style="flex:1;min-width:130px;">Cancelar</button>
-          </div>
-        </div>
-      </div>
 
-      <div *ngIf="activeTab==='ajustes'">
-        <h2 class="section-title" style="display:flex;align-items:center;gap:8px;">
-          <i data-lucide="settings" style="width:20px;height:20px;"></i>
-          Ajustes
-        </h2>
-        <p class="section-sub">Personaliza la experiencia de tu tienda.</p>
-
-        <div class="settings-card">
-          <h3>
-            <i data-lucide="message-circle" style="width:18px;height:18px;color:#14452F;"></i>
-            Mensaje predeterminado de WhatsApp
-          </h3>
-          <p>Este mensaje se envía automáticamente cuando un cliente toca "Me interesa" en un producto. Puedes usar variables para personalizar el mensaje.</p>
-
-          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
-            <span style="font-size:0.72rem;color:#516052;font-weight:600;align-self:center;">Variables disponibles:</span>
-            <button class="var-chip" (click)="insertVar('{planta}')"><i data-lucide="package" style="width:13px;height:13px;"></i>{{ '{' }}planta{{ '}' }}</button>
-            <button class="var-chip" (click)="insertVar('{precio}')"><i data-lucide="dollar-sign" style="width:13px;height:13px;"></i>{{ '{' }}precio{{ '}' }}</button>
-            <button class="var-chip" (click)="insertVar('{categoria}')"><i data-lucide="tag" style="width:13px;height:13px;"></i>{{ '{' }}categoria{{ '}' }}</button>
-          </div>
-
-          <textarea
-            id="wa-message-input"
-            [(ngModel)]="waMessage"
-            class="form-input"
-            style="min-height:100px;resize:vertical;font-size:0.92rem;line-height:1.6;margin-bottom:10px;"
-            placeholder="Ej: Hola! Me interesa {{ '{' }}planta{{ '}' }} a {{ '{' }}precio{{ '}' }}. ¿Está disponible?">
-          </textarea>
-
-          <div style="background:#f4f8f1;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:0.82rem;color:#516052;">
-            <strong style="color:#102319;">Vista previa:</strong><br>
-            <span style="color:#102319;">{{ getWaPreview() }}</span>
-          </div>
-
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-            <button (click)="saveSettings()" class="btn-primary" style="display:flex;align-items:center;gap:6px;padding:10px 20px;">
-              <i data-lucide="save" style="width:15px;height:15px;"></i>
-              {{ settingsSaving ? 'Guardando...' : 'Guardar mensaje' }}
-            </button>
-            <button (click)="resetWaMessage()" class="btn-secondary" style="padding:10px 18px;">
-              Restaurar default
-            </button>
-            <span class="save-feedback" [class.show]="settingsSaved">
-              <i data-lucide="check-circle" style="width:15px;height:15px;"></i>
-              ¡Guardado!
-            </span>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>Producto</th><th>Categoría</th><th>Stock Actual</th><th>Estado</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let p of plants">
+                  <td style="font-weight:600;">{{ p.name }}</td>
+                  <td>{{ p.category }}</td>
+                  <td style="font-weight:700;">{{ p.stock }}</td>
+                  <td>
+                    <span class="status-pill" [style.background]="p.stock > 5 ? '#D1FAE5' : (p.stock > 0 ? '#FEF3C7' : '#FEE2E2')" [style.color]="p.stock > 5 ? '#065F46' : (p.stock > 0 ? '#92400E' : '#991B1B')">
+                      {{ p.stock > 5 ? 'Ok' : (p.stock > 0 ? 'Bajo' : 'Agotado') }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div class="settings-card">
-          <h3>
-            <i data-lucide="store" style="width:18px;height:18px;color:#14452F;"></i>
-            Tu tienda pública
-          </h3>
-          <p>Comparte este enlace con tus clientes para que vean tu catálogo.</p>
-          <div style="display:flex;align-items:center;gap:10px;background:#f4f8f1;border-radius:12px;padding:12px 16px;flex-wrap:wrap;">
-            <span style="flex:1;font-size:0.88rem;color:#102319;font-weight:600;word-break:break-all;">{{ storeUrl }}</span>
-            <button (click)="copyStoreUrl()" style="background:#14452F;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;flex-shrink:0;">
-              <i data-lucide="copy" style="width:13px;height:13px;"></i>
-              {{ urlCopied ? 'Copiado' : 'Copiar' }}
-            </button>
+        <div *ngIf="activeTab==='ventas'">
+          <div style="display:flex; gap:8px; margin-bottom:24px;">
+            <button *ngFor="let p of salesPeriods" class="period-pill" [class.active]="selectedSalesPeriod===p.value" (click)="changeSalesPeriod(p.value)">{{ p.label }}</button>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="card">
+              <div class="metric-top"><div class="metric-icon" style="background:#ECFDF5; color:#10B981;"><i data-lucide="dollar-sign"></i></div></div>
+              <div class="metric-val">\${{ salesReport?.summary?.total_revenue | number:'1.2-2' }}</div>
+              <div class="metric-lab">Ventas Totales</div>
+            </div>
+            <div class="card">
+              <div class="metric-top"><div class="metric-icon" style="background:#EFF6FF; color:#3B82F6;"><i data-lucide="trending-up"></i></div></div>
+              <div class="metric-val">\${{ salesReport?.summary?.total_profit | number:'1.2-2' }}</div>
+              <div class="metric-lab">Ganancia Total</div>
+            </div>
+            <div class="card">
+              <div class="metric-top"><div class="metric-icon" style="background:#F5F3FF; color:#8B5CF6;"><i data-lucide="shopping-bag"></i></div></div>
+              <div class="metric-val">{{ salesReport?.summary?.total_transactions }}</div>
+              <div class="metric-lab">Transacciones</div>
+            </div>
+            <div class="card">
+              <div class="metric-top"><div class="metric-icon" style="background:#FFF7ED; color:#F59E0B;"><i data-lucide="percent"></i></div></div>
+              <div class="metric-val">{{ salesReport?.summary?.margin_pct | number:'1.0-1' }}%</div>
+              <div class="metric-lab">Margen de Ganancia</div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <div style="padding:16px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;">
+              <h3 style="margin:0; font-size:1.1rem;">Transacciones Recientes</h3>
+            </div>
+            <table>
+              <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Ganancia</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let item of salesReport?.recent_imports">
+                  <td style="color:var(--text-muted);">{{ item.imported_at | date:'yyyy-MM-dd' }}</td>
+                  <td style="font-weight:600;">{{ item.plant_name }}</td>
+                  <td>{{ item.qty_sold }}</td>
+                  <td style="font-weight:700;">\${{ (item.qty_sold * item.price) | number:'1.2-2' }}</td>
+                  <td style="font-weight:700; color:#10B981;">\${{ (item.qty_sold * (item.price - (item.cost_price||0))) | number:'1.2-2' }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-      </div>
+        <div *ngIf="activeTab==='pos'">
+          <div class="card" style="text-align:center; padding:60px 20px;">
+            <i data-lucide="upload-cloud" style="width:64px; height:64px; color:#10B981; margin-bottom:20px;"></i>
+            <h2 style="margin:0 0 10px;">Importar Ventas desde POS</h2>
+            <p style="color:var(--text-muted); margin-bottom:24px;">Sube el archivo Excel o CSV de tu sistema de ventas para descontar inventario automáticamente.</p>
+            <label class="btn-primary" style="display:inline-flex; margin:0 auto;">
+              <i data-lucide="file-up"></i> Seleccionar Archivo
+              <input type="file" (change)="onPosFileSelected($event)" accept=".csv,.xlsx,.xls" style="display:none;">
+            </label>
+            <div *ngIf="posFile" style="margin-top:16px; font-weight:600;">{{ posFile.name }}</div>
+            <button *ngIf="posFile" class="btn-outline" style="margin: 16px auto 0;" (click)="analyzePosFile()" [disabled]="posLoading">
+              {{ posLoading ? 'Analizando...' : 'Analizar Ventas' }}
+            </button>
+          </div>
+          
+          <div *ngIf="posImportSuccessMsg" style="background:#ECFDF5; color:#065F46; padding:16px; border-radius:12px; margin-top:20px;">
+            {{ posImportSuccessMsg }}
+          </div>
 
+          <div class="table-container" *ngIf="posItems.length" style="margin-top:30px;">
+            <div style="padding:16px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="margin:0;">Resultados del POS</h3>
+              <button class="btn-primary" (click)="confirmPosImport()">Confirmar Descuento</button>
+            </div>
+            <table>
+              <thead><tr><th>Producto del POS</th><th>Cant.</th><th>Match Catálogo</th><th>Estado</th><th>Omitir</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let item of posItems">
+                  <td>{{ item.product_name }}</td>
+                  <td>{{ item.qty_sold }}</td>
+                  <td>{{ item.matched_plant_name || '—' }}</td>
+                  <td>
+                    <span class="status-pill" [style.background]="getPosBadgeBg(item.status)" [style.color]="getPosBadgeColor(item.status)">
+                      {{ getPosBadgeLabel(item.status) }}
+                    </span>
+                  </td>
+                  <td><input type="checkbox" [(ngModel)]="item.skip" style="width:18px;height:18px;accent-color:#10B981;"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div *ngIf="activeTab==='ajustes'">
+          <div class="card" style="max-width: 600px;">
+            <h3 style="margin:0 0 20px; display:flex; align-items:center; gap:8px;"><i data-lucide="message-circle" style="color:#10B981;"></i> Mensaje Predefinido de WhatsApp</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px;">Usa las variables para que el sistema las reemplace automáticamente por la información del producto.</p>
+            
+            <div style="display:flex; gap:8px; margin-bottom:16px;">
+              <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar('{planta}')">{planta}</button>
+              <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar('{precio}')">{precio}</button>
+              <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar('{categoria}')">{categoria}</button>
+            </div>
+
+            <textarea id="wa-message-input" [(ngModel)]="waMessage" class="form-input" style="min-height:120px; margin-bottom:16px;"></textarea>
+            
+            <div style="background:#F9FAFB; padding:16px; border-radius:10px; margin-bottom:20px; font-size:0.9rem;">
+              <strong>Vista previa:</strong><br>
+              <span style="color:var(--text-muted);">{{ getWaPreview() }}</span>
+            </div>
+
+            <div style="display:flex; gap:12px;">
+              <button class="btn-primary" (click)="saveSettings()">{{ settingsSaving ? 'Guardando...' : 'Guardar Mensaje' }}</button>
+              <button class="btn-outline" (click)="resetWaMessage()">Restaurar</button>
+            </div>
+            <div *ngIf="settingsSaved" style="color:#10B981; font-size:0.85rem; margin-top:10px; font-weight:600;">¡Ajustes guardados correctamente!</div>
+          </div>
+          
+          <div class="card" style="max-width: 600px; margin-top:20px;">
+            <h3 style="margin:0 0 16px;">Tu tienda pública</h3>
+            <div style="display:flex; gap:10px;">
+              <input type="text" [value]="storeUrl" class="form-input" readonly style="background:#F9FAFB; color:var(--text-muted);">
+              <button class="btn-outline" (click)="copyStoreUrl()">{{ urlCopied ? 'Copiado' : 'Copiar' }}</button>
+            </div>
+          </div>
+        </div>
+
+      </main>
     </div>
   `
 })
@@ -656,7 +486,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   imageUploading = false;
   showForm = false;
 
-  activeTab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'ajustes' = 'dashboard';
+  activeTab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'stock' | 'ajustes' = 'dashboard';
   inventoryFilter: 'all' | 'low' | 'out' = 'all';
 
   selectedInvoice: File | null = null;
@@ -681,16 +511,13 @@ export class AdminComponent implements OnInit, AfterViewInit {
     { label: 'Todo',     value: 'all'   },
   ];
 
-  // ── Ajustes ──
   waMessage = '';
   settingsSaving = false;
   settingsSaved = false;
   urlCopied = false;
   readonly DEFAULT_WA_MESSAGE = 'Hola! Me interesa {planta} a {precio}. ¿Está disponible?';
 
-  get storeUrl(): string {
-    return `https://${this.clientSlug}.verzagarden.com`;
-  }
+  get storeUrl(): string { return `https://${this.clientSlug}.verzagarden.com`; }
 
   constructor(private plantService: PlantService, private router: Router, private cdr: ChangeDetectorRef) {}
 
@@ -706,10 +533,22 @@ export class AdminComponent implements OnInit, AfterViewInit {
     setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 50);
   }
 
-  setTab(tab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'ajustes') {
+  setTab(tab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'stock' | 'ajustes') {
     this.activeTab = tab;
     this.cdr.detectChanges();
     this.renderIcons();
+  }
+
+  getTabTitle() {
+    const titles: any = { 
+      'dashboard': 'Dashboard', 
+      'inventario': 'Inventario', 
+      'stock': 'Stock', 
+      'ventas': 'Ventas & Ganancias', 
+      'pos': 'Importar POS', 
+      'ajustes': 'Ajustes' 
+    };
+    return titles[this.activeTab];
   }
 
   goToInventory(filter: 'all' | 'low' | 'out') {
@@ -738,7 +577,6 @@ export class AdminComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // ── Settings ──
   getWaPreview(): string {
     return this.waMessage
       .replace('{planta}', 'Monstera Deliciosa')
@@ -758,9 +596,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     }
   }
 
-  resetWaMessage() {
-    this.waMessage = this.DEFAULT_WA_MESSAGE;
-  }
+  resetWaMessage() { this.waMessage = this.DEFAULT_WA_MESSAGE; }
 
   saveSettings() {
     this.settingsSaving = true;
@@ -783,7 +619,6 @@ export class AdminComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // ── Sales ──
   loadSalesReport(period: string) {
     this.salesLoading = true;
     this.salesReport = null;
@@ -813,13 +648,13 @@ export class AdminComponent implements OnInit, AfterViewInit {
   getBarPxRevenue(value: number): number {
     if (!this.salesReport?.chart_data?.length) return 0;
     const max = Math.max(...this.salesReport.chart_data.map(d => d.revenue), 1);
-    return Math.max(4, Math.round((value / max) * 90));
+    return Math.max(4, Math.round((value / max) * 150));
   }
 
   getBarPxUnits(value: number): number {
     if (!this.salesReport?.chart_data?.length) return 0;
     const max = Math.max(...this.salesReport.chart_data.map(d => d.units), 1);
-    return Math.max(4, Math.round((value / max) * 40));
+    return Math.max(4, Math.round((value / max) * 80));
   }
 
   formatChartDay(day: string): string {
@@ -964,8 +799,8 @@ export class AdminComponent implements OnInit, AfterViewInit {
   cancelPosImport() { this.posFile = null; this.posItems = []; this.posError = ''; }
 
   countPosStatus(status: string): number { return this.posItems.filter(i => i.status === status).length; }
-  getPosBadgeBg(s: string) { return s === 'found' ? '#dcfce7' : s === 'review' ? '#fef3c7' : '#fee2e2'; }
-  getPosBadgeColor(s: string) { return s === 'found' ? '#15803d' : s === 'review' ? '#92400e' : '#991b1b'; }
+  getPosBadgeBg(s: string) { return s === 'found' ? '#D1FAE5' : s === 'review' ? '#FEF3C7' : '#FEE2E2'; }
+  getPosBadgeColor(s: string) { return s === 'found' ? '#065F46' : s === 'review' ? '#92400E' : '#991B1B'; }
   getPosBadgeLabel(s: string) { return s === 'found' ? 'Encontrado' : s === 'review' ? 'Revisar' : 'No encontrado'; }
 
   savePlant() {
@@ -976,7 +811,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   editPlant(plant: Plant) {
     this.editingId = plant.id; this.plantForm = { ...plant }; this.showForm = true;
-    setTimeout(() => { document.getElementById('plant-form')?.scrollIntoView({ behavior: 'smooth' }); this.renderIcons(); }, 50);
+    setTimeout(() => { document.querySelector('.main')?.scrollTo({top: 0, behavior: 'smooth'}); this.renderIcons(); }, 50);
   }
 
   removePlant(plant: Plant) {
