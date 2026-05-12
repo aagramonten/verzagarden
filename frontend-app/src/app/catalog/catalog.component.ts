@@ -10,7 +10,7 @@ const T = {
   es: {
     tagline: 'Plantas y Jardines',
     search: 'Buscar plantas y productos...',
-    all: 'Todas',
+    all: 'Todas las categorías',
     available: 'INVENTARIO DISPONIBLE',
     heroTitle: 'Demo Garden PR',
     heroSub: 'Explora plantas y productos disponibles y ordena directo por WhatsApp.',
@@ -20,7 +20,7 @@ const T = {
     viewPlants: 'Ver productos',
     viewAll: 'Ver todas',
     loading: 'Cargando catálogo...',
-    noPlants: 'No hay productos disponibles en esta categoría por el momento.',
+    noPlants: 'No hay productos disponibles en esta búsqueda por el momento.',
     noPlantsSub: 'Escríbenos por WhatsApp para consultar disponibilidad.',
     consultWA: 'Consultar por WhatsApp',
     adminAccess: 'Acceso Admin',
@@ -40,7 +40,7 @@ const T = {
   en: {
     tagline: 'Plants & Gardens',
     search: 'Search plants and products...',
-    all: 'All',
+    all: 'All categories',
     available: 'AVAILABLE INVENTORY',
     heroTitle: 'Demo Garden PR',
     heroSub: 'Browse available plants and products and order directly via WhatsApp.',
@@ -50,7 +50,7 @@ const T = {
     viewPlants: 'View products',
     viewAll: 'View all',
     loading: 'Loading catalog...',
-    noPlants: 'No products available in this category at the moment.',
+    noPlants: 'No products available for this search at the moment.',
     noPlantsSub: 'Message us on WhatsApp to check availability.',
     consultWA: 'Ask on WhatsApp',
     adminAccess: 'Admin Access',
@@ -103,14 +103,14 @@ const CATEGORIES_ES = [
     .page { background: var(--bg); min-height: 100vh; color: var(--text); font-family: 'Helvetica Neue', Arial, sans-serif; }
 
     /* NAV */
-    .nav { background: var(--bg); display: flex; justify-content: center; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-    .nav-center { display: flex; align-items: center; gap: 10px; }
+    .nav { background: var(--bg); display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; gap: 10px; }
+    .nav-center { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .nav-logo { width: 36px; height: 36px; border-radius: 10px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
     .nav-logo img { width: 100%; height: 100%; object-fit: cover; }
     .nav-logo-fallback { color: white; display:flex; align-items:center; justify-content:center; }
-    .nav-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.2; }
+    .nav-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .nav-sub { font-size: 10px; color: var(--muted); }
-    .nav-admin { position: absolute; right: 20px; background: var(--primary); border: none; color: white; border-radius: 8px; padding: 6px 14px; font-size: 11px; font-weight: 600; cursor: pointer; display:flex; align-items:center; gap:4px; }
+    .nav-admin { background: var(--primary); border: none; color: white; border-radius: 8px; padding: 7px 12px; font-size: 11px; font-weight: 600; cursor: pointer; display:flex; align-items:center; gap:5px; flex-shrink:0; }
 
     /* HERO */
     .hero { background: var(--hero); padding: 28px 20px; border-bottom: 1px solid var(--border); }
@@ -127,6 +127,7 @@ const CATEGORIES_ES = [
     .stat-n { font-size: 20px; font-weight: 700; color: var(--text); }
     .stat-l { font-size: 10px; color: var(--muted); margin-top: 2px; }
     .hero-right { width: 140px; flex-shrink: 0; }
+    @media (max-width: 768px) { .hero-right { display: none; } }
     .featured-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
     .featured-img { background: linear-gradient(160deg, var(--primary), var(--primary-hover)); height: 90px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .featured-img img { width: 100%; height: 100%; object-fit: cover; }
@@ -137,16 +138,28 @@ const CATEGORIES_ES = [
     .featured-stock { font-size: 9px; color: var(--primary); margin-top: 2px; }
     .featured-btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 7px; font-size: 10px; font-weight: 600; width: 100%; margin-top: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
 
-    /* SEARCH */
-    .search-wrap { background: var(--surface); padding: 12px 20px; border-bottom: 1px solid var(--border); }
-    .search-box { background: var(--bg); border: 1px solid var(--border); border-radius: 24px; padding: 9px 16px; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .search-box input { flex: 1; border: none; background: transparent; font-size: 13px; color: var(--text); outline: none; }
+    /* SEARCH & FILTER DROPDOWN */
+    .search-wrap { background: var(--surface); padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .search-container { position: relative; width: 100%; }
+    .search-box { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; transition: border-color 0.2s; }
+    .search-box:focus-within { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px var(--primary-light); }
+    .search-box input { flex: 1; border: none; background: transparent; font-size: 14px; color: var(--text); outline: none; }
     .search-box input::placeholder { color: var(--muted); }
-    .pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-    .pills::-webkit-scrollbar { display: none; }
-    .pill { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 10px; font-weight: 500; cursor: pointer; white-space: nowrap; flex-shrink: 0; display:flex; align-items:center; gap:5px; }
-    .pill.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .pill-sep { font-size: 10px; color: var(--muted); font-weight: 600; padding: 0 4px; white-space: nowrap; display: flex; align-items: center; flex-shrink: 0; }
+    
+    /* LIVE RESULTS DROPDOWN */
+    .search-results { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); margin-top: 6px; z-index: 50; max-height: 280px; overflow-y: auto; }
+    .search-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--bg); cursor: pointer; transition: background 0.2s; }
+    .search-item:last-child { border-bottom: none; }
+    .search-item:hover { background: var(--hero); }
+    .search-item-img { width: 40px; height: 40px; border-radius: 8px; background: var(--primary-light); object-fit: cover; flex-shrink: 0; }
+    
+    /* CATEGORY SELECT */
+    .cat-select-wrapper { position: relative; width: 100%; }
+    .cat-select { width: 100%; appearance: none; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 40px 12px 16px; font-size: 14px; color: var(--text); font-weight: 600; outline: none; cursor: pointer; transition: border-color 0.2s; }
+    .cat-select:focus { border-color: var(--primary); background: white; }
+    .cat-select-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--muted); }
+    .cat-select optgroup { font-weight: bold; color: var(--primary); }
+    .cat-select option { color: var(--text); font-weight: normal; }
 
     /* SECTIONS */
     .section { padding: 24px 20px 0; max-width: 1200px; margin: 0 auto; }
@@ -156,7 +169,7 @@ const CATEGORIES_ES = [
     .sec-link { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 5px 12px; font-size: 10px; font-weight: 600; cursor: pointer; }
     .group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--primary); display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
 
-    /* CAT GRID */
+    /* CAT GRID (EXPLORE) */
     .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
     @media (max-width: 600px) { .cat-grid { grid-template-columns: repeat(2, 1fr); } }
     .cat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 10px; cursor: pointer; transition: all 0.15s; text-align: left; }
@@ -236,13 +249,13 @@ const CATEGORIES_ES = [
           <img *ngIf="client?.logo_url" [src]="client!.logo_url" alt="logo">
           <span *ngIf="!client?.logo_url" class="nav-logo-fallback"><i data-lucide="leaf" style="width:20px;height:20px;"></i></span>
         </div>
-        <div>
+        <div style="min-width:0; flex: 1;">
           <div class="nav-title">{{ client?.business_name || t.heroTitle }}</div>
           <div class="nav-sub">{{ t.tagline }}</div>
         </div>
       </div>
       <button class="nav-admin" (click)="goToAdmin()">
-        <i data-lucide="settings" style="width:12px;height:12px;"></i>{{ t.admin }}
+        <i data-lucide="settings" style="width:14px;height:14px;"></i>{{ t.admin }}
       </button>
     </header>
 
@@ -280,24 +293,50 @@ const CATEGORIES_ES = [
     </section>
 
     <div class="search-wrap">
-      <div class="search-box">
-        <i data-lucide="search" style="width:16px;height:16px;color:#6F786E;"></i>
-        <input type="text" [(ngModel)]="search" [placeholder]="t.search">
-        <a [href]="getGeneralWhatsappLink()" target="_blank" style="color:#9CAF96;display:flex;align-items:center;">
-          <i data-lucide="message-circle" style="width:18px;height:18px;"></i>
-        </a>
+      
+      <div class="search-container">
+        <div class="search-box">
+          <i data-lucide="search" style="width:18px;height:18px;color:#6F786E;"></i>
+          <input 
+            type="text" 
+            [(ngModel)]="search" 
+            (focus)="searchFocused = true" 
+            (blur)="onSearchBlur()" 
+            [placeholder]="t.search">
+          
+          <button *ngIf="search" (click)="clearSearch()" style="background:none;border:none;color:#6F786E;cursor:pointer;display:flex;align-items:center;padding:4px;">
+            <i data-lucide="x" style="width:18px;height:18px;"></i>
+          </button>
+        </div>
+
+        <div class="search-results" *ngIf="search && searchFocused && filteredPlants.length > 0">
+          <div *ngFor="let p of filteredPlants | slice:0:6" class="search-item" (mousedown)="selectSearchResult(p)">
+            <img *ngIf="p.image_url" [src]="p.image_url" class="search-item-img">
+            <div *ngIf="!p.image_url" class="search-item-img" style="display:flex;align-items:center;justify-content:center;">
+              <i data-lucide="sprout" style="width:20px;height:20px;color:white;"></i>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);">{{ p.name }}</div>
+              <div style="font-size:11px;color:var(--muted);">{{ p.category || 'Producto' }}</div>
+            </div>
+            <div style="font-weight:700;font-size:14px;color:var(--primary);">\${{ p.price.toFixed(2) }}</div>
+          </div>
+        </div>
       </div>
-      <div class="pills">
-        <button class="pill" [class.active]="selectedCategory === 'Todas'" (click)="setCategory('Todas')">{{ t.all }}</button>
-        <span class="pill-sep">— Plantas</span>
-        <button *ngFor="let cat of PLANT_CATS" class="pill" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
-          <i [attr.data-lucide]="cat.icon" style="width:12px;height:12px;"></i> {{ getFilterLabel(cat) }}
-        </button>
-        <span class="pill-sep">— Productos</span>
-        <button *ngFor="let cat of PRODUCT_CATS" class="pill" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
-          <i [attr.data-lucide]="cat.icon" style="width:12px;height:12px;"></i> {{ getFilterLabel(cat) }}
-        </button>
+
+      <div class="cat-select-wrapper">
+        <select [(ngModel)]="selectedCategory" (change)="setCategory(selectedCategory)" class="cat-select">
+          <option value="Todas">{{ t.all }}</option>
+          <optgroup label="🌿 Plantas">
+            <option *ngFor="let cat of PLANT_CATS" [value]="cat.name">{{ getFilterLabel(cat) }}</option>
+          </optgroup>
+          <optgroup label="🛒 Productos de Jardín">
+            <option *ngFor="let cat of PRODUCT_CATS" [value]="cat.name">{{ getFilterLabel(cat) }}</option>
+          </optgroup>
+        </select>
+        <i data-lucide="chevron-down" class="cat-select-icon" style="width:18px;height:18px;"></i>
       </div>
+      
     </div>
 
     <div class="section">
@@ -336,9 +375,9 @@ const CATEGORIES_ES = [
             <span *ngIf="selectedCategory !== 'Todas'" style="display:flex;align-items:center;gap:6px;">
               <i [attr.data-lucide]="getCatIcon(selectedCategory)" style="width:16px;height:16px;"></i> {{ getActiveCatName() }}
             </span>
-            <span *ngIf="selectedCategory === 'Todas'">Plantas disponibles</span>
+            <span *ngIf="selectedCategory === 'Todas'">Catálogo Completo</span>
           </div>
-          <div class="sec-sub">{{ filteredPlants.length }} {{ t.plants.toLowerCase() }} disponibles</div>
+          <div class="sec-sub">{{ filteredPlants.length }} resultados disponibles</div>
         </div>
         <button *ngIf="selectedCategory !== 'Todas'" class="sec-link" (click)="setCategory('Todas')">{{ t.viewAll }} ✕</button>
       </div>
@@ -371,10 +410,10 @@ const CATEGORIES_ES = [
         </div>
       </div>
       <div *ngIf="!loading && filteredPlants.length === 0" class="empty">
-        <div class="empty-icon"><i data-lucide="sprout" style="width:40px;height:40px;"></i></div>
+        <div class="empty-icon"><i data-lucide="search-x" style="width:48px;height:48px;"></i></div>
         <div class="empty-title">{{ t.noPlants }}</div>
         <p class="empty-sub">{{ t.noPlantsSub }}</p>
-        <a class="empty-btn" [href]="getGeneralWhatsappLink()" target="_blank"><i data-lucide="message-circle" style="width:14px;height:14px;"></i> {{ t.consultWA }}</a>
+        <button class="empty-btn" (click)="clearSearch()"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Limpiar búsqueda</button>
       </div>
     </div>
 
@@ -431,6 +470,7 @@ export class CatalogComponent implements OnInit, AfterViewInit {
   client?: Client;
   plants: Plant[] = [];
   search = '';
+  searchFocused = false;
   selectedCategory = 'Todas';
   loading = true;
   showLoginModal = false;
@@ -493,13 +533,32 @@ export class CatalogComponent implements OnInit, AfterViewInit {
   setCategory(cat: string) {
     this.selectedCategory = cat;
     setTimeout(() => {
-      document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      this.scrollToCatalog();
       this.renderIcons();
     }, 50);
   }
 
   scrollToCatalog() {
     document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  onSearchBlur() {
+    // Le damos un retraso pequeñito para que alcance a registrar si el usuario hace click en un resultado
+    setTimeout(() => { this.searchFocused = false; }, 200);
+  }
+
+  clearSearch() {
+    this.search = '';
+    this.searchFocused = false;
+    setTimeout(() => this.renderIcons(), 50);
+  }
+
+  selectSearchResult(plant: Plant) {
+    this.search = plant.name;
+    this.selectedCategory = plant.category || 'Todas';
+    this.searchFocused = false;
+    this.scrollToCatalog();
+    setTimeout(() => this.renderIcons(), 50);
   }
 
   getFilterLabel(cat: typeof CATEGORIES_ES[0]): string {
