@@ -7,6 +7,7 @@ import { pool } from './db.js';
 import OpenAI from 'openai';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
+import * as XLSX from 'xlsx';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -522,23 +523,54 @@ app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (
     if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
     const clientId = clients[0].id;
     const [plants] = await pool.query('SELECT id, name, stock FROM plants WHERE client_id = ? AND is_active = TRUE', [clientId]);
-    const fileContent = req.file.buffer.toString('utf8');
-    const lines = fileContent.split(/\r?\n/).filter(l => l.trim());
-    if (!lines.length) return res.status(400).json({ message: 'Archivo vacío o inválido.' });
-    const headers = lines[0].split(/,|;|\t/).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
-    const nameIdx = headers.findIndex(h => ['producto','nombre','name','item','description','descripcion','product'].some(k => h.includes(k)));
-    const qtyIdx  = headers.findIndex(h => ['cantidad','quantity','qty','cant','vendido','sold','units'].some(k => h.includes(k)));
-    if (nameIdx === -1 || qtyIdx === -1) {
-      return res.status(400).json({ message: 'No se encontraron columnas de producto o cantidad.', headers });
-    }
-    const rows = [];
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(/,|;|\t/).map(c => c.trim().replace(/['"]/g, ''));
-      if (cols.length <= Math.max(nameIdx, qtyIdx)) continue;
-      const productName = cols[nameIdx];
-      const qty = parseInt(cols[qtyIdx]) || 0;
-      if (!productName || qty <= 0) continue;
-      rows.push({ productName, qty });
+    // Soporta CSV y Excel (.xlsx, .xls)
+    let rows = [];
+    const isExcel = req.file.mimetype.includes('spreadsheet') || 
+                    req.file.mimetype.includes('excel') ||
+                    req.file.originalname?.match(/\.xlsx?$/i);
+
+    if (isExcel) {
+      // Leer Excel con SheetJS
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+      if (!jsonData.length) return res.status(400).json({ message: 'Archivo Excel vacío.' });
+
+      const headerRow = jsonData[0].map(h => String(h).trim().toLowerCase());
+      const nameIdx = headerRow.findIndex(h => ['producto','nombre','name','item','description','descripcion','product'].some(k => h.includes(k)));
+      const qtyIdx  = headerRow.findIndex(h => ['cantidad','quantity','qty','cant','vendido','sold','units'].some(k => h.includes(k)));
+
+      if (nameIdx === -1 || qtyIdx === -1) {
+        return res.status(400).json({ message: 'No se encontraron columnas de producto o cantidad.', headers: headerRow });
+      }
+
+      for (let i = 1; i < jsonData.length; i++) {
+        const row = jsonData[i];
+        const productName = String(row[nameIdx] || '').trim();
+        const qty = parseInt(row[qtyIdx]) || 0;
+        if (!productName || qty <= 0) continue;
+        rows.push({ productName, qty });
+      }
+    } else {
+      // Leer CSV
+      const fileContent = req.file.buffer.toString('utf8');
+      const lines = fileContent.split(/\r?\n/).filter(l => l.trim());
+      if (!lines.length) return res.status(400).json({ message: 'Archivo vacío o inválido.' });
+      const headers = lines[0].split(/,|;|\t/).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+      const nameIdx = headers.findIndex(h => ['producto','nombre','name','item','description','descripcion','product'].some(k => h.includes(k)));
+      const qtyIdx  = headers.findIndex(h => ['cantidad','quantity','qty','cant','vendido','sold','units'].some(k => h.includes(k)));
+      if (nameIdx === -1 || qtyIdx === -1) {
+        return res.status(400).json({ message: 'No se encontraron columnas de producto o cantidad.', headers });
+      }
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(/,|;|\t/).map(c => c.trim().replace(/['"]/g, ''));
+        if (cols.length <= Math.max(nameIdx, qtyIdx)) continue;
+        const productName = cols[nameIdx];
+        const qty = parseInt(cols[qtyIdx]) || 0;
+        if (!productName || qty <= 0) continue;
+        rows.push({ productName, qty });
+      }
     }
     const normalize = s => s.toLowerCase().replace(/[^a-z0-9áéíóúñü]/g, ' ').replace(/\s+/g, ' ').trim();
     const results = rows.map(row => {
