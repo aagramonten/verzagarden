@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { PlantService, Client, Plant, SalesReport, Category } from '../services/plant.service';
+import { PlantService, Client, Plant, SalesReport, Category, AdminUser, UserRole, ROLE_LABELS, PERMISSIONS, LoginResponse } from '../services/plant.service';
 import { PlantCardComponent } from '../plant-card.component';
 
 export const PLANT_CATEGORIES = [
@@ -99,34 +99,37 @@ declare const lucide: any;
         <div class="brand">
           <i data-lucide="leaf" class="brand-icon"></i>
           <div class="brand-text">
-            <span class="brand-title">Jardín Esmeralda</span>
-            <span class="brand-sub">Sistema de Gestión</span>
+            <span class="brand-title">{{ currentName || 'Admin' }}</span>
+            <span class="brand-sub">{{ ROLE_LABELS[currentRole] }}</span>
           </div>
         </div>
         
         <nav class="nav-menu">
-          <button class="nav-item" [class.active]="activeTab==='dashboard'" (click)="setTab('dashboard')">
+          <button *ngIf="PERMISSIONS.canSeeDashboard(currentRole)" class="nav-item" [class.active]="activeTab==='dashboard'" (click)="setTab('dashboard')">
             <i data-lucide="layout-dashboard"></i> <span>Dashboard</span>
           </button>
           <button class="nav-item" [class.active]="activeTab==='inventario'" (click)="setTab('inventario')">
             <i data-lucide="package"></i> <span>Inventario</span>
           </button>
-          <button class="nav-item" [class.active]="activeTab==='stock'" (click)="setTab('stock')">
+          <button *ngIf="PERMISSIONS.canSeeStock(currentRole)" class="nav-item" [class.active]="activeTab==='stock'" (click)="setTab('stock')">
             <i data-lucide="shopping-cart"></i> <span>Stock</span>
           </button>
-          <button class="nav-item" [class.active]="activeTab==='ventas'" (click)="setTab('ventas')">
+          <button *ngIf="PERMISSIONS.canSeeVentas(currentRole)" class="nav-item" [class.active]="activeTab==='ventas'" (click)="setTab('ventas')">
             <i data-lucide="trending-up"></i> <span>Ventas &amp; Ganancias</span>
           </button>
           
           <div class="nav-divider"></div>
           
-          <button class="nav-item" [class.active]="activeTab==='pos'" (click)="setTab('pos')">
+          <button *ngIf="PERMISSIONS.canImportPOS(currentRole)" class="nav-item" [class.active]="activeTab==='pos'" (click)="setTab('pos')">
             <i data-lucide="upload-cloud"></i> <span>Importar POS</span>
           </button>
-          <button class="nav-item" [class.active]="activeTab==='categorias'" (click)="setTab('categorias')">
+          <button *ngIf="PERMISSIONS.canSeeCategorias(currentRole)" class="nav-item" [class.active]="activeTab==='categorias'" (click)="setTab('categorias')">
             <i data-lucide="folder-open"></i> <span>Categorías</span>
           </button>
-          <button class="nav-item" [class.active]="activeTab==='ajustes'" (click)="setTab('ajustes')">
+          <button *ngIf="PERMISSIONS.canManageUsers(currentRole)" class="nav-item" [class.active]="activeTab==='usuarios'" (click)="setTab('usuarios')">
+            <i data-lucide="users"></i> <span>Usuarios</span>
+          </button>
+          <button *ngIf="PERMISSIONS.canSeeAjustes(currentRole)" class="nav-item" [class.active]="activeTab==='ajustes'" (click)="setTab('ajustes')">
             <i data-lucide="settings"></i> <span>Ajustes</span>
           </button>
         </nav>
@@ -149,7 +152,7 @@ declare const lucide: any;
           </h1>
           <div class="header-actions">
             <button class="btn-outline" (click)="goToPublic()"><i data-lucide="external-link"></i> Ver Tienda</button>
-            <button *ngIf="activeTab==='inventario'" class="btn-primary" (click)="showForm = !showForm">
+            <button *ngIf="activeTab==='inventario' && PERMISSIONS.canEditInventoryFull(currentRole)" class="btn-primary" (click)="showForm = !showForm">
               <i [attr.data-lucide]="showForm ? 'x' : 'plus'"></i> {{ showForm ? 'Cerrar' : 'Agregar Producto' }}
             </button>
             <button *ngIf="activeTab==='ventas'" class="btn-primary"><i data-lucide="download"></i> Exportar</button>
@@ -227,7 +230,7 @@ declare const lucide: any;
             <h3 style="margin:0 0 20px; font-size:1.2rem;">{{ editingId ? 'Editar Producto' : 'Crear Nuevo Producto' }}</h3>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
               <div class="form-group"><label class="form-label">Nombre</label><input type="text" [(ngModel)]="plantForm.name" class="form-input"></div>
-              <div class="form-group">
+              <div *ngIf="PERMISSIONS.canEditInventoryFull(currentRole)" class="form-group">
                 <label class="form-label">Categoría</label>
                 <select [(ngModel)]="plantForm.category" class="form-input">
                   <optgroup *ngFor="let group of CATEGORY_GROUPS" [label]="group.label">
@@ -235,9 +238,9 @@ declare const lucide: any;
                   </optgroup>
                 </select>
               </div>
-              <div class="form-group"><label class="form-label">Precio de Venta ($)</label><input type="number" [(ngModel)]="plantForm.price" class="form-input"></div>
-              <div class="form-group"><label class="form-label">Costo de Compra ($)</label><input type="number" [(ngModel)]="plantForm.cost_price" class="form-input"></div>
-              <div class="form-group"><label class="form-label">Stock Inicial</label><input type="number" [(ngModel)]="plantForm.stock" class="form-input"></div>
+              <div *ngIf="PERMISSIONS.canEditInventoryFull(currentRole)" class="form-group"><label class="form-label">Precio de Venta ($)</label><input type="number" [(ngModel)]="plantForm.price" class="form-input"></div>
+              <div *ngIf="PERMISSIONS.canEditInventoryFull(currentRole)" class="form-group"><label class="form-label">Costo de Compra ($)</label><input type="number" [(ngModel)]="plantForm.cost_price" class="form-input"></div>
+              <div *ngIf="PERMISSIONS.canEditInventoryFull(currentRole)" class="form-group"><label class="form-label">Stock Inicial</label><input type="number" [(ngModel)]="plantForm.stock" class="form-input"></div>
               <div class="form-group">
                 <label class="form-label">Luz</label>
                 <select [(ngModel)]="plantForm.light" class="form-input">
@@ -291,7 +294,12 @@ declare const lucide: any;
 
           <div *ngIf="loading" style="text-align:center; padding:40px;">Cargando...</div>
           <div class="admin-inventory" *ngIf="!loading">
-            <app-plant-card *ngFor="let p of filteredInventory" [plant]="p" [adminMode]="true" [client]="client" (onEdit)="editPlant($event)" (onRemove)="removePlant($event)"></app-plant-card>
+            <app-plant-card *ngFor="let p of filteredInventory" [plant]="p"
+              [adminMode]="true"
+              [client]="client"
+              (onEdit)="PERMISSIONS.canEditInventoryFull(currentRole) ? editPlant($event) : editPlantVendor($event)"
+              (onRemove)="PERMISSIONS.canEditInventoryFull(currentRole) ? removePlant($event) : null">
+            </app-plant-card>
           </div>
         </div>
 
@@ -466,6 +474,145 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- USUARIOS -->
+        <div *ngIf="activeTab==='usuarios'">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <p style="font-size:0.9rem; color:var(--text-muted);">Gestiona los accesos de tu equipo. Cada rol tiene permisos distintos.</p>
+            <button class="btn-primary" (click)="openUserForm()">
+              <i data-lucide="plus"></i> Nuevo usuario
+            </button>
+          </div>
+
+          <!-- Formulario crear/editar usuario -->
+          <div *ngIf="showUserForm" class="card" style="margin-bottom:24px; border-left:4px solid #10B981;">
+            <h3 style="margin:0 0 20px; font-size:1.1rem;">{{ editingUserId ? 'Editar usuario' : 'Nuevo usuario' }}</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:16px;">
+              <div class="form-group">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" [(ngModel)]="userForm.name" class="form-input" placeholder="Ej: María González">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Usuario (para login)</label>
+                <input type="text" [(ngModel)]="userForm.username" class="form-input" placeholder="Ej: maria">
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ editingUserId ? 'Nueva contraseña (dejar vacío para no cambiar)' : 'Contraseña' }}</label>
+                <input type="password" [(ngModel)]="userForm.password" class="form-input" placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Rol</label>
+                <select [(ngModel)]="userForm.role" class="form-input">
+                  <option value="owner">Dueño — acceso total</option>
+                  <option value="manager">Gerente — sin ventas/ajustes</option>
+                  <option value="vendor">Vendedor — solo fotos y nombres</option>
+                </select>
+              </div>
+            </div>
+            <div *ngIf="userError" style="color:#DC2626; font-size:0.85rem; font-weight:600; margin:8px 0;">{{ userError }}</div>
+            <div *ngIf="userSuccess" style="color:#10B981; font-size:0.85rem; font-weight:600; margin:8px 0;">{{ userSuccess }}</div>
+            <div style="display:flex; gap:12px; margin-top:16px;">
+              <button class="btn-primary" (click)="saveUser()" [disabled]="userSaving">
+                {{ userSaving ? 'Guardando...' : editingUserId ? 'Actualizar' : 'Crear usuario' }}
+              </button>
+              <button class="btn-outline" (click)="showUserForm = false; userError = ''">Cancelar</button>
+            </div>
+          </div>
+
+          <!-- Tabla de usuarios -->
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let u of adminUsers">
+                  <td style="font-weight:600;">{{ u.name }}</td>
+                  <td style="color:var(--text-muted);">{{ u.username }}</td>
+                  <td>
+                    <span class="status-pill"
+                      [style.background]="u.role === 'owner' ? '#ECFDF5' : u.role === 'manager' ? '#EFF6FF' : '#F5F3FF'"
+                      [style.color]="u.role === 'owner' ? '#065F46' : u.role === 'manager' ? '#1D4ED8' : '#6D28D9'">
+                      {{ ROLE_LABELS[u.role] }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-pill"
+                      [style.background]="u.is_active ? '#D1FAE5' : '#FEE2E2'"
+                      [style.color]="u.is_active ? '#065F46' : '#991B1B'">
+                      {{ u.is_active ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td style="display:flex; gap:8px;">
+                    <button class="btn-outline" style="padding:5px 12px; font-size:0.8rem;" (click)="openUserForm(u)">
+                      <i data-lucide="pencil" style="width:14px;height:14px;"></i> Editar
+                    </button>
+                    <button class="btn-outline" style="padding:5px 12px; font-size:0.8rem;"
+                      [style.color]="u.is_active ? '#DC2626' : '#10B981'"
+                      (click)="toggleUserActive(u)">
+                      {{ u.is_active ? 'Desactivar' : 'Reactivar' }}
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Leyenda de roles -->
+          <div class="card" style="margin-top:24px; background:#F9FAFB;">
+            <h3 style="margin:0 0 16px; font-size:1rem;">Permisos por rol</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:16px; font-size:0.85rem;">
+              <div>
+                <div style="font-weight:700; color:#065F46; margin-bottom:8px;">👑 Dueño</div>
+                <div style="color:var(--text-muted); line-height:1.8;">
+                  ✅ Dashboard completo<br>
+                  ✅ Ventas y ganancias<br>
+                  ✅ Stock y alertas<br>
+                  ✅ Importar POS<br>
+                  ✅ Restock con factura<br>
+                  ✅ Inventario completo<br>
+                  ✅ Categorías<br>
+                  ✅ Ajustes<br>
+                  ✅ Gestionar usuarios
+                </div>
+              </div>
+              <div>
+                <div style="font-weight:700; color:#1D4ED8; margin-bottom:8px;">🏢 Gerente</div>
+                <div style="color:var(--text-muted); line-height:1.8;">
+                  ✅ Dashboard (sin $$)<br>
+                  ❌ Ventas y ganancias<br>
+                  ✅ Stock y alertas<br>
+                  ✅ Importar POS<br>
+                  ✅ Restock con factura<br>
+                  ✅ Inventario completo<br>
+                  ✅ Categorías<br>
+                  ❌ Ajustes<br>
+                  ❌ Gestionar usuarios
+                </div>
+              </div>
+              <div>
+                <div style="font-weight:700; color:#6D28D9; margin-bottom:8px;">🏷️ Vendedor</div>
+                <div style="color:var(--text-muted); line-height:1.8;">
+                  ❌ Dashboard<br>
+                  ❌ Ventas y ganancias<br>
+                  ❌ Stock y alertas<br>
+                  ❌ Importar POS<br>
+                  ❌ Restock con factura<br>
+                  ✅ Fotos, nombre y descripción<br>
+                  ❌ Categorías<br>
+                  ❌ Ajustes<br>
+                  ❌ Gestionar usuarios
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- CATEGORÍAS -->
         <div *ngIf="activeTab==='categorias'">
           <div style="margin-bottom:20px;">
@@ -619,7 +766,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   imageUploading = false;
   showForm = false;
 
-  activeTab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'stock' | 'ajustes' | 'categorias' = 'dashboard';
+  activeTab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'stock' | 'ajustes' | 'categorias' | 'usuarios' = 'dashboard';
   inventoryFilter: 'all' | 'low' | 'out' = 'all';
 
   selectedInvoice: File | null = null;
@@ -636,6 +783,21 @@ export class AdminComponent implements OnInit, AfterViewInit {
   categories: Category[] = [];
   categorySaving: number | null = null;
   categorySaved: number | null = null;
+
+  // Roles
+  readonly ROLE_LABELS = ROLE_LABELS;
+  readonly PERMISSIONS = PERMISSIONS;
+  get currentRole(): UserRole { return this.plantService.getRole() || 'vendor'; }
+  get currentName(): string { return this.plantService.getName(); }
+
+  // Usuarios
+  adminUsers: AdminUser[] = [];
+  userForm: Partial<AdminUser & { password?: string }> = {};
+  editingUserId?: number;
+  showUserForm = false;
+  userSaving = false;
+  userError = '';
+  userSuccess = '';
 
   salesReport: SalesReport | null = null;
   salesLoading = false;
@@ -659,9 +821,13 @@ export class AdminComponent implements OnInit, AfterViewInit {
   constructor(private plantService: PlantService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    if (sessionStorage.getItem('admin_slug') !== this.clientSlug) { this.router.navigate(['/']); return; }
+    const slug = sessionStorage.getItem('admin_slug');
+    const role = this.plantService.getRole();
+    if (!slug || slug !== this.clientSlug || !role) { this.router.navigate(['/']); return; }
+    // Redirigir vendedor directo al inventario
+    if (role === 'vendor') { this.activeTab = 'inventario'; }
     this.loadData();
-    this.loadSalesReport(this.selectedSalesPeriod);
+    if (this.PERMISSIONS.canSeeVentas(role)) this.loadSalesReport(this.selectedSalesPeriod);
   }
 
   ngAfterViewInit() { this.renderIcons(); }
@@ -670,9 +836,10 @@ export class AdminComponent implements OnInit, AfterViewInit {
     setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 50);
   }
 
-  setTab(tab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'stock' | 'ajustes' | 'categorias') {
+  setTab(tab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'stock' | 'ajustes' | 'categorias' | 'usuarios') {
     this.activeTab = tab;
     if (tab === 'categorias' && !this.categories.length) this.loadCategories();
+    if (tab === 'usuarios') this.loadAdminUsers();
     this.cdr.detectChanges();
     this.renderIcons();
   }
@@ -685,7 +852,8 @@ export class AdminComponent implements OnInit, AfterViewInit {
       'ventas': 'Ventas & Ganancias',
       'pos': 'Importar POS',
       'categorias': 'Categorías',
-      'ajustes': 'Ajustes'
+      'ajustes': 'Ajustes',
+      'usuarios': 'Usuarios'
     };
     return titles[this.activeTab];
   }
@@ -695,6 +863,79 @@ export class AdminComponent implements OnInit, AfterViewInit {
       next: cats => { this.categories = cats; this.cdr.detectChanges(); this.renderIcons(); },
       error: err => console.error('Error cargando categorías:', err)
     });
+  }
+
+  // =======================
+  // 👥 Usuarios
+  // =======================
+  loadAdminUsers() {
+    this.plantService.getAdminUsers(this.clientSlug).subscribe({
+      next: users => { this.adminUsers = users; this.cdr.detectChanges(); this.renderIcons(); },
+      error: err => console.error('Error cargando usuarios:', err)
+    });
+  }
+
+  openUserForm(user?: AdminUser) {
+    if (user) {
+      this.editingUserId = user.id;
+      this.userForm = { name: user.name, username: user.username, role: user.role, password: '' };
+    } else {
+      this.editingUserId = undefined;
+      this.userForm = { name: '', username: '', role: 'vendor', password: '' };
+    }
+    this.showUserForm = true;
+    this.userError = '';
+    this.userSuccess = '';
+    setTimeout(() => this.renderIcons(), 50);
+  }
+
+  saveUser() {
+    this.userError = '';
+    if (!this.userForm.name || !this.userForm.username) {
+      this.userError = 'Nombre y usuario son requeridos'; return;
+    }
+    if (!this.editingUserId && !this.userForm.password) {
+      this.userError = 'La contraseña es requerida para usuarios nuevos'; return;
+    }
+    this.userSaving = true;
+    const req = this.editingUserId
+      ? this.plantService.updateAdminUser(this.clientSlug, this.editingUserId, this.userForm)
+      : this.plantService.createAdminUser(this.clientSlug, {
+          name: this.userForm.name!,
+          username: this.userForm.username!,
+          password: this.userForm.password!,
+          role: this.userForm.role as UserRole
+        });
+    req.subscribe({
+      next: () => {
+        this.userSaving = false;
+        this.userSuccess = this.editingUserId ? 'Usuario actualizado' : 'Usuario creado';
+        this.showUserForm = false;
+        this.loadAdminUsers();
+        this.cdr.detectChanges();
+        setTimeout(() => { this.userSuccess = ''; this.cdr.detectChanges(); }, 3000);
+      },
+      error: (err) => {
+        this.userSaving = false;
+        this.userError = err.error?.message || 'Error guardando usuario';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  toggleUserActive(user: AdminUser) {
+    const action = user.is_active ? 'desactivar' : 'reactivar';
+    if (!confirm(`¿Quieres ${action} a ${user.name}?`)) return;
+    this.plantService.updateAdminUser(this.clientSlug, user.id, { is_active: !user.is_active }).subscribe({
+      next: () => { this.loadAdminUsers(); },
+      error: (err) => { alert(err.error?.message || 'Error actualizando usuario'); }
+    });
+  }
+
+  getRoleBadgeColor(role: UserRole): string {
+    if (role === 'owner')   return '#ECFDF5; color:#065F46';
+    if (role === 'manager') return '#EFF6FF; color:#1D4ED8';
+    return '#F5F3FF; color:#6D28D9';
   }
 
   saveCategory(cat: Category) {
@@ -834,7 +1075,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     return `${d.getDate()}/${d.getMonth() + 1}`;
   }
 
-  logout() { sessionStorage.removeItem('admin_slug'); this.router.navigate(['/']); }
+  logout() { this.plantService.clearSession(); this.router.navigate(['/']); }
   goToPublic() { this.router.navigate(['/']); }
 
   get totalStock() { return this.plants.reduce((s, p) => s + (p.stock || 0), 0); }
@@ -976,6 +1217,10 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   savePlant() {
     if (!this.plantForm.name) return;
+    // Vendedor solo puede actualizar nombre, descripción e imagen
+    if (this.PERMISSIONS.canEditInventoryBasic(this.currentRole) && this.editingId) {
+      this.savePlantVendor(); return;
+    }
     const req = this.editingId ? this.plantService.updatePlant(this.editingId, this.plantForm) : this.plantService.createPlant(this.clientSlug, this.plantForm);
     req.subscribe({ next: () => { this.resetForm(); this.showForm = false; this.loadData(); }, error: e => console.error(e) });
   }
@@ -990,6 +1235,31 @@ export class AdminComponent implements OnInit, AfterViewInit {
       document.querySelector('.main')?.scrollTo({ top: 0, behavior: 'smooth' });
       this.renderIcons();
     }, 100);
+  }
+
+  editPlantVendor(plant: Plant) {
+    // Vendedor solo puede editar nombre, descripción e imagen
+    this.editingId = plant.id;
+    this.plantForm = { ...plant };
+    this.showForm = true;
+    this.activeTab = 'inventario';
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      document.querySelector('.main')?.scrollTo({ top: 0, behavior: 'smooth' });
+      this.renderIcons();
+    }, 100);
+  }
+
+  savePlantVendor() {
+    if (!this.plantForm.name || !this.editingId) return;
+    this.plantService.vendorUpdatePlant(this.editingId, {
+      name: this.plantForm.name,
+      description: this.plantForm.description || '',
+      image_url: this.plantForm.image_url || ''
+    }).subscribe({
+      next: () => { this.resetForm(); this.showForm = false; this.loadData(); },
+      error: e => console.error(e)
+    });
   }
 
   removePlant(plant: Plant) {

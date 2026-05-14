@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 import { pool } from './db.js';
 import OpenAI from 'openai';
 import multer from 'multer';
@@ -148,8 +149,45 @@ async function seedDefaultCategories(clientId) {
   }
 }
 
+async function ensureAdminUsersTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admin_users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        client_id INT NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        username VARCHAR(100) NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        role ENUM('owner', 'manager', 'vendor') NOT NULL DEFAULT 'vendor',
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_client_username (client_id, username)
+      )
+    `);
+    console.log('✅ admin_users table ready');
+    const [clients] = await pool.query('SELECT id, admin_user, admin_password FROM clients');
+    for (const client of clients) {
+      if (!client.admin_user) continue;
+      const [existing] = await pool.query(
+        'SELECT id FROM admin_users WHERE client_id = ? AND role = "owner" LIMIT 1',
+        [client.id]
+      );
+      if (existing.length === 0) {
+        const hashed = await bcrypt.hash(client.admin_password || 'admin123', 10);
+        await pool.query(
+          `INSERT IGNORE INTO admin_users (client_id, name, username, password, role) VALUES (?, 'Dueño', ?, ?, 'owner')`,
+          [client.id, client.admin_user, hashed]
+        );
+        console.log(`✅ Owner migrado para cliente ${client.id}`);
+      }
+    }
+  } catch (err) { console.warn('admin_users migration warning:', err.message); }
+}
+
 ensureCostPriceColumn();
 ensureWhatsappMessage();
+ensureAdminUsersTable();
 ensureCategoriesTable();
 
 // =======================
@@ -177,15 +215,94 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
 app.post('/api/clients/:slug/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const [rows] = await pool.query('SELECT * FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
-    if (!rows.length) return res.status(404).json({ message: 'Cliente no encontrado' });
-    const client = rows[0];
-    if (client.admin_user !== username || client.admin_password !== password) {
-      return res.status(401).json({ message: 'Credenciales incorrectas' });
-    }
-    res.json({ ok: true, slug: client.slug });
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
+    const [users] = await pool.query(
+      'SELECT * FROM admin_users WHERE client_id = ? AND username = ? AND is_active = TRUE LIMIT 1',
+      [clients[0].id, username]
+    );
+    if (!users.length) return res.status(401).json({ message: 'Credenciales incorrectas' });
+    const user = users[0];
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(401).json({ message: 'Credenciales incorrectas' });
+    res.json({ ok: true, slug: req.params.slug, user_id: user.id, name: user.name, role: user.role });
   } catch (error) {
     res.status(500).json({ message: 'Error en login', error: error.message });
+  }
+});
+
+// =======================
+// 👥 ADMIN USERS — solo owner
+// =======================
+app.get('/api/clients/:slug/admin-users', async (req, res) => {
+  try {
+    if (req.headers['x-user-role'] !== 'owner') return res.status(403).json({ message: 'Solo el dueño puede ver los usuarios' });
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
+    const [users] = await pool.query(
+      'SELECT id, name, username, role, is_active, created_at FROM admin_users WHERE client_id = ? ORDER BY role ASC, name ASC',
+      [clients[0].id]
+    );
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error obteniendo usuarios', error: error.message });
+  }
+});
+
+app.post('/api/clients/:slug/admin-users', async (req, res) => {
+  try {
+    if (req.headers['x-user-role'] !== 'owner') return res.status(403).json({ message: 'Solo el dueño puede crear usuarios' });
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
+    const { name, username, password, role } = req.body;
+    if (!name || !username || !password || !role) return res.status(400).json({ message: 'Todos los campos son requeridos' });
+    if (!['owner','manager','vendor'].includes(role)) return res.status(400).json({ message: 'Rol inválido' });
+    const hashed = await bcrypt.hash(password, 10);
+    const [result] = await pool.query(
+      'INSERT INTO admin_users (client_id, name, username, password, role) VALUES (?, ?, ?, ?, ?)',
+      [clients[0].id, name, username, hashed, role]
+    );
+    res.status(201).json({ id: result.insertId, message: 'Usuario creado' });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ message: 'Ese usuario ya existe' });
+    res.status(500).json({ message: 'Error creando usuario', error: error.message });
+  }
+});
+
+app.put('/api/clients/:slug/admin-users/:id', async (req, res) => {
+  try {
+    const callerRole = req.headers['x-user-role'];
+    const callerId = req.headers['x-user-id'];
+    if (callerRole !== 'owner') return res.status(403).json({ message: 'Solo el dueño puede editar usuarios' });
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
+    if (String(callerId) === String(req.params.id) && req.body.role) {
+      return res.status(400).json({ message: 'No puedes cambiar tu propio rol' });
+    }
+    if (req.body.is_active === false) {
+      const [owners] = await pool.query(
+        'SELECT COUNT(*) as cnt FROM admin_users WHERE client_id = ? AND role = "owner" AND is_active = TRUE',
+        [clients[0].id]
+      );
+      const [target] = await pool.query('SELECT role FROM admin_users WHERE id = ?', [req.params.id]);
+      if (target[0]?.role === 'owner' && owners[0].cnt <= 1) {
+        return res.status(400).json({ message: 'Debe haber al menos un dueño activo' });
+      }
+    }
+    const { name, username, password, role, is_active } = req.body;
+    const fields = []; const values = [];
+    if (name !== undefined)      { fields.push('name = ?');      values.push(name); }
+    if (username !== undefined)  { fields.push('username = ?');  values.push(username); }
+    if (role !== undefined)      { fields.push('role = ?');      values.push(role); }
+    if (is_active !== undefined) { fields.push('is_active = ?'); values.push(is_active); }
+    if (password)                { fields.push('password = ?');  values.push(await bcrypt.hash(password, 10)); }
+    if (!fields.length) return res.status(400).json({ message: 'Nada que actualizar' });
+    values.push(req.params.id, clients[0].id);
+    await pool.query(`UPDATE admin_users SET ${fields.join(', ')} WHERE id = ? AND client_id = ?`, values);
+    res.json({ message: 'Usuario actualizado' });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ message: 'Ese usuario ya existe' });
+    res.status(500).json({ message: 'Error actualizando usuario', error: error.message });
   }
 });
 
@@ -309,6 +426,16 @@ app.put('/api/plants/:id', async (req, res) => {
       `UPDATE plants SET name=?, category=?, description=?, price=?, cost_price=?, stock=?, image_url=?, light=?, water=?, is_featured=?, is_active=? WHERE id=?`,
       [name, category, description, price ?? null, cost_price ?? null, stock, image_url, light, water, !!is_featured, is_active !== false, req.params.id]
     );
+    res.json({ message: 'Planta actualizada' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error actualizando planta', error: error.message });
+  }
+});
+
+app.patch('/api/plants/:id/vendor-update', async (req, res) => {
+  try {
+    const { name, description, image_url } = req.body;
+    await pool.query('UPDATE plants SET name=?, description=?, image_url=? WHERE id=?', [name, description, image_url, req.params.id]);
     res.json({ message: 'Planta actualizada' });
   } catch (error) {
     res.status(500).json({ message: 'Error actualizando planta', error: error.message });

@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { PlantService, Client, Plant, Category } from '../services/plant.service';
+import { PlantService, Client, Plant, Category, LoginResponse } from '../services/plant.service';
 
 declare const lucide: any;
 
@@ -702,7 +702,9 @@ export class CatalogComponent implements OnInit, AfterViewInit {
   }
 
   goToAdmin() {
-    if (sessionStorage.getItem('admin_slug') === this.clientSlug) {
+    const slug = sessionStorage.getItem('admin_slug');
+    const role = this.plantService.getRole();
+    if (slug === this.clientSlug && role) {
       this.router.navigate(['/admin']);
     } else {
       this.showLoginModal = true;
@@ -715,8 +717,8 @@ export class CatalogComponent implements OnInit, AfterViewInit {
     this.loginLoading = true;
     this.loginError = '';
     this.plantService.login(this.clientSlug, this.loginUsername, this.loginPassword).subscribe({
-      next: () => {
-        sessionStorage.setItem('admin_slug', this.clientSlug);
+      next: (res: LoginResponse) => {
+        this.plantService.saveSession(res);
         this.loginLoading = false;
         this.showLoginModal = false;
         this.router.navigate(['/admin']);
