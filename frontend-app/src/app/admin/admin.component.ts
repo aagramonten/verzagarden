@@ -1135,7 +1135,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     this.invoiceLoading = true;
     this.plantService.analyzeInvoice(this.clientSlug, this.selectedInvoice).subscribe({
       next: (res) => {
-        const items = res.result?.items || [];
+        const items = res.items || res.result?.items || [];
         this.restockItems = this.buildRestockItems(items);
         this.invoiceLoading = false;
         this.cdr.detectChanges();

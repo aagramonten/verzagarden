@@ -71,7 +71,8 @@ export interface InvoiceItem {
 
 export interface InvoiceAnalysisResponse {
   message: string;
-  result: { items: InvoiceItem[] };
+  items?: InvoiceItem[];
+  result?: { items: InvoiceItem[] };
 }
 
 export interface RestockResponse {
