@@ -192,57 +192,134 @@ declare const lucide: any;
             </div>
           </div>
 
-          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
-            <div class="card chart-box" style="position:relative;">
-              <div class="chart-head"><span class="chart-title">Ventas (14 días)</span></div>
-              <div style="position:relative;" (mouseleave)="chartTooltip = null">
-                <svg [attr.viewBox]="'0 0 600 200'" width="100%" height="200" style="overflow:visible;">
-                  <defs>
-                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#10B981" stop-opacity="0.3"/>
-                      <stop offset="100%" stop-color="#10B981" stop-opacity="0.02"/>
-                    </linearGradient>
-                  </defs>
-                  <path [attr.d]="getAreaPath()" fill="url(#areaGrad)"/>
-                  <path [attr.d]="getLinePath()" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-                  <circle *ngFor="let pt of getChartPoints(); let i = index"
-                    [attr.cx]="pt.x" [attr.cy]="pt.y" r="16" fill="transparent"
-                    style="cursor:pointer;"
-                    (mouseenter)="chartTooltip = {idx: i, x: pt.x, y: pt.y, d: salesReport!.chart_data[i]}">
-                  </circle>
-                  <circle *ngFor="let pt of getChartPoints()"
-                    [attr.cx]="pt.x" [attr.cy]="pt.y" r="4"
-                    fill="white" stroke="#10B981" stroke-width="2"/>
-                  <text *ngFor="let pt of getChartPoints(); let i = index"
-                    [attr.x]="pt.x" y="198" text-anchor="middle"
-                    style="font-size:9px;fill:#9CA3AF;">
-                    {{ formatChartDay(salesReport!.chart_data[i].day) }}
-                  </text>
-                </svg>
-                <div *ngIf="chartTooltip"
-                  style="position:absolute; background:white; border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:0.8rem; pointer-events:none; box-shadow:0 4px 12px rgba(0,0,0,0.1); min-width:150px; z-index:10;"
-                  [style.left.px]="chartTooltip.x > 400 ? chartTooltip.x - 170 : chartTooltip.x + 10"
-                  [style.top.px]="chartTooltip.y - 10">
-                  <div style="font-weight:700; color:var(--text-main); margin-bottom:4px;">{{ formatChartDay(chartTooltip.d.day) }}</div>
-                  <div style="color:#10B981; font-weight:600;">Ventas: \${{ chartTooltip.d.revenue | number:'1.0-0' }}</div>
-                  <div style="color:#6B7280;">Unidades: {{ chartTooltip.d.units }}</div>
+          <div class="card" style="margin-bottom:30px; position:relative;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <div>
+                <div style="font-size:1.1rem; font-weight:700; color:var(--text-main);">Ventas (14 días)</div>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Ingresos diarios del período</div>
+              </div>
+              <div style="position:relative;">
+                <button (click)="chartDropdownOpen = !chartDropdownOpen" style="background:white; border:1px solid var(--border); border-radius:10px; padding:7px 14px; font-size:0.8rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; color:var(--text-main);">
+                  <i data-lucide="calendar" style="width:14px;height:14px;"></i>
+                  {{ chartPeriodLabel }}
+                  <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+                </button>
+                <div *ngIf="chartDropdownOpen" style="position:absolute; right:0; top:calc(100% + 6px); background:white; border:1px solid var(--border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.1); z-index:50; min-width:140px; overflow:hidden;">
+                  <div *ngFor="let p of salesPeriods" (click)="selectChartPeriod(p)" style="padding:10px 16px; font-size:0.85rem; cursor:pointer; font-weight:500;" [style.background]="selectedSalesPeriod === p.value ? '#ECFDF5' : 'white'" [style.color]="selectedSalesPeriod === p.value ? '#065F46' : 'var(--text-main)'" (mouseenter)="$event.target.style.background='#F9FAFB'" (mouseleave)="$event.target.style.background = selectedSalesPeriod === p.value ? '#ECFDF5' : 'white'">
+                    {{ p.label }}
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="card chart-box">
-              <div class="chart-head"><span class="chart-title">Distribución por Categoría</span></div>
-              <div style="display:flex; justify-content:center; margin-top:20px;">
-                <svg width="150" height="150" viewBox="0 0 130 130">
-                  <ng-container *ngFor="let seg of donutSegments">
-                    <circle cx="65" cy="65" r="44" fill="none" [attr.stroke]="seg.color" stroke-width="22" [attr.stroke-dasharray]="seg.dashArray" [attr.stroke-dashoffset]="seg.dashOffset" style="transform:rotate(-90deg);transform-origin:65px 65px;"></circle>
-                  </ng-container>
-                  <text x="65" y="70" text-anchor="middle" style="font-size:20px;font-weight:800;fill:var(--text-main);">{{ plants.length }}</text>
-                </svg>
-              </div>
-              <div style="margin-top:20px;">
-                <div *ngFor="let seg of donutSegments | slice:0:3" style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:8px;">
-                  <span style="display:flex; align-items:center; gap:6px;"><span style="width:10px;height:10px;border-radius:50%;" [style.background]="seg.color"></span>{{ seg.category }}</span>
-                  <span style="font-weight:600;">{{ seg.count }}</span>
+
+            <div style="position:relative;" (mouseleave)="chartTooltip = null" (click)="chartDropdownOpen = false">
+              <svg [attr.viewBox]="'0 0 700 220'" width="100%" height="220" style="overflow:visible;">
+                <defs>
+                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#10B981" stop-opacity="0.25"/>
+                    <stop offset="100%" stop-color="#10B981" stop-opacity="0.01"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- Y axis lines and labels -->
+                <ng-container *ngFor="let tick of getYTicks()">
+                  <line [attr.x1]="50" [attr.y1]="tick.y" [attr.x2]="680" [attr.y2]="tick.y"
+                    stroke="#F3F4F6" stroke-width="1" stroke-dasharray="4,4"/>
+                  <text [attr.x]="44" [attr.y]="tick.y + 4" text-anchor="end"
+                    style="font-size:9px; fill:#9CA3AF;">
+                    \${{ tick.value | number:'1.0-0' }}
+                  </text>
+                </ng-container>
+
+                <!-- Area and line -->
+                <path [attr.d]="getAreaPath()" fill="url(#areaGrad)"/>
+                <path [attr.d]="getLinePath()" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+
+                <!-- Hover zones -->
+                <circle *ngFor="let pt of getChartPoints(); let i = index"
+                  [attr.cx]="pt.x" [attr.cy]="pt.y" r="18" fill="transparent"
+                  style="cursor:pointer;"
+                  (mouseenter)="onChartHover(i, pt)">
+                </circle>
+
+                <!-- Active point highlight -->
+                <ng-container *ngIf="chartTooltip">
+                  <circle [attr.cx]="chartTooltip.x" [attr.cy]="chartTooltip.y" r="7"
+                    fill="#10B981" opacity="0.2"/>
+                  <circle [attr.cx]="chartTooltip.x" [attr.cy]="chartTooltip.y" r="4"
+                    fill="white" stroke="#10B981" stroke-width="2.5"/>
+                </ng-container>
+
+                <!-- Dots -->
+                <circle *ngFor="let pt of getChartPoints()"
+                  [attr.cx]="pt.x" [attr.cy]="pt.y" r="3"
+                  fill="white" stroke="#10B981" stroke-width="1.5"/>
+
+                <!-- X labels -->
+                <text *ngFor="let pt of getChartPoints(); let i = index"
+                  [attr.x]="pt.x" y="215" text-anchor="middle"
+                  style="font-size:9px;fill:#9CA3AF;">
+                  {{ formatChartDay(salesReport!.chart_data[i].day) }}
+                </text>
+              </svg>
+
+              <!-- Rich Tooltip -->
+              <div *ngIf="chartTooltip"
+                style="position:absolute; background:white; border:1px solid var(--border); border-radius:14px; padding:16px; font-size:0.8rem; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.12); width:240px; z-index:20;"
+                [style.left.px]="chartTooltip.x > 450 ? chartTooltip.x - 256 : chartTooltip.x + 16"
+                [style.top.px]="chartTooltip.y - 20">
+
+                <!-- Header -->
+                <div style="font-weight:700; color:var(--text-main); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border); font-size:0.85rem;">
+                  📅 Detalles del Día: {{ chartTooltip.fullDate }}
+                </div>
+
+                <!-- Main metrics -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+                  <div style="background:#F9FAFB; border-radius:8px; padding:8px;">
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:2px;">Ventas Totales</div>
+                    <div style="font-weight:700; color:#10B981; font-size:1rem;">\${{ chartTooltip.d.revenue | number:'1.0-0' }}</div>
+                  </div>
+                  <div style="background:#F9FAFB; border-radius:8px; padding:8px;">
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:2px;">Unidades</div>
+                    <div style="font-weight:700; color:var(--text-main); font-size:1rem;">{{ chartTooltip.d.units }}</div>
+                  </div>
+                </div>
+
+                <!-- AOV -->
+                <div style="background:#ECFDF5; border-radius:8px; padding:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:0.7rem; color:#065F46; font-weight:600;">AOV (Ticket Promedio)</span>
+                  <span style="font-weight:700; color:#065F46;">\${{ chartTooltip.aov | number:'1.2-2' }}</span>
+                </div>
+
+                <!-- Comparatives -->
+                <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--border);">
+                  <div style="font-size:0.7rem; color:var(--text-muted); font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Comparativas</div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span style="color:var(--text-muted);">vs día anterior</span>
+                    <span [style.color]="chartTooltip.vsPrev >= 0 ? '#10B981' : '#EF4444'" style="font-weight:700;">
+                      {{ chartTooltip.vsPrev >= 0 ? '▲' : '▼' }} {{ chartTooltip.vsPrev | number:'1.0-0' }}%
+                    </span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--text-muted);">vs semana anterior</span>
+                    <span [style.color]="chartTooltip.vsWeek >= 0 ? '#10B981' : '#EF4444'" style="font-weight:700;">
+                      {{ chartTooltip.vsWeek >= 0 ? '▲' : '▼' }} {{ chartTooltip.vsWeek | number:'1.0-0' }}%
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Category breakdown -->
+                <div>
+                  <div style="font-size:0.7rem; color:var(--text-muted); font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Por Categoría</div>
+                  <div *ngFor="let cat of chartTooltip.categories" style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:0.75rem;">
+                    <span style="display:flex; align-items:center; gap:5px;">
+                      <span style="width:6px;height:6px;border-radius:50%;background:#10B981;display:inline-block;"></span>
+                      {{ cat.name }}
+                    </span>
+                    <span style="font-weight:600;">\${{ cat.revenue | number:'1.0-0' }}</span>
+                  </div>
+                  <div *ngIf="!chartTooltip.categories?.length" style="color:var(--text-muted); font-style:italic;">Sin desglose disponible</div>
                 </div>
               </div>
             </div>
@@ -866,6 +943,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   salesReport: SalesReport | null = null;
   salesLoading = false;
   chartTooltip: any = null;
+  chartDropdownOpen = false;
   expandedDates = new Set<string>();
   selectedSalesPeriod = 'month';
   salesPeriods = [
@@ -882,7 +960,10 @@ export class AdminComponent implements OnInit, AfterViewInit {
   urlCopied = false;
   readonly DEFAULT_WA_MESSAGE = 'Hola! Me interesa {planta} a {precio}. ¿Está disponible?';
 
-  get storeUrl(): string { return `https://${this.clientSlug}.verzagarden.com`; }
+  get storeUrl(): string { return `https://\${this.clientSlug}.verzagarden.com`; }
+  get chartPeriodLabel(): string {
+    return this.salesPeriods.find(p => p.value === this.selectedSalesPeriod)?.label || '30 días';
+  }
 
   constructor(private plantService: PlantService, private router: Router, private cdr: ChangeDetectorRef) {}
 
@@ -1141,12 +1222,62 @@ export class AdminComponent implements OnInit, AfterViewInit {
   getChartPoints(): { x: number; y: number }[] {
     const data = this.salesReport?.chart_data;
     if (!data?.length) return [];
-    const W = 600, H = 170, pad = 30;
-    const maxRev = Math.max(...data.map(d => d.revenue), 1);
-    return data.map((d, i) => ({
-      x: pad + (i / Math.max(data.length - 1, 1)) * (W - pad * 2),
-      y: H - ((d.revenue / maxRev) * (H - 20)) - 5
+    const W = 700, H = 190, padL = 55, padR = 20;
+    const maxRev = Math.max(...data.map((d: any) => d.revenue), 1);
+    return data.map((d: any, i: number) => ({
+      x: padL + (i / Math.max(data.length - 1, 1)) * (W - padL - padR),
+      y: 10 + ((1 - d.revenue / maxRev) * (H - 30))
     }));
+  }
+
+  getYTicks(): { y: number; value: number }[] {
+    const data = this.salesReport?.chart_data;
+    if (!data?.length) return [];
+    const maxRev = Math.max(...data.map((d: any) => d.revenue), 1);
+    const step = Math.ceil(maxRev / 4 / 100) * 100;
+    const ticks = [];
+    const H = 190, padL = 55;
+    for (let v = 0; v <= maxRev; v += step) {
+      const y = 10 + ((1 - v / maxRev) * (H - 30));
+      ticks.push({ y, value: v });
+    }
+    return ticks;
+  }
+
+  selectChartPeriod(p: any) {
+    this.chartDropdownOpen = false;
+    this.changeSalesPeriod(p.value);
+  }
+
+  onChartHover(i: number, pt: { x: number; y: number }) {
+    const data = this.salesReport?.chart_data;
+    if (!data) return;
+    const d = data[i];
+    const prev = i > 0 ? data[i - 1] : null;
+    const weekAgo = i >= 7 ? data[i - 7] : null;
+    const vsPrev = prev && prev.revenue > 0 ? ((d.revenue - prev.revenue) / prev.revenue) * 100 : 0;
+    const vsWeek = weekAgo && weekAgo.revenue > 0 ? ((d.revenue - weekAgo.revenue) / weekAgo.revenue) * 100 : 0;
+    const aov = d.units > 0 ? d.revenue / d.units : 0;
+    // Build category breakdown from recent_imports for this day
+    const dayStr = d.day instanceof Date ? d.day.toISOString().split('T')[0] : String(d.day).split('T')[0];
+    const catMap = new Map<string, number>();
+    if (this.salesReport?.recent_imports) {
+      for (const row of this.salesReport.recent_imports) {
+        const rowDay = String(row.imported_at).split('T')[0].split(' ')[0];
+        if (rowDay === dayStr && row.plant_name) {
+          const cat = row.category || 'Sin categoría';
+          catMap.set(cat, (catMap.get(cat) || 0) + (row.qty_sold * row.price));
+        }
+      }
+    }
+    const categories = Array.from(catMap.entries())
+      .map(([name, revenue]) => ({ name, revenue }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 4);
+    const dateObj = new Date(d.day);
+    const fullDate = dateObj.toLocaleDateString('es-PR', { weekday: 'short', month: 'short', day: 'numeric' });
+    this.chartTooltip = { idx: i, x: pt.x, y: pt.y, d, vsPrev, vsWeek, aov, categories, fullDate };
+    this.cdr.detectChanges();
   }
 
   getLinePath(): string {
@@ -1165,9 +1296,9 @@ export class AdminComponent implements OnInit, AfterViewInit {
   getAreaPath(): string {
     const pts = this.getChartPoints();
     if (!pts.length) return '';
-    if (pts.length === 1) return `M 30 ${pts[0].y} L 570 ${pts[0].y} L 570 175 L 30 175 Z`;
+    if (pts.length === 1) return `M 55 ${pts[0].y} L 680 ${pts[0].y} L 680 170 L 55 170 Z`;
     const line = this.getLinePath();
-    return `${line} L ${pts[pts.length - 1].x} 175 L ${pts[0].x} 175 Z`;
+    return `${line} L ${pts[pts.length - 1].x} 170 L ${pts[0].x} 170 Z`;
   }
 
   // =======================
