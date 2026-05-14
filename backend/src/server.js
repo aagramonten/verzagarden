@@ -537,15 +537,21 @@ app.post('/api/clients/:slug/pos-import/analyze', upload.single('file'), async (
       const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
       if (!jsonData.length) return res.status(400).json({ message: 'Archivo Excel vacío.' });
 
-      const headerRow = jsonData[0].map(h => String(h).trim().toLowerCase());
-      const nameIdx = headerRow.findIndex(h => ['producto','nombre','name','item','description','descripcion','product'].some(k => h.includes(k)));
-      const qtyIdx  = headerRow.findIndex(h => ['cantidad','quantity','qty','cant','vendido','sold','units'].some(k => h.includes(k)));
-
-      if (nameIdx === -1 || qtyIdx === -1) {
-        return res.status(400).json({ message: 'No se encontraron columnas de producto o cantidad.', headers: headerRow });
+      // Buscar la fila de headers automáticamente (puede no estar en fila 1)
+      const NAME_KEYS = ['producto','nombre','name','item','description','descripcion','product'];
+      const QTY_KEYS  = ['cantidad','quantity','qty','cant','vendido','sold','units'];
+      let headerRowIdx = -1, nameIdx = -1, qtyIdx = -1;
+      for (let i = 0; i < Math.min(10, jsonData.length); i++) {
+        const row = jsonData[i].map(h => String(h || '').trim().toLowerCase());
+        const ni = row.findIndex(h => NAME_KEYS.some(k => h.includes(k)));
+        const qi = row.findIndex(h => QTY_KEYS.some(k => h.includes(k)));
+        if (ni !== -1 && qi !== -1) { headerRowIdx = i; nameIdx = ni; qtyIdx = qi; break; }
+      }
+      if (headerRowIdx === -1) {
+        return res.status(400).json({ message: 'No se encontraron columnas de producto o cantidad en las primeras 10 filas.' });
       }
 
-      for (let i = 1; i < jsonData.length; i++) {
+      for (let i = headerRowIdx + 1; i < jsonData.length; i++) {
         const row = jsonData[i];
         const productName = String(row[nameIdx] || '').trim();
         const qty = parseInt(row[qtyIdx]) || 0;
