@@ -247,20 +247,22 @@ declare const lucide: any;
                 </text>
               </svg>
 
-              <!-- Tooltip minimalista: solo fecha, ventas, unidades -->
+              <!-- Tooltip minimalista -->
               <div *ngIf="chartTooltip"
-                style="position:absolute; background:white; border:1px solid var(--border); border-radius:12px; padding:12px 16px; font-size:0.82rem; pointer-events:none; box-shadow:0 6px 20px rgba(0,0,0,0.10); min-width:160px; z-index:20;"
-                [style.left.px]="chartTooltip.x > 450 ? chartTooltip.x - 180 : chartTooltip.x + 14"
+                style="position:absolute; background:white; border:1px solid var(--border); border-radius:12px; padding:14px 16px; pointer-events:none; box-shadow:0 6px 20px rgba(0,0,0,0.10); min-width:200px; z-index:20;"
+                [style.left.px]="chartTooltip.x > 450 ? chartTooltip.x - 220 : chartTooltip.x + 14"
                 [style.top.px]="chartTooltip.y - 16">
-                <div style="font-weight:700; color:var(--text-main); margin-bottom:8px; font-size:0.85rem;">{{ chartTooltip.fullDate }}</div>
-                <div style="display:flex; justify-content:space-between; gap:16px;">
-                  <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:2px;">Ventas</div>
-                    <div style="font-weight:700; color:#10B981; font-size:1rem;">\${{ chartTooltip.d.revenue | number:'1.0-0' }}</div>
+                <div style="font-weight:700; color:var(--text-main); font-size:0.85rem; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #E5E7EB;">
+                  📅 Detalles del Día: {{ chartTooltip.fullDate }}
+                </div>
+                <div style="display:flex; gap:10px;">
+                  <div style="flex:1; background:#F8FAFC; border-radius:8px; padding:8px 10px;">
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:3px;">Ventas Totales</div>
+                    <div style="font-weight:700; color:#10B981; font-size:1.05rem;">\${{ chartTooltip.d.revenue | number:'1.0-0' }}</div>
                   </div>
-                  <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:2px;">Unidades</div>
-                    <div style="font-weight:700; color:var(--text-main); font-size:1rem;">{{ chartTooltip.d.units }}</div>
+                  <div style="flex:1; background:#F8FAFC; border-radius:8px; padding:8px 10px;">
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:3px;">Unidades</div>
+                    <div style="font-weight:700; color:var(--text-main); font-size:1.05rem;">{{ chartTooltip.d.units }}</div>
                   </div>
                 </div>
               </div>
@@ -285,7 +287,7 @@ declare const lucide: any;
               <div class="card" style="padding:16px 20px;">
                 <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Promedio por compra</div>
                 <div style="font-size:1.5rem; font-weight:800; color:var(--text-main);">
-                  \${{ getAOV() | number:'1.0-0' }}
+                  \${{ getAvgTicket() | number:'1.0-0' }}
                   <span style="font-size:0.8rem; font-weight:400; color:var(--text-muted);"> por pedido</span>
                 </div>
               </div>
@@ -1252,7 +1254,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     return Math.round(((recent - older) / older) * 100);
   }
 
-  getAOV(): number {
+  getAvgTicket(): number {
     const s = this.salesReport?.summary;
     if (!s || !s.total_transactions || s.total_transactions === 0) return 0;
     return s.total_revenue / s.total_transactions;
@@ -1280,30 +1282,9 @@ export class AdminComponent implements OnInit, AfterViewInit {
     const data = this.salesReport?.chart_data;
     if (!data) return;
     const d = data[i];
-    const prev = i > 0 ? data[i - 1] : null;
-    const weekAgo = i >= 7 ? data[i - 7] : null;
-    const vsPrev = prev && prev.revenue > 0 ? ((d.revenue - prev.revenue) / prev.revenue) * 100 : 0;
-    const vsWeek = weekAgo && weekAgo.revenue > 0 ? ((d.revenue - weekAgo.revenue) / weekAgo.revenue) * 100 : 0;
-    const aov = d.units > 0 ? d.revenue / d.units : 0;
-    // Build category breakdown from recent_imports for this day
-    const dayStr = String(d.day).split('T')[0].replace(' ', '-');
-    const catMap = new Map<string, number>();
-    if (this.salesReport?.recent_imports) {
-      for (const row of this.salesReport.recent_imports) {
-        const rowDay = String(row.imported_at).split('T')[0].split(' ')[0];
-        if (rowDay === dayStr && row.plant_name) {
-          const cat = row.category || 'Sin categoría';
-          catMap.set(cat, (catMap.get(cat) || 0) + (row.qty_sold * row.price));
-        }
-      }
-    }
-    const categories = Array.from(catMap.entries())
-      .map(([name, revenue]) => ({ name, revenue }))
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 4);
     const dateObj = new Date(d.day);
     const fullDate = dateObj.toLocaleDateString('es-PR', { weekday: 'short', month: 'short', day: 'numeric' });
-    this.chartTooltip = { idx: i, x: pt.x, y: pt.y, d, vsPrev, vsWeek, aov, categories, fullDate };
+    this.chartTooltip = { idx: i, x: pt.x, y: pt.y, d, fullDate };
     this.cdr.detectChanges();
   }
 
