@@ -960,7 +960,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   urlCopied = false;
   readonly DEFAULT_WA_MESSAGE = 'Hola! Me interesa {planta} a {precio}. ¿Está disponible?';
 
-  get storeUrl(): string { return `https://\${this.clientSlug}.verzagarden.com`; }
+  get storeUrl(): string { return 'https://' + this.clientSlug + '.verzagarden.com'; }
   get chartPeriodLabel(): string {
     return this.salesPeriods.find(p => p.value === this.selectedSalesPeriod)?.label || '30 días';
   }
@@ -1270,7 +1270,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
       'Tiestos y Macetas': '🏺',
     };
     const emoji = emojis[top.category] || '🌱';
-    return \`\${emoji} \${top.name} (\${top.units_sold} uds.)\`;
+    return emoji + ' ' + top.name + ' (' + top.units_sold + ' uds.)';
   }
 
   selectChartPeriod(p: any) {
@@ -1292,11 +1292,11 @@ export class AdminComponent implements OnInit, AfterViewInit {
     const pts = this.getChartPoints();
     if (!pts.length) return '';
     // Con un solo punto dibujamos una línea horizontal
-    if (pts.length === 1) return `M 30 ${pts[0].y} L 570 ${pts[0].y}`;
-    let d = `M ${pts[0].x} ${pts[0].y}`;
+    if (pts.length === 1) return 'M 30 ' + pts[0].y + ' L 570 ' + pts[0].y;
+    let d = 'M ' + pts[0].x + ' ' + pts[0].y;
     for (let i = 1; i < pts.length; i++) {
       const cp1x = (pts[i - 1].x + pts[i].x) / 2;
-      d += ` C ${cp1x} ${pts[i - 1].y} ${cp1x} ${pts[i].y} ${pts[i].x} ${pts[i].y}`;
+      d += ' C ' + cp1x + ' ' + pts[i - 1].y + ' ' + cp1x + ' ' + pts[i].y + ' ' + pts[i].x + ' ' + pts[i].y;
     }
     return d;
   }
@@ -1304,9 +1304,9 @@ export class AdminComponent implements OnInit, AfterViewInit {
   getAreaPath(): string {
     const pts = this.getChartPoints();
     if (!pts.length) return '';
-    if (pts.length === 1) return `M 55 ${pts[0].y} L 680 ${pts[0].y} L 680 170 L 55 170 Z`;
+    if (pts.length === 1) return 'M 55 ' + pts[0].y + ' L 680 ' + pts[0].y + ' L 680 170 L 55 170 Z';
     const line = this.getLinePath();
-    return `${line} L ${pts[pts.length - 1].x} 170 L ${pts[0].x} 170 Z`;
+    return line + ' L ' + pts[pts.length - 1].x + ' 170 L ' + pts[0].x + ' 170 Z';
   }
 
   // =======================
@@ -1340,7 +1340,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   formatChartDay(day: string): string {
     if (!day) return '';
     const d = new Date(day);
-    return `${d.getDate()}/${d.getMonth() + 1}`;
+    return d.getDate() + '/' + (d.getMonth() + 1);
   }
 
   logout() { this.plantService.clearSession(); this.router.navigate(['/']); }
