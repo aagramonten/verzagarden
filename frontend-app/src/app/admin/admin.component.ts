@@ -192,8 +192,9 @@ declare const lucide: any;
             </div>
           </div>
 
-          <div class="card" style="margin-bottom:30px; position:relative;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <!-- FILA 1: Gráfica full-width -->
+          <div class="card" style="margin-bottom:20px; position:relative;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
               <div>
                 <div style="font-size:1.1rem; font-weight:700; color:var(--text-main);">Ventas (14 días)</div>
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Ingresos diarios del período</div>
@@ -223,106 +224,100 @@ declare const lucide: any;
                     <stop offset="100%" stop-color="#10B981" stop-opacity="0.01"/>
                   </linearGradient>
                 </defs>
-
-                <!-- Y axis lines and labels -->
                 <ng-container *ngFor="let tick of getYTicks()">
                   <line [attr.x1]="50" [attr.y1]="tick.y" [attr.x2]="680" [attr.y2]="tick.y"
                     stroke="#F3F4F6" stroke-width="1" stroke-dasharray="4,4"/>
                   <text [attr.x]="44" [attr.y]="tick.y + 4" text-anchor="end"
-                    style="font-size:9px; fill:#9CA3AF;">
-                    \${{ tick.value | number:'1.0-0' }}
-                  </text>
+                    style="font-size:9px; fill:#9CA3AF;">\${{ tick.value | number:'1.0-0' }}</text>
                 </ng-container>
-
-                <!-- Area and line -->
                 <path [attr.d]="getAreaPath()" fill="url(#areaGrad)"/>
                 <path [attr.d]="getLinePath()" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-
-                <!-- Hover zones -->
                 <circle *ngFor="let pt of getChartPoints(); let i = index"
-                  [attr.cx]="pt.x" [attr.cy]="pt.y" r="18" fill="transparent"
-                  style="cursor:pointer;"
+                  [attr.cx]="pt.x" [attr.cy]="pt.y" r="18" fill="transparent" style="cursor:pointer;"
                   (mouseenter)="onChartHover(i, pt)">
                 </circle>
-
-                <!-- Active point highlight -->
                 <ng-container *ngIf="chartTooltip">
-                  <circle [attr.cx]="chartTooltip.x" [attr.cy]="chartTooltip.y" r="7"
-                    fill="#10B981" opacity="0.2"/>
-                  <circle [attr.cx]="chartTooltip.x" [attr.cy]="chartTooltip.y" r="4"
-                    fill="white" stroke="#10B981" stroke-width="2.5"/>
+                  <circle [attr.cx]="chartTooltip.x" [attr.cy]="chartTooltip.y" r="7" fill="#10B981" opacity="0.2"/>
+                  <circle [attr.cx]="chartTooltip.x" [attr.cy]="chartTooltip.y" r="4" fill="white" stroke="#10B981" stroke-width="2.5"/>
                 </ng-container>
-
-                <!-- Dots -->
-                <circle *ngFor="let pt of getChartPoints()"
-                  [attr.cx]="pt.x" [attr.cy]="pt.y" r="3"
-                  fill="white" stroke="#10B981" stroke-width="1.5"/>
-
-                <!-- X labels -->
+                <circle *ngFor="let pt of getChartPoints()" [attr.cx]="pt.x" [attr.cy]="pt.y" r="3" fill="white" stroke="#10B981" stroke-width="1.5"/>
                 <text *ngFor="let pt of getChartPoints(); let i = index"
-                  [attr.x]="pt.x" y="215" text-anchor="middle"
-                  style="font-size:9px;fill:#9CA3AF;">
+                  [attr.x]="pt.x" y="215" text-anchor="middle" style="font-size:9px;fill:#9CA3AF;">
                   {{ formatChartDay(salesReport!.chart_data[i].day) }}
                 </text>
               </svg>
 
-              <!-- Rich Tooltip -->
+              <!-- Tooltip minimalista: solo fecha, ventas, unidades -->
               <div *ngIf="chartTooltip"
-                style="position:absolute; background:white; border:1px solid var(--border); border-radius:14px; padding:16px; font-size:0.8rem; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.12); width:240px; z-index:20;"
-                [style.left.px]="chartTooltip.x > 450 ? chartTooltip.x - 256 : chartTooltip.x + 16"
-                [style.top.px]="chartTooltip.y - 20">
-
-                <!-- Header -->
-                <div style="font-weight:700; color:var(--text-main); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border); font-size:0.85rem;">
-                  📅 Detalles del Día: {{ chartTooltip.fullDate }}
-                </div>
-
-                <!-- Main metrics -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
-                  <div style="background:#F9FAFB; border-radius:8px; padding:8px;">
-                    <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:2px;">Ventas Totales</div>
+                style="position:absolute; background:white; border:1px solid var(--border); border-radius:12px; padding:12px 16px; font-size:0.82rem; pointer-events:none; box-shadow:0 6px 20px rgba(0,0,0,0.10); min-width:160px; z-index:20;"
+                [style.left.px]="chartTooltip.x > 450 ? chartTooltip.x - 180 : chartTooltip.x + 14"
+                [style.top.px]="chartTooltip.y - 16">
+                <div style="font-weight:700; color:var(--text-main); margin-bottom:8px; font-size:0.85rem;">{{ chartTooltip.fullDate }}</div>
+                <div style="display:flex; justify-content:space-between; gap:16px;">
+                  <div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:2px;">Ventas</div>
                     <div style="font-weight:700; color:#10B981; font-size:1rem;">\${{ chartTooltip.d.revenue | number:'1.0-0' }}</div>
                   </div>
-                  <div style="background:#F9FAFB; border-radius:8px; padding:8px;">
+                  <div>
                     <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:2px;">Unidades</div>
                     <div style="font-weight:700; color:var(--text-main); font-size:1rem;">{{ chartTooltip.d.units }}</div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
 
-                <!-- AOV -->
-                <div style="background:#ECFDF5; border-radius:8px; padding:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                  <span style="font-size:0.7rem; color:#065F46; font-weight:600;">AOV (Ticket Promedio)</span>
-                  <span style="font-weight:700; color:#065F46;">\${{ chartTooltip.aov | number:'1.2-2' }}</span>
+          <!-- FILA 2: Resumen izquierda + Dona derecha -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:30px;">
+
+            <!-- Columna izquierda: 3 tarjetas de resumen -->
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <!-- Tendencia -->
+              <div class="card" style="padding:16px 20px;">
+                <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Tendencia</div>
+                <div style="font-size:1rem; font-weight:700; color:var(--text-main);">
+                  <span *ngIf="getTrend() >= 0" style="color:#10B981;">🟢 Subió un {{ getTrend() | number:'1.0-0' }}% vs quincena pasada</span>
+                  <span *ngIf="getTrend() < 0" style="color:#EF4444;">🔴 Bajó un {{ getTrend() * -1 | number:'1.0-0' }}% vs quincena pasada</span>
+                  <span *ngIf="getTrend() === 0" style="color:var(--text-muted);">⚪ Sin cambio vs quincena pasada</span>
                 </div>
-
-                <!-- Comparatives -->
-                <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--border);">
-                  <div style="font-size:0.7rem; color:var(--text-muted); font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Comparativas</div>
-                  <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                    <span style="color:var(--text-muted);">vs día anterior</span>
-                    <span [style.color]="chartTooltip.vsPrev >= 0 ? '#10B981' : '#EF4444'" style="font-weight:700;">
-                      {{ chartTooltip.vsPrev >= 0 ? '▲' : '▼' }} {{ chartTooltip.vsPrev | number:'1.0-0' }}%
-                    </span>
-                  </div>
-                  <div style="display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted);">vs semana anterior</span>
-                    <span [style.color]="chartTooltip.vsWeek >= 0 ? '#10B981' : '#EF4444'" style="font-weight:700;">
-                      {{ chartTooltip.vsWeek >= 0 ? '▲' : '▼' }} {{ chartTooltip.vsWeek | number:'1.0-0' }}%
-                    </span>
-                  </div>
+              </div>
+              <!-- Promedio por compra -->
+              <div class="card" style="padding:16px 20px;">
+                <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Promedio por compra</div>
+                <div style="font-size:1.5rem; font-weight:800; color:var(--text-main);">
+                  \${{ getAOV() | number:'1.0-0' }}
+                  <span style="font-size:0.8rem; font-weight:400; color:var(--text-muted);"> por pedido</span>
                 </div>
+              </div>
+              <!-- Lo más vendido -->
+              <div class="card" style="padding:16px 20px;">
+                <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Lo más vendido</div>
+                <div style="font-size:1rem; font-weight:700; color:var(--text-main);">
+                  {{ getTopProduct() }}
+                </div>
+              </div>
+            </div>
 
-                <!-- Category breakdown -->
-                <div>
-                  <div style="font-size:0.7rem; color:var(--text-muted); font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Por Categoría</div>
-                  <div *ngFor="let cat of chartTooltip.categories" style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:0.75rem;">
-                    <span style="display:flex; align-items:center; gap:5px;">
-                      <span style="width:6px;height:6px;border-radius:50%;background:#10B981;display:inline-block;"></span>
-                      {{ cat.name }}
-                    </span>
-                    <span style="font-weight:600;">\${{ cat.revenue | number:'1.0-0' }}</span>
-                  </div>
-                  <div *ngIf="!chartTooltip.categories?.length" style="color:var(--text-muted); font-style:italic;">Sin desglose disponible</div>
+            <!-- Columna derecha: Dona -->
+            <div class="card">
+              <div style="font-size:1rem; font-weight:700; color:var(--text-main); margin-bottom:16px;">Distribución por Categoría</div>
+              <div style="display:flex; justify-content:center; margin-top:8px;">
+                <svg width="150" height="150" viewBox="0 0 130 130">
+                  <ng-container *ngFor="let seg of donutSegments">
+                    <circle cx="65" cy="65" r="44" fill="none" [attr.stroke]="seg.color" stroke-width="22"
+                      [attr.stroke-dasharray]="seg.dashArray" [attr.stroke-dashoffset]="seg.dashOffset"
+                      style="transform:rotate(-90deg);transform-origin:65px 65px;"></circle>
+                  </ng-container>
+                  <text x="65" y="70" text-anchor="middle" style="font-size:20px;font-weight:800;fill:var(--text-main);">{{ plants.length }}</text>
+                </svg>
+              </div>
+              <div style="margin-top:16px;">
+                <div *ngFor="let seg of donutSegments | slice:0:5" style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:8px; align-items:center;">
+                  <span style="display:flex; align-items:center; gap:6px;">
+                    <span style="width:10px;height:10px;border-radius:50%;flex-shrink:0;" [style.background]="seg.color"></span>
+                    {{ seg.category }}
+                  </span>
+                  <span style="font-weight:600; color:var(--text-muted);">{{ seg.count }}</span>
                 </div>
               </div>
             </div>
@@ -1245,6 +1240,35 @@ export class AdminComponent implements OnInit, AfterViewInit {
       ticks.push({ y, value: v });
     }
     return ticks;
+  }
+
+  getTrend(): number {
+    const data = this.salesReport?.chart_data;
+    if (!data || data.length < 8) return 0;
+    const half = Math.floor(data.length / 2);
+    const recent = data.slice(half).reduce((s: number, d: any) => s + d.revenue, 0);
+    const older  = data.slice(0, half).reduce((s: number, d: any) => s + d.revenue, 0);
+    if (older === 0) return 0;
+    return Math.round(((recent - older) / older) * 100);
+  }
+
+  getAOV(): number {
+    const s = this.salesReport?.summary;
+    if (!s || !s.total_transactions || s.total_transactions === 0) return 0;
+    return s.total_revenue / s.total_transactions;
+  }
+
+  getTopProduct(): string {
+    const top = this.salesReport?.top_plants?.[0];
+    if (!top) return '—';
+    const emojis: Record<string, string> = {
+      'Palmas': '🌴', 'Árboles': '🌳', 'Arbustos': '🌿', 'Suculentas': '🌵',
+      'Trepadoras': '🍃', 'Flores de estación': '🌸', 'Plantas de interior': '🪴',
+      'Herramientas': '🪚', 'Fertilizantes y Abonos': '🧪', 'Tierra y Sustratos': '🪣',
+      'Tiestos y Macetas': '🏺',
+    };
+    const emoji = emojis[top.category] || '🌱';
+    return \`\${emoji} \${top.name} (\${top.units_sold} uds.)\`;
   }
 
   selectChartPeriod(p: any) {
