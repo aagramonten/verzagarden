@@ -430,19 +430,40 @@ declare const lucide: any;
           </div>
 
           <div class="table-container">
-            <div style="padding:16px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;">
+            <div style="padding:16px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
               <h3 style="margin:0; font-size:1.1rem;">Transacciones Recientes</h3>
+              <span style="font-size:0.8rem; color:var(--text-muted);">Haz clic en una fecha para ver el detalle</span>
             </div>
             <table>
-              <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Ganancia</th></tr></thead>
+              <thead><tr><th>Fecha</th><th>Productos</th><th>Unidades</th><th>Total</th><th>Ganancia</th><th></th></tr></thead>
               <tbody>
-                <tr *ngFor="let item of salesReport?.recent_imports">
-                  <td style="color:var(--text-muted);">{{ item.imported_at | date:'yyyy-MM-dd' }}</td>
-                  <td style="font-weight:600;">{{ item.plant_name }}</td>
-                  <td>{{ item.qty_sold }}</td>
-                  <td style="font-weight:700;">\${{ (item.qty_sold * item.price) | number:'1.2-2' }}</td>
-                  <td style="font-weight:700; color:#10B981;">\${{ (item.qty_sold * (item.price - (item.cost_price || 0))) | number:'1.2-2' }}</td>
-                </tr>
+                <ng-container *ngFor="let group of getGroupedTransactions()">
+                  <!-- Fila resumen por fecha -->
+                  <tr (click)="toggleDateGroup(group.date)" style="cursor:pointer; background:#F9FAFB;">
+                    <td style="font-weight:700; color:var(--text-main);">{{ group.date }}</td>
+                    <td style="color:var(--text-muted);">{{ group.items.length }} productos</td>
+                    <td style="font-weight:600;">{{ group.totalUnits }}</td>
+                    <td style="font-weight:700;">\${{ group.totalRevenue | number:'1.2-2' }}</td>
+                    <td style="font-weight:700; color:#10B981;">\${{ group.totalProfit | number:'1.2-2' }}</td>
+                    <td>
+                      <i [attr.data-lucide]="expandedDates.has(group.date) ? 'chevron-up' : 'chevron-down'" style="width:16px;height:16px;color:var(--text-muted);"></i>
+                    </td>
+                  </tr>
+                  <!-- Filas detalle expandibles -->
+                  <ng-container *ngIf="expandedDates.has(group.date)">
+                    <tr *ngFor="let item of group.items" style="background:#FAFFFE;">
+                      <td style="color:var(--text-muted); padding-left:32px;">
+                        <i data-lucide="corner-down-right" style="width:12px;height:12px;margin-right:6px;color:var(--text-muted);"></i>
+                        {{ item.imported_at | date:'h:mm a' }}
+                      </td>
+                      <td style="font-weight:600;">{{ item.plant_name }}</td>
+                      <td>{{ item.qty_sold }}</td>
+                      <td style="font-weight:700;">\${{ (item.qty_sold * item.price) | number:'1.2-2' }}</td>
+                      <td style="font-weight:700; color:#10B981;">\${{ (item.qty_sold * (item.price - (item.cost_price || 0))) | number:'1.2-2' }}</td>
+                      <td></td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
               </tbody>
             </table>
           </div>
@@ -819,6 +840,8 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   salesReport: SalesReport | null = null;
   salesLoading = false;
+  chartTooltip: any = null;
+  expandedDates = new Set<string>();
   selectedSalesPeriod = 'month';
   salesPeriods = [
     { label: 'Hoy',      value: 'today' },
@@ -1085,6 +1108,67 @@ export class AdminComponent implements OnInit, AfterViewInit {
     if (!this.salesReport?.chart_data?.length) return 0;
     const max = Math.max(...this.salesReport.chart_data.map(d => d.units), 1);
     return Math.max(4, Math.round((value / max) * 80));
+  }
+
+  // =======================
+  // 📈 Chart helpers
+  // =======================
+  getChartPoints(): { x: number; y: number }[] {
+    const data = this.salesReport?.chart_data;
+    if (!data?.length) return [];
+    const W = 600, H = 170, pad = 30;
+    const maxRev = Math.max(...data.map(d => d.revenue), 1);
+    return data.map((d, i) => ({
+      x: pad + (i / Math.max(data.length - 1, 1)) * (W - pad * 2),
+      y: H - ((d.revenue / maxRev) * (H - 20)) - 5
+    }));
+  }
+
+  getLinePath(): string {
+    const pts = this.getChartPoints();
+    if (!pts.length) return '';
+    if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const cp1x = (pts[i - 1].x + pts[i].x) / 2;
+      d += ` C ${cp1x} ${pts[i - 1].y} ${cp1x} ${pts[i].y} ${pts[i].x} ${pts[i].y}`;
+    }
+    return d;
+  }
+
+  getAreaPath(): string {
+    const pts = this.getChartPoints();
+    if (!pts.length) return '';
+    const line = this.getLinePath();
+    return `${line} L ${pts[pts.length - 1].x} 175 L ${pts[0].x} 175 Z`;
+  }
+
+  // =======================
+  // 📋 Grouped transactions
+  // =======================
+  getGroupedTransactions(): { date: string; items: any[]; totalUnits: number; totalRevenue: number; totalProfit: number }[] {
+    if (!this.salesReport?.recent_imports?.length) return [];
+    const map = new Map<string, any[]>();
+    for (const row of this.salesReport.recent_imports) {
+      const d = new Date(row.imported_at);
+      const key = d.toLocaleDateString('es-PR', { year: 'numeric', month: 'short', day: 'numeric' });
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(row);
+    }
+    return Array.from(map.entries()).map(([date, items]) => ({
+      date,
+      items,
+      totalUnits:   items.reduce((s, i) => s + (i.qty_sold || 0), 0),
+      totalRevenue: items.reduce((s, i) => s + ((i.qty_sold || 0) * (i.price || 0)), 0),
+      totalProfit:  items.reduce((s, i) => s + ((i.qty_sold || 0) * ((i.price || 0) - (i.cost_price || 0))), 0),
+    }));
+  }
+
+  toggleDateGroup(date: string) {
+    if (this.expandedDates.has(date)) this.expandedDates.delete(date);
+    else this.expandedDates.add(date);
+    this.cdr.detectChanges();
+    this.renderIcons();
   }
 
   formatChartDay(day: string): string {
