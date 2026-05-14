@@ -20,7 +20,7 @@ const CHART_COLORS = ['#10B981','#34D399','#6EE7B7','#059669','#047857','#14452F
 
 interface RestockItem {
   plant_name: string; category: string; quantity: number; unit_cost: number;
-  total_cost: number; current_sale_price: number | null; row_margin: number; apply_suggested_price: boolean;
+  total_cost: number; current_sale_price: number | null; row_margin: number; apply_suggested_price: boolean; custom_price?: number;
 }
 
 declare const lucide: any;
@@ -347,17 +347,35 @@ declare const lucide: any;
               </div>
             </div>
             <table>
-              <thead><tr><th>Producto</th><th>Cant.</th><th>Costo Unit.</th><th>Precio Sugerido</th><th>Confirmar</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cant.</th>
+                  <th>Costo Unit.</th>
+                  <th>Precio Sugerido (50%)</th>
+                  <th>Precio Venta Cliente</th>
+                </tr>
+              </thead>
               <tbody>
                 <tr *ngFor="let item of restockItems; let i = index">
                   <td><input type="text" [(ngModel)]="item.plant_name" class="form-input" style="padding:6px; height:auto;"></td>
                   <td><input type="number" [(ngModel)]="item.quantity" class="form-input" style="padding:6px; width:70px; height:auto;"></td>
                   <td><input type="number" [(ngModel)]="item.unit_cost" class="form-input" style="padding:6px; width:90px; height:auto;"></td>
                   <td>
-                    <div style="font-weight:700; color:#10B981;">\${{ getRowSuggestedPrice(item) | number:'1.2-2' }}</div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);">Margen: {{ item.row_margin }}%</div>
+                    <div style="font-size:0.85rem; color:#10B981; font-weight:600;">\${{ getRowSuggestedPrice(item) | number:'1.2-2' }}</div>
+                    <button style="margin-top:4px; font-size:0.7rem; background:none; border:1px solid #10B981; color:#10B981; border-radius:6px; padding:2px 8px; cursor:pointer;"
+                      (click)="item.custom_price = getRowSuggestedPrice(item)">
+                      Usar este
+                    </button>
                   </td>
-                  <td><input type="checkbox" [(ngModel)]="item.apply_suggested_price" style="width:18px;height:18px;accent-color:#10B981;"></td>
+                  <td>
+                    <input type="number" [(ngModel)]="item.custom_price" class="form-input"
+                      style="padding:6px; width:100px; height:auto; border-color: item.custom_price ? '#10B981' : 'var(--border)';"
+                      placeholder="$0.00">
+                    <div *ngIf="item.custom_price && item.unit_cost" style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">
+                      Margen: {{ getCustomMargin(item) | number:'1.0-1' }}%
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1097,6 +1115,11 @@ export class AdminComponent implements OnInit, AfterViewInit {
     return segs;
   }
 
+  getCustomMargin(item: RestockItem): number {
+    if (!item.custom_price || !item.unit_cost) return 0;
+    return ((item.custom_price - item.unit_cost) / item.custom_price) * 100;
+  }
+
   getRowSuggestedPrice(item: RestockItem): number {
     if (!item.unit_cost || item.row_margin >= 100) return 0;
     return item.unit_cost / (1 - item.row_margin / 100);
@@ -1155,7 +1178,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     return raw.map(r => {
       const match = this.plants.find(p => p.name.toLowerCase().includes((r.plant_name || '').toLowerCase()));
       const hasPrice = match?.price != null && match.price > 0;
-      return { plant_name: r.plant_name || '', category: r.category || match?.category || '', quantity: r.quantity || 1, unit_cost: r.unit_cost || 0, total_cost: (r.unit_cost || 0) * (r.quantity || 1), current_sale_price: match?.price ?? null, row_margin: this.desiredMargin, apply_suggested_price: !hasPrice };
+      return { plant_name: r.plant_name || '', category: r.category || match?.category || '', quantity: r.quantity || 1, unit_cost: r.unit_cost || 0, total_cost: (r.unit_cost || 0) * (r.quantity || 1), current_sale_price: match?.price ?? null, row_margin: this.desiredMargin, apply_suggested_price: !hasPrice, custom_price: match?.price || undefined };
     });
   }
 
