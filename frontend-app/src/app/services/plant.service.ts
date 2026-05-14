@@ -28,6 +28,21 @@ export interface Plant {
   is_active?: boolean;
 }
 
+export interface Category {
+  id: number;
+  client_id: number;
+  slug: string;
+  name: string;
+  name_en?: string;
+  icon?: string;
+  description?: string;
+  description_en?: string;
+  ideal?: string;
+  ideal_en?: string;
+  group_type: 'plants' | 'products';
+  sort_order: number;
+}
+
 export interface InvoiceItem {
   plant_name: string;
   quantity: number;
@@ -99,11 +114,9 @@ export class PlantService {
   getSlug(): string {
     const hostname = window.location.hostname;
     const parts = hostname.split('.');
-
     if (parts.length >= 3 && parts[0] !== 'www') {
       return parts[0];
     }
-
     return sessionStorage.getItem('admin_slug') || 'demo';
   }
 
@@ -118,10 +131,7 @@ export class PlantService {
   }
 
   login(slug: string, username: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/clients/${slug}/login`, {
-      username,
-      password
-    });
+    return this.http.post(`${this.apiUrl}/clients/${slug}/login`, { username, password });
   }
 
   getPlants(slug: string): Observable<Plant[]> {
@@ -148,46 +158,47 @@ export class PlantService {
   }
 
   updateClientSettings(slug: string, whatsapp_message: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/clients/${slug}/settings`, {
-      whatsapp_message
-    });
+    return this.http.put(`${this.apiUrl}/clients/${slug}/settings`, { whatsapp_message });
+  }
+
+  // =======================
+  // 📂 CATEGORIES
+  // =======================
+  getCategories(slug: string): Observable<Category[]> {
+    return this.http.get<Category[]>(`${this.apiUrl}/clients/${slug}/categories`);
+  }
+
+  updateCategory(slug: string, id: number, data: Partial<Category>): Observable<any> {
+    return this.http.put(`${this.apiUrl}/clients/${slug}/categories/${id}`, data);
   }
 
   analyzeInvoice(slug: string, file: File): Observable<InvoiceAnalysisResponse> {
     const formData = new FormData();
     formData.append('invoice', file);
-
     return this.http.post<InvoiceAnalysisResponse>(
-      `${this.apiUrl}/clients/${slug}/invoices/analyze`,
-      formData
+      `${this.apiUrl}/clients/${slug}/invoices/analyze`, formData
     );
   }
 
   restockPlants(slug: string, items: InvoiceItem[]): Observable<RestockResponse> {
     return this.http.post<RestockResponse>(
-      `${this.apiUrl}/clients/${slug}/invoices/confirm-restock`,
-      { items }
+      `${this.apiUrl}/clients/${slug}/invoices/confirm-restock`, { items }
     );
   }
 
   uploadImage(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('image', file);
-
     return this.http.post(`${this.apiUrl}/upload`, formData);
   }
 
   analyzePosFile(slug: string, formData: FormData): Observable<any> {
-    return this.http.post(
-      `${this.apiUrl}/clients/${slug}/pos-import/analyze`,
-      formData
-    );
+    return this.http.post(`${this.apiUrl}/clients/${slug}/pos-import/analyze`, formData);
   }
 
   confirmPosImport(slug: string, items: PosImportItem[], filename: string): Observable<any> {
     return this.http.post(
-      `${this.apiUrl}/clients/${slug}/pos-import/confirm`,
-      { items, filename }
+      `${this.apiUrl}/clients/${slug}/pos-import/confirm`, { items, filename }
     );
   }
 

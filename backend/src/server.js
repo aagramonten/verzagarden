@@ -87,8 +87,70 @@ async function ensureWhatsappMessage() {
   }
 }
 
+async function ensureCategoriesTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        client_id INT NOT NULL,
+        slug VARCHAR(100) NOT NULL,
+        name VARCHAR(150) NOT NULL,
+        name_en VARCHAR(150),
+        icon VARCHAR(80) DEFAULT 'leaf',
+        description TEXT,
+        description_en TEXT,
+        ideal VARCHAR(255),
+        ideal_en VARCHAR(255),
+        group_type VARCHAR(50) DEFAULT 'plants',
+        sort_order INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_client_slug (client_id, slug)
+      )
+    `);
+    console.log('✅ categories table ready');
+
+    // Seed default categories for each client that has none
+    const [clients] = await pool.query('SELECT id FROM clients');
+    for (const client of clients) {
+      const [existing] = await pool.query('SELECT COUNT(*) as cnt FROM categories WHERE client_id = ?', [client.id]);
+      if (existing[0].cnt === 0) {
+        await seedDefaultCategories(client.id);
+        console.log(`✅ Default categories seeded for client ${client.id}`);
+      }
+    }
+  } catch (err) {
+    console.warn('categories migration warning:', err.message);
+  }
+}
+
+async function seedDefaultCategories(clientId) {
+  const defaults = [
+    { slug: 'arboles',            name: 'Árboles',                name_en: 'Trees',            icon: 'tree-pine',     description: 'Plantas grandes con un tronco principal leñoso que se ramifica a cierta altura.', description_en: 'Large plants with a single woody trunk that branches at a certain height.',        ideal: 'Sombra, estructura y jardines amplios.',                    ideal_en: 'Shade, structure and large gardens.',                         group_type: 'plants',    sort_order: 1 },
+    { slug: 'arbustos',           name: 'Arbustos',               name_en: 'Shrubs',           icon: 'leaf',          description: 'Plantas medianas con varios tallos leñosos que crecen desde la base.',            description_en: 'Medium-sized plants with multiple woody stems growing from the base.',            ideal: 'Bordes, divisiones naturales y jardines frondosos.',          ideal_en: 'Borders, natural dividers and lush gardens.',                 group_type: 'plants',    sort_order: 2 },
+    { slug: 'flores-estacion',    name: 'Flores de estación',     name_en: 'Seasonal Flowers', icon: 'flower-2',      description: 'Plantas que florecen en épocas específicas del año y aportan color al jardín.',   description_en: 'Plants that bloom at specific times of year and add color to the garden.',       ideal: 'Renovar espacios según la temporada.',                        ideal_en: 'Refreshing spaces according to the season.',                  group_type: 'plants',    sort_order: 3 },
+    { slug: 'interior',           name: 'Plantas de interior',    name_en: 'Indoor Plants',    icon: 'home',          description: 'Plantas que se adaptan bien a espacios interiores con luz y humedad controladas.', description_en: 'Plants that thrive indoors with controlled light and humidity.',                  ideal: 'Hogares, oficinas y decoración interior.',                    ideal_en: 'Homes, offices and interior décor.',                          group_type: 'plants',    sort_order: 4 },
+    { slug: 'trepadoras',         name: 'Trepadoras',             name_en: 'Climbers',         icon: 'sprout',        description: 'Plantas que necesitan soporte para crecer hacia arriba.',                         description_en: 'Plants that need support to grow upward.',                                        ideal: 'Cubrir paredes, crear sombra y añadir privacidad.',           ideal_en: 'Covering walls, creating shade and adding privacy.',          group_type: 'plants',    sort_order: 5 },
+    { slug: 'suculentas',         name: 'Suculentas',             name_en: 'Succulents',       icon: 'sun',           description: 'Plantas que almacenan agua en hojas, tallos o raíces, toleran mejor la sequía.',  description_en: 'Plants that store water in leaves, stems or roots, tolerating drought well.',    ideal: 'Bajo mantenimiento y espacios soleados.',                     ideal_en: 'Low maintenance and sunny spaces.',                           group_type: 'plants',    sort_order: 6 },
+    { slug: 'palmas',             name: 'Palmas',                 name_en: 'Palms',            icon: 'tree-palm',     description: 'Plantas tropicales que aportan altura, elegancia y sensación caribeña.',          description_en: 'Tropical plants that add height, elegance and a Caribbean feel.',                 ideal: 'Entradas, patios, terrazas y jardines tropicales.',           ideal_en: 'Entrances, patios, terraces and tropical gardens.',           group_type: 'plants',    sort_order: 7 },
+    { slug: 'tiestos-macetas',    name: 'Tiestos y Macetas',      name_en: 'Pots & Planters',  icon: 'archive',       description: 'Envases de barro, plástico, cerámica y materiales reciclados para todo tipo de plantas.', description_en: 'Clay, plastic, ceramic and recycled pots for all types of plants.',          ideal: 'Interior, exterior, balcones y terrazas.',                   ideal_en: 'Indoors, outdoors, balconies and terraces.',                  group_type: 'products',  sort_order: 8 },
+    { slug: 'tierra-sustratos',   name: 'Tierra y Sustratos',     name_en: 'Soil & Substrates',icon: 'layers',        description: 'Mezclas de suelo, turba, perlita y sustrato especializado para cada tipo de planta.',     description_en: 'Soil mixes, peat, perlite and specialized substrate for every plant type.',   ideal: 'Siembra, trasplante y jardinería en general.',                ideal_en: 'Planting, transplanting and general gardening.',              group_type: 'products',  sort_order: 9 },
+    { slug: 'fertilizantes',      name: 'Fertilizantes y Abonos', name_en: 'Fertilizers',      icon: 'flask-conical', description: 'Abonos orgánicos, líquidos y granulados para estimular el crecimiento y la floración.',   description_en: 'Organic, liquid and granulated fertilizers to boost growth and blooming.',    ideal: 'Nutrición, crecimiento y floración de plantas.',              ideal_en: 'Plant nutrition, growth and blooming.',                       group_type: 'products',  sort_order: 10 },
+    { slug: 'herramientas',       name: 'Herramientas',           name_en: 'Tools',            icon: 'hammer',        description: 'Palas, podadoras, guantes, regaderas y todo lo que necesitas para cuidar tu jardín.',    description_en: 'Shovels, pruners, gloves, watering cans and everything for your garden.',     ideal: 'Jardinería, poda, siembra y mantenimiento.',                  ideal_en: 'Gardening, pruning, planting and maintenance.',               group_type: 'products',  sort_order: 11 },
+  ];
+
+  for (const cat of defaults) {
+    await pool.query(`
+      INSERT IGNORE INTO categories 
+        (client_id, slug, name, name_en, icon, description, description_en, ideal, ideal_en, group_type, sort_order)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [clientId, cat.slug, cat.name, cat.name_en, cat.icon, cat.description, cat.description_en, cat.ideal, cat.ideal_en, cat.group_type, cat.sort_order]);
+  }
+}
+
 ensureCostPriceColumn();
 ensureWhatsappMessage();
+ensureCategoriesTable();
 
 // =======================
 
@@ -137,9 +199,6 @@ app.get('/api/clients/:slug', async (req, res) => {
   }
 });
 
-// =======================
-// 🖼️ UPDATE CLIENT LOGO
-// =======================
 app.put('/api/clients/:slug/logo', async (req, res) => {
   try {
     const { logo_url } = req.body;
@@ -155,9 +214,6 @@ app.put('/api/clients/:slug/logo', async (req, res) => {
   }
 });
 
-// =======================
-// ⚙️ UPDATE CLIENT SETTINGS
-// =======================
 app.put('/api/clients/:slug/settings', async (req, res) => {
   try {
     const { whatsapp_message } = req.body;
@@ -172,6 +228,50 @@ app.put('/api/clients/:slug/settings', async (req, res) => {
   }
 });
 
+// =======================
+// 📂 CATEGORIES
+// =======================
+app.get('/api/clients/:slug/categories', async (req, res) => {
+  try {
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
+    const [categories] = await pool.query(
+      'SELECT * FROM categories WHERE client_id = ? ORDER BY sort_order ASC, id ASC',
+      [clients[0].id]
+    );
+    // If none exist yet, seed and return
+    if (!categories.length) {
+      await seedDefaultCategories(clients[0].id);
+      const [seeded] = await pool.query(
+        'SELECT * FROM categories WHERE client_id = ? ORDER BY sort_order ASC',
+        [clients[0].id]
+      );
+      return res.json(seeded);
+    }
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ message: 'Error obteniendo categorías', error: error.message });
+  }
+});
+
+app.put('/api/clients/:slug/categories/:id', async (req, res) => {
+  try {
+    const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
+    if (!clients.length) return res.status(404).json({ message: 'Cliente no encontrado' });
+    const { name, name_en, description, description_en, ideal, ideal_en, icon } = req.body;
+    const [result] = await pool.query(
+      `UPDATE categories SET name=?, name_en=?, description=?, description_en=?, ideal=?, ideal_en=?, icon=?
+       WHERE id=? AND client_id=?`,
+      [name, name_en, description, description_en, ideal, ideal_en, icon, req.params.id, clients[0].id]
+    );
+    if (result.affectedRows === 0) return res.status(404).json({ message: 'Categoría no encontrada' });
+    res.json({ message: 'Categoría actualizada' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error actualizando categoría', error: error.message });
+  }
+});
+
+// =======================
 app.get('/api/clients/:slug/plants', async (req, res) => {
   try {
     const [clients] = await pool.query('SELECT id FROM clients WHERE slug = ? LIMIT 1', [req.params.slug]);
@@ -460,7 +560,8 @@ app.get('/api/clients/:slug/sales-report', async (req, res) => {
       SELECT
         h.id, h.filename, h.product_name, h.qty_sold,
         h.stock_before, h.stock_after, h.imported_at,
-        p.name AS plant_name, p.price, p.image_url, p.category
+        p.name AS plant_name, p.price, p.image_url, p.category,
+        p.cost_price
       FROM pos_import_history h
       LEFT JOIN plants p ON p.id = h.matched_plant_id
       WHERE h.client_id = ? ${dateFilter}

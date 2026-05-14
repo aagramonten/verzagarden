@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { PlantService, Client, Plant, SalesReport } from '../services/plant.service';
+import { PlantService, Client, Plant, SalesReport, Category } from '../services/plant.service';
 import { PlantCardComponent } from '../plant-card.component';
 
 export const PLANT_CATEGORIES = [
@@ -123,6 +123,9 @@ declare const lucide: any;
           <button class="nav-item" [class.active]="activeTab==='pos'" (click)="setTab('pos')">
             <i data-lucide="upload-cloud"></i> <span>Importar POS</span>
           </button>
+          <button class="nav-item" [class.active]="activeTab==='categorias'" (click)="setTab('categorias')">
+            <i data-lucide="folder-open"></i> <span>Categorías</span>
+          </button>
           <button class="nav-item" [class.active]="activeTab==='ajustes'" (click)="setTab('ajustes')">
             <i data-lucide="settings"></i> <span>Ajustes</span>
           </button>
@@ -235,6 +238,26 @@ declare const lucide: any;
               <div class="form-group"><label class="form-label">Precio de Venta ($)</label><input type="number" [(ngModel)]="plantForm.price" class="form-input"></div>
               <div class="form-group"><label class="form-label">Costo de Compra ($)</label><input type="number" [(ngModel)]="plantForm.cost_price" class="form-input"></div>
               <div class="form-group"><label class="form-label">Stock Inicial</label><input type="number" [(ngModel)]="plantForm.stock" class="form-input"></div>
+              <div class="form-group">
+                <label class="form-label">Luz</label>
+                <select [(ngModel)]="plantForm.light" class="form-input">
+                  <option value="">-- Sin especificar --</option>
+                  <option value="Sol pleno">Sol pleno</option>
+                  <option value="Sol parcial">Sol parcial</option>
+                  <option value="Luz indirecta">Luz indirecta</option>
+                  <option value="Baja a media">Baja a media</option>
+                  <option value="Sombra">Sombra</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Agua</label>
+                <select [(ngModel)]="plantForm.water" class="form-input">
+                  <option value="">-- Sin especificar --</option>
+                  <option value="Poca">Poca</option>
+                  <option value="Moderada">Moderada</option>
+                  <option value="Abundante">Abundante</option>
+                </select>
+              </div>
               <div class="form-group">
                 <label class="form-label">Imagen</label>
                 <label style="display:flex; align-items:center; gap:8px; background:white; border:1px solid var(--border); border-radius:10px; padding:10px 14px; cursor:pointer; transition:border-color 0.2s; font-size:0.9rem; font-weight:600; color:var(--text-main);" 
@@ -443,6 +466,101 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- CATEGORÍAS -->
+        <div *ngIf="activeTab==='categorias'">
+          <div style="margin-bottom:20px;">
+            <p style="font-size:0.9rem; color:var(--text-muted);">Edita el nombre, descripción e ideal de cada categoría. Los cambios se reflejan de inmediato en tu tienda pública.</p>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <div class="group-label" style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#10B981;display:flex;align-items:center;gap:6px;">
+              <i data-lucide="leaf" style="width:12px;height:12px;"></i> Plantas
+            </div>
+          </div>
+          <div *ngFor="let cat of categories.filter(c => c.group_type === 'plants')" class="card" style="margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <i [attr.data-lucide]="cat.icon" style="width:20px;height:20px;color:#10B981;"></i>
+                <span style="font-weight:700; font-size:1rem;">{{ cat.name }}</span>
+              </div>
+              <button class="btn-primary" style="padding:6px 14px; font-size:0.8rem;" (click)="saveCategory(cat)">
+                {{ categorySaving === cat.id ? 'Guardando...' : 'Guardar' }}
+              </button>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px;">
+              <div class="form-group">
+                <label class="form-label">Nombre (español)</label>
+                <input type="text" [(ngModel)]="cat.name" class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nombre (inglés)</label>
+                <input type="text" [(ngModel)]="cat.name_en" class="form-input">
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Descripción (español)</label>
+                <textarea [(ngModel)]="cat.description" class="form-input" style="min-height:60px;"></textarea>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Descripción (inglés)</label>
+                <textarea [(ngModel)]="cat.description_en" class="form-input" style="min-height:60px;"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ideal para (español)</label>
+                <input type="text" [(ngModel)]="cat.ideal" class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ideal para (inglés)</label>
+                <input type="text" [(ngModel)]="cat.ideal_en" class="form-input">
+              </div>
+            </div>
+            <div *ngIf="categorySaved === cat.id" style="color:#10B981; font-size:0.8rem; font-weight:600; margin-top:8px;">¡Guardado correctamente!</div>
+          </div>
+
+          <div style="margin:20px 0 12px;">
+            <div class="group-label" style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#c87830;display:flex;align-items:center;gap:6px;">
+              <i data-lucide="shopping-bag" style="width:12px;height:12px;"></i> Productos de jardín
+            </div>
+          </div>
+          <div *ngFor="let cat of categories.filter(c => c.group_type === 'products')" class="card" style="margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <i [attr.data-lucide]="cat.icon" style="width:20px;height:20px;color:#c87830;"></i>
+                <span style="font-weight:700; font-size:1rem;">{{ cat.name }}</span>
+              </div>
+              <button class="btn-primary" style="padding:6px 14px; font-size:0.8rem;" (click)="saveCategory(cat)">
+                {{ categorySaving === cat.id ? 'Guardando...' : 'Guardar' }}
+              </button>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px;">
+              <div class="form-group">
+                <label class="form-label">Nombre (español)</label>
+                <input type="text" [(ngModel)]="cat.name" class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nombre (inglés)</label>
+                <input type="text" [(ngModel)]="cat.name_en" class="form-input">
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Descripción (español)</label>
+                <textarea [(ngModel)]="cat.description" class="form-input" style="min-height:60px;"></textarea>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Descripción (inglés)</label>
+                <textarea [(ngModel)]="cat.description_en" class="form-input" style="min-height:60px;"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ideal para (español)</label>
+                <input type="text" [(ngModel)]="cat.ideal" class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ideal para (inglés)</label>
+                <input type="text" [(ngModel)]="cat.ideal_en" class="form-input">
+              </div>
+            </div>
+            <div *ngIf="categorySaved === cat.id" style="color:#10B981; font-size:0.8rem; font-weight:600; margin-top:8px;">¡Guardado correctamente!</div>
+          </div>
+        </div>
+
         <!-- AJUSTES -->
         <div *ngIf="activeTab==='ajustes'">
           <div class="card" style="max-width: 600px;">
@@ -501,7 +619,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   imageUploading = false;
   showForm = false;
 
-  activeTab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'stock' | 'ajustes' = 'dashboard';
+  activeTab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'stock' | 'ajustes' | 'categorias' = 'dashboard';
   inventoryFilter: 'all' | 'low' | 'out' = 'all';
 
   selectedInvoice: File | null = null;
@@ -514,6 +632,10 @@ export class AdminComponent implements OnInit, AfterViewInit {
   posError = '';
   posItems: any[] = [];
   posImportSuccessMsg = '';
+
+  categories: Category[] = [];
+  categorySaving: number | null = null;
+  categorySaved: number | null = null;
 
   salesReport: SalesReport | null = null;
   salesLoading = false;
@@ -548,8 +670,9 @@ export class AdminComponent implements OnInit, AfterViewInit {
     setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 50);
   }
 
-  setTab(tab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'stock' | 'ajustes') {
+  setTab(tab: 'dashboard' | 'ventas' | 'inventario' | 'pos' | 'stock' | 'ajustes' | 'categorias') {
     this.activeTab = tab;
+    if (tab === 'categorias' && !this.categories.length) this.loadCategories();
     this.cdr.detectChanges();
     this.renderIcons();
   }
@@ -561,9 +684,38 @@ export class AdminComponent implements OnInit, AfterViewInit {
       'stock': 'Stock',
       'ventas': 'Ventas & Ganancias',
       'pos': 'Importar POS',
+      'categorias': 'Categorías',
       'ajustes': 'Ajustes'
     };
     return titles[this.activeTab];
+  }
+
+  loadCategories() {
+    this.plantService.getCategories(this.clientSlug).subscribe({
+      next: cats => { this.categories = cats; this.cdr.detectChanges(); this.renderIcons(); },
+      error: err => console.error('Error cargando categorías:', err)
+    });
+  }
+
+  saveCategory(cat: Category) {
+    this.categorySaving = cat.id;
+    this.plantService.updateCategory(this.clientSlug, cat.id, {
+      name: cat.name,
+      name_en: cat.name_en,
+      description: cat.description,
+      description_en: cat.description_en,
+      ideal: cat.ideal,
+      ideal_en: cat.ideal_en,
+      icon: cat.icon
+    }).subscribe({
+      next: () => {
+        this.categorySaving = null;
+        this.categorySaved = cat.id;
+        this.cdr.detectChanges();
+        setTimeout(() => { this.categorySaved = null; this.cdr.detectChanges(); }, 3000);
+      },
+      error: err => { console.error(err); this.categorySaving = null; this.cdr.detectChanges(); }
+    });
   }
 
   goToInventory(filter: 'all' | 'low' | 'out') {

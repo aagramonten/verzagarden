@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { PlantService, Client, Plant } from '../services/plant.service';
+import { PlantService, Client, Plant, Category } from '../services/plant.service';
 
 declare const lucide: any;
 
@@ -378,9 +378,9 @@ const CATEGORIES_ES = [
       <div class="cat-grid">
         <div *ngFor="let cat of PLANT_CATS" class="cat-card" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
           <span class="cat-emoji"><i [attr.data-lucide]="cat.icon" style="width:22px;height:22px;"></i></span>
-          <div class="cat-name">{{ isEnglish ? cat.nameEn : cat.name }}</div>
-          <div class="cat-desc">{{ isEnglish ? cat.descEn : cat.desc }}</div>
-          <div class="cat-ideal">{{ t.catIdeal }} {{ isEnglish ? cat.idealEn : cat.ideal }}</div>
+          <div class="cat-name">{{ isEnglish ? cat.name_en : cat.name }}</div>
+          <div class="cat-desc">{{ isEnglish ? cat.description_en : cat.description }}</div>
+          <div class="cat-ideal">{{ t.catIdeal }} {{ isEnglish ? cat.ideal_en : cat.ideal }}</div>
           <button class="cat-btn" (click)="$event.stopPropagation(); setCategory(cat.name)">{{ t.viewPlants }}</button>
         </div>
       </div>
@@ -388,9 +388,9 @@ const CATEGORIES_ES = [
       <div class="cat-grid" style="margin-bottom:24px;">
         <div *ngFor="let cat of PRODUCT_CATS" class="cat-card" [class.active]="selectedCategory === cat.name" (click)="setCategory(cat.name)">
           <span class="cat-emoji"><i [attr.data-lucide]="cat.icon" style="width:22px;height:22px;"></i></span>
-          <div class="cat-name">{{ isEnglish ? cat.nameEn : cat.name }}</div>
-          <div class="cat-desc">{{ isEnglish ? cat.descEn : cat.desc }}</div>
-          <div class="cat-ideal" style="color:#c87830;">{{ t.catIdeal }} {{ isEnglish ? cat.idealEn : cat.ideal }}</div>
+          <div class="cat-name">{{ isEnglish ? cat.name_en : cat.name }}</div>
+          <div class="cat-desc">{{ isEnglish ? cat.description_en : cat.description }}</div>
+          <div class="cat-ideal" style="color:#c87830;">{{ t.catIdeal }} {{ isEnglish ? cat.ideal_en : cat.ideal }}</div>
           <button class="cat-btn" (click)="$event.stopPropagation(); setCategory(cat.name)">{{ t.viewPlants }}</button>
         </div>
       </div>
@@ -529,9 +529,10 @@ const CATEGORIES_ES = [
   `
 })
 export class CatalogComponent implements OnInit, AfterViewInit {
-  readonly CATEGORIES = CATEGORIES_ES;
-  readonly PLANT_CATS = CATEGORIES_ES.filter(c => c.group === 'plants');
-  readonly PRODUCT_CATS = CATEGORIES_ES.filter(c => c.group === 'products');
+  // Categorías cargadas dinámicamente desde el backend
+  categories: Category[] = [];
+  get PLANT_CATS(): Category[] { return this.categories.filter(c => c.group_type === 'plants'); }
+  get PRODUCT_CATS(): Category[] { return this.categories.filter(c => c.group_type === 'products'); }
 
   isEnglish = false;
   clientSlug = 'demo-garden';
@@ -599,6 +600,10 @@ export class CatalogComponent implements OnInit, AfterViewInit {
       next: client => { this.client = { ...client }; this.cdr.detectChanges(); },
       error: err => console.error(err)
     });
+    this.plantService.getCategories(this.clientSlug).subscribe({
+      next: cats => { this.categories = cats; this.cdr.detectChanges(); this.renderIcons(); },
+      error: err => console.error('Error cargando categorías:', err)
+    });
   }
 
   openDetail(plant: Plant) {
@@ -644,13 +649,14 @@ export class CatalogComponent implements OnInit, AfterViewInit {
     setTimeout(() => this.renderIcons(), 50);
   }
 
-  getFilterLabel(cat: typeof CATEGORIES_ES[0]): string {
+  getFilterLabel(cat: Category): string {
     if (this.isEnglish) {
-      if (cat.nameEn === 'Seasonal Flowers') return 'Flowers';
-      if (cat.nameEn === 'Indoor Plants') return 'Indoor';
-      if (cat.nameEn === 'Pots & Planters') return 'Pots';
-      if (cat.nameEn === 'Soil & Substrates') return 'Soil';
-      return cat.nameEn;
+      const en = cat.name_en || cat.name;
+      if (en === 'Seasonal Flowers') return 'Flowers';
+      if (en === 'Indoor Plants') return 'Indoor';
+      if (en === 'Pots & Planters') return 'Pots';
+      if (en === 'Soil & Substrates') return 'Soil';
+      return en;
     }
     if (cat.name === 'Plantas de interior') return 'Interior';
     if (cat.name === 'Flores de estación') return 'Flores';
@@ -661,13 +667,13 @@ export class CatalogComponent implements OnInit, AfterViewInit {
   }
 
   getCatIcon(name: string): string {
-    return CATEGORIES_ES.find(c => c.name === name)?.icon || 'leaf';
+    return this.categories.find(c => c.name === name)?.icon || 'leaf';
   }
 
   getActiveCatName(): string {
-    const cat = CATEGORIES_ES.find(c => c.name === this.selectedCategory);
+    const cat = this.categories.find(c => c.name === this.selectedCategory);
     if (!cat) return this.selectedCategory;
-    return this.isEnglish ? cat.nameEn : cat.name;
+    return this.isEnglish ? (cat.name_en || cat.name) : cat.name;
   }
 
   orderPlant(plant: Plant) {
