@@ -293,8 +293,8 @@ declare const lucide: any;
           </div>
 
           <div class="card" style="margin-bottom:30px; background:linear-gradient(to right, #0A5C36, #10B981); color:white; border:none;">
-            <h3 style="margin:0 0 8px; display:flex; align-items:center; gap:8px;"><i data-lucide="sparkles"></i> Actualizar con Factura (IA)</h3>
-            <p style="font-size:0.9rem; opacity:0.9; margin-bottom:16px;">Sube la factura de tu proveedor y la Inteligencia Artificial actualizará cantidades y costos automáticamente.</p>
+            <h3 style="margin:0 0 8px; display:flex; align-items:center; gap:8px;"><i data-lucide="sparkles"></i> Actualizar con Factura</h3>
+            <p style="font-size:0.9rem; opacity:0.9; margin-bottom:16px;">Sube la factura de tu proveedor para actualizar cantidades y costos automáticamente.</p>
             <div style="display:flex; gap:16px; align-items:center;">
               <label class="btn-outline" style="background:rgba(255,255,255,0.2); border:none; color:white;">
                 <i data-lucide="upload"></i> Subir PDF/Imagen
@@ -592,7 +592,6 @@ export class AdminComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // ✅ Método helper para evitar .map() directo en template (causa error en algunos builds)
   getOutOfStockNames(): string {
     return this.outOfStockPlants.map(p => p.name).join(', ');
   }
@@ -833,8 +832,8 @@ export class AdminComponent implements OnInit, AfterViewInit {
     this.editingId = plant.id;
     this.plantForm = { ...plant };
     this.showForm = true;
-    this.activeTab = 'inventario'; // ✅ asegura que estás en la tab correcta
-    this.cdr.detectChanges();      // ✅ fuerza render inmediato
+    this.activeTab = 'inventario';
+    this.cdr.detectChanges();
     setTimeout(() => {
       document.querySelector('.main')?.scrollTo({ top: 0, behavior: 'smooth' });
       this.renderIcons();

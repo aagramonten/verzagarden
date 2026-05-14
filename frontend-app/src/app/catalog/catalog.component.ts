@@ -157,9 +157,9 @@ const CATEGORIES_ES = [
     .cat-select-wrapper { position: relative; width: 100%; }
     .cat-select { width: 100%; appearance: none; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 40px 12px 16px; font-size: 14px; color: var(--text); font-weight: 600; outline: none; cursor: pointer; transition: border-color 0.2s; }
     .cat-select:focus { border-color: var(--primary); background: white; }
-    .cat-select-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--muted); }
     .cat-select optgroup { font-weight: bold; color: var(--primary); }
     .cat-select option { color: var(--text); font-weight: normal; }
+    .cat-select-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--muted); }
 
     /* SECTIONS */
     .section { padding: 24px 20px 0; max-width: 1200px; margin: 0 auto; }
@@ -186,21 +186,24 @@ const CATEGORIES_ES = [
     .cat-btn { margin-top: 8px; background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 4px 10px; font-size: 9px; font-weight: 600; cursor: pointer; }
     .cat-card.active .cat-btn { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); color: white; }
 
-    /* PLANT GRID */
+    /* PLANT GRID — imágenes más grandes */
     .plant-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 24px; }
     @media (min-width: 768px) { .plant-grid { grid-template-columns: repeat(3, 1fr); } }
-    .pcard { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
-    .pcard-img { background: linear-gradient(160deg, var(--primary), var(--primary-hover)); height: 120px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-    .pcard-img img { width: 100%; height: 100%; object-fit: cover; }
+    .pcard { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; display: flex; flex-direction: column; }
+    .pcard:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.10); }
+    .pcard-img { background: linear-gradient(160deg, var(--primary), var(--primary-hover)); height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    @media (max-width: 600px) { .pcard-img { height: 160px; } }
+    .pcard-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .pcard:hover .pcard-img img { transform: scale(1.04); }
     .pcard-img-fallback { color: white; opacity: 0.5; }
     .stock-badge { position: absolute; top: 8px; right: 8px; border-radius: 8px; padding: 3px 7px; font-size: 9px; font-weight: 600; }
     .stock-badge.ok { background: var(--primary); color: white; }
     .stock-badge.low { background: #c87830; color: white; }
     .stock-badge.out { background: #888; color: white; }
-    .pcard-body { padding: 12px; }
+    .pcard-body { padding: 12px; display: flex; flex-direction: column; flex: 1; }
     .pcard-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-    .pcard-desc { font-size: 10px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
-    .pcard-foot { display: flex; justify-content: space-between; align-items: center; }
+    .pcard-desc { font-size: 10px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+    .pcard-foot { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
     .pcard-price { font-size: 16px; font-weight: 700; color: var(--text); }
     .pcard-btn { background: var(--primary); color: white; border: none; border-radius: 9px; padding: 7px 12px; font-size: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
     .pcard-btn.out { background: var(--border); color: var(--muted); cursor: default; }
@@ -225,7 +228,7 @@ const CATEGORIES_ES = [
     .footer-wa { background: var(--primary); color: white; border: none; border-radius: 12px; padding: 12px; width: 100%; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 14px; }
     .footer-copy { font-size: 10px; color: var(--muted); text-align: center; }
 
-    /* MODAL */
+    /* LOGIN MODAL */
     .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
     .modal { background: #FFFFFF; border-radius: 24px; padding: 32px; width: 100%; max-width: 380px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
     .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
@@ -240,8 +243,34 @@ const CATEGORIES_ES = [
     .modal-btn { background: #14452F; color: white; border: none; border-radius: 12px; padding: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s; }
     .modal-btn:hover { background: #0A2E1F; }
     .modal-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    /* PRODUCT DETAIL MODAL */
+    .detail-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
+    @media (min-width: 600px) { .detail-modal-bg { align-items: center; } }
+    .detail-modal { background: white; border-radius: 24px 24px 0 0; width: 100%; max-width: 500px; max-height: 92vh; overflow-y: auto; box-shadow: 0 -8px 40px rgba(0,0,0,0.2); animation: slideUp 0.25s ease; }
+    @media (min-width: 600px) { .detail-modal { border-radius: 24px; max-height: 85vh; } }
+    @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .detail-img { width: 100%; height: 300px; object-fit: cover; display: block; }
+    @media (max-width: 600px) { .detail-img { height: 240px; } }
+    .detail-img-fallback { width: 100%; height: 300px; background: linear-gradient(160deg, var(--primary), var(--primary-hover)); display: flex; align-items: center; justify-content: center; color: white; opacity: 0.6; }
+    .detail-close { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.45); border: none; border-radius: 50%; width: 36px; height: 36px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 10; }
+    .detail-img-wrap { position: relative; }
+    .detail-stock-badge { position: absolute; top: 12px; left: 12px; border-radius: 10px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
+    .detail-stock-badge.ok { background: var(--primary); color: white; }
+    .detail-stock-badge.low { background: #c87830; color: white; }
+    .detail-stock-badge.out { background: #888; color: white; }
+    .detail-body { padding: 20px 20px 28px; }
+    .detail-cat { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; }
+    .detail-name { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 10px; line-height: 1.2; }
+    .detail-desc { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+    .detail-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .detail-tag { background: var(--hero); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    .detail-price-row { display: flex; justify-content: space-between; align-items: center; }
+    .detail-price { font-size: 28px; font-weight: 800; color: var(--text); }
+    .detail-wa-btn { background: var(--primary); color: white; border: none; border-radius: 14px; padding: 14px 24px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .detail-wa-btn.out { background: var(--border); color: var(--muted); cursor: default; }
+
     .loading-state { display:flex; align-items:center; justify-content:center; gap:8px; padding: 40px; color: var(--muted); font-size: 14px; }
-    
     @keyframes spin { 100% { transform: rotate(360deg); } }
     .spin { animation: spin 1s linear infinite; }
   `],
@@ -298,7 +327,6 @@ const CATEGORIES_ES = [
     </section>
 
     <div class="search-wrap">
-      
       <div class="search-container">
         <div class="search-box">
           <i data-lucide="search" style="width:18px;height:18px;color:#6F786E;"></i>
@@ -308,12 +336,10 @@ const CATEGORIES_ES = [
             (focus)="searchFocused = true" 
             (blur)="onSearchBlur()" 
             [placeholder]="t.search">
-          
           <button *ngIf="search" (click)="clearSearch()" style="background:none;border:none;color:#6F786E;cursor:pointer;display:flex;align-items:center;padding:4px;">
             <i data-lucide="x" style="width:18px;height:18px;"></i>
           </button>
         </div>
-
         <div class="search-results" *ngIf="search && searchFocused && filteredPlants.length > 0">
           <div *ngFor="let p of filteredPlants | slice:0:6" class="search-item" (mousedown)="selectSearchResult(p)">
             <img *ngIf="p.image_url" [src]="p.image_url" class="search-item-img">
@@ -328,7 +354,6 @@ const CATEGORIES_ES = [
           </div>
         </div>
       </div>
-
       <div class="cat-select-wrapper">
         <select [(ngModel)]="selectedCategory" (change)="setCategory(selectedCategory)" class="cat-select">
           <option value="Todas">{{ t.all }}</option>
@@ -341,7 +366,6 @@ const CATEGORIES_ES = [
         </select>
         <i data-lucide="chevron-down" class="cat-select-icon" style="width:18px;height:18px;"></i>
       </div>
-      
     </div>
 
     <div class="section">
@@ -390,7 +414,7 @@ const CATEGORIES_ES = [
         <i data-lucide="loader-2" class="spin" style="width:20px;height:20px;"></i> {{ t.loading }}
       </div>
       <div *ngIf="!loading && filteredPlants.length > 0" class="plant-grid">
-        <div *ngFor="let p of filteredPlants" class="pcard">
+        <div *ngFor="let p of filteredPlants" class="pcard" (click)="openDetail(p)">
           <div class="pcard-img">
             <img *ngIf="p.image_url" [src]="p.image_url" [alt]="p.name">
             <span *ngIf="!p.image_url" class="pcard-img-fallback"><i data-lucide="sprout" style="width:40px;height:40px;"></i></span>
@@ -407,7 +431,7 @@ const CATEGORIES_ES = [
             </div>
             <div class="pcard-foot">
               <div class="pcard-price">\${{ p.price.toFixed(2) }}</div>
-              <button class="pcard-btn" [class.out]="p.stock === 0" (click)="orderPlant(p)" [disabled]="p.stock === 0">
+              <button class="pcard-btn" [class.out]="p.stock === 0" (click)="$event.stopPropagation(); orderPlant(p)" [disabled]="p.stock === 0">
                 <i data-lucide="message-circle" style="width:12px;height:12px;"></i> {{ p.stock === 0 ? t.outOfStock : t.order }}
               </button>
             </div>
@@ -449,6 +473,44 @@ const CATEGORIES_ES = [
 
   </div>
 
+  <!-- PRODUCT DETAIL MODAL -->
+  <div class="detail-modal-bg" *ngIf="selectedPlant" (click)="closeDetail()">
+    <div class="detail-modal" (click)="$event.stopPropagation()">
+      <div class="detail-img-wrap">
+        <img *ngIf="selectedPlant.image_url" [src]="selectedPlant.image_url" [alt]="selectedPlant.name" class="detail-img">
+        <div *ngIf="!selectedPlant.image_url" class="detail-img-fallback">
+          <i data-lucide="sprout" style="width:60px;height:60px;"></i>
+        </div>
+        <button class="detail-close" (click)="closeDetail()">✕</button>
+        <div class="detail-stock-badge" [class.ok]="selectedPlant.stock > 5" [class.low]="selectedPlant.stock > 0 && selectedPlant.stock <= 5" [class.out]="selectedPlant.stock === 0">
+          <span *ngIf="selectedPlant.stock > 0">{{ selectedPlant.stock }} {{ t.inStock }}</span>
+          <span *ngIf="selectedPlant.stock === 0">{{ t.outOfStock }}</span>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div class="detail-cat">{{ selectedPlant.category }}</div>
+        <div class="detail-name">{{ selectedPlant.name }}</div>
+        <div class="detail-desc" *ngIf="selectedPlant.description">{{ selectedPlant.description }}</div>
+        <div class="detail-tags">
+          <span *ngIf="selectedPlant.light" class="detail-tag">
+            <i data-lucide="sun" style="width:12px;height:12px;"></i> {{ selectedPlant.light }}
+          </span>
+          <span *ngIf="selectedPlant.water" class="detail-tag">
+            <i data-lucide="droplets" style="width:12px;height:12px;"></i> {{ selectedPlant.water }}
+          </span>
+        </div>
+        <div class="detail-price-row">
+          <div class="detail-price">\${{ selectedPlant.price.toFixed(2) }}</div>
+          <button class="detail-wa-btn" [class.out]="selectedPlant.stock === 0" (click)="orderPlant(selectedPlant)" [disabled]="selectedPlant.stock === 0">
+            <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
+            {{ selectedPlant.stock === 0 ? t.outOfStock : t.order }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIN MODAL -->
   <div class="modal-bg" *ngIf="showLoginModal" (click)="showLoginModal = false">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-head">
@@ -458,9 +520,7 @@ const CATEGORIES_ES = [
       <div class="modal-fields">
         <input class="modal-input" type="text" [placeholder]="t.username" [(ngModel)]="loginUsername">
         <input class="modal-input" type="password" [placeholder]="t.password" [(ngModel)]="loginPassword" (keyup.enter)="submitLogin()">
-        
         <div class="modal-error" *ngIf="loginError">{{ t.wrongCredentials }}</div>
-        
         <button class="modal-btn" (click)="submitLogin()" [disabled]="loginLoading">
           {{ loginLoading ? t.verifying : t.enter }}
         </button>
@@ -487,6 +547,9 @@ export class CatalogComponent implements OnInit, AfterViewInit {
   loginPassword = '';
   loginError = '';
   loginLoading = false;
+
+  // Detail modal
+  selectedPlant: Plant | null = null;
 
   get t() { return this.isEnglish ? T.en : T.es; }
 
@@ -539,6 +602,19 @@ export class CatalogComponent implements OnInit, AfterViewInit {
     });
   }
 
+  openDetail(plant: Plant) {
+    this.selectedPlant = plant;
+    this.cdr.detectChanges();
+    setTimeout(() => this.renderIcons(), 50);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeDetail() {
+    this.selectedPlant = null;
+    document.body.style.overflow = '';
+    this.cdr.detectChanges();
+  }
+
   setCategory(cat: string) {
     this.selectedCategory = cat;
     setTimeout(() => {
@@ -552,7 +628,6 @@ export class CatalogComponent implements OnInit, AfterViewInit {
   }
 
   onSearchBlur() {
-    // Le damos un retraso pequeñito para que alcance a registrar si el usuario hace click en un resultado
     setTimeout(() => { this.searchFocused = false; }, 200);
   }
 
@@ -598,24 +673,16 @@ export class CatalogComponent implements OnInit, AfterViewInit {
 
   orderPlant(plant: Plant) {
     const phone = this.client?.whatsapp_number || '19392360534';
-    
-    // Fallback de idioma si no hay custom template
     const defaultMsg = this.isEnglish
       ? "Hello! I'm interested in {planta} at {precio}. Is it available?"
       : "Hola! Me interesa {planta} a {precio}. ¿Está disponible?";
-      
-    // Leemos el settings del backend
     let template = (this.client as any)?.whatsapp_message || defaultMsg;
-    
-    // Reemplazamos tags dinámicos
     const priceStr = plant.price ? '$' + plant.price.toFixed(2) : (this.isEnglish ? 'TBD' : 'por confirmar');
     const catStr = plant.category || '';
-    
     const msg = template
       .replace(/{planta}/g, plant.name)
       .replace(/{precio}/g, priceStr)
       .replace(/{categoria}/g, catStr);
-
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   }
 
