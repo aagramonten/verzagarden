@@ -250,9 +250,8 @@ const CATEGORIES_ES = [
     .detail-modal { background: white; border-radius: 24px 24px 0 0; width: 100%; max-width: 500px; max-height: 92vh; overflow-y: auto; box-shadow: 0 -8px 40px rgba(0,0,0,0.2); animation: slideUp 0.25s ease; }
     @media (min-width: 600px) { .detail-modal { border-radius: 24px; max-height: 85vh; } }
     @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .detail-img { width: 100%; height: 300px; object-fit: cover; display: block; }
-    @media (max-width: 600px) { .detail-img { height: 240px; } }
-    .detail-img-fallback { width: 100%; height: 300px; background: linear-gradient(160deg, var(--primary), var(--primary-hover)); display: flex; align-items: center; justify-content: center; color: white; opacity: 0.6; }
+    .detail-img { width: 100%; max-height: 70vh; object-fit: contain; display: block; background: #f0f0eb; }
+    .detail-img-fallback { width: 100%; height: 260px; background: linear-gradient(160deg, var(--primary), var(--primary-hover)); display: flex; align-items: center; justify-content: center; color: white; opacity: 0.6; }
     .detail-close { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.45); border: none; border-radius: 50%; width: 36px; height: 36px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 10; }
     .detail-img-wrap { position: relative; }
     .detail-stock-badge { position: absolute; top: 12px; left: 12px; border-radius: 10px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
