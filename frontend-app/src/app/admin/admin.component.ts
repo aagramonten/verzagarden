@@ -205,7 +205,10 @@ declare const lucide: any;
                   <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
                 </button>
                 <div *ngIf="chartDropdownOpen" style="position:absolute; right:0; top:calc(100% + 6px); background:white; border:1px solid var(--border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.1); z-index:50; min-width:140px; overflow:hidden;">
-                  <div *ngFor="let p of salesPeriods" (click)="selectChartPeriod(p)" style="padding:10px 16px; font-size:0.85rem; cursor:pointer; font-weight:500;" [style.background]="selectedSalesPeriod === p.value ? '#ECFDF5' : 'white'" [style.color]="selectedSalesPeriod === p.value ? '#065F46' : 'var(--text-main)'" (mouseenter)="$event.target.style.background='#F9FAFB'" (mouseleave)="$event.target.style.background = selectedSalesPeriod === p.value ? '#ECFDF5' : 'white'">
+                  <div *ngFor="let p of salesPeriods" (click)="selectChartPeriod(p)"
+                    style="padding:10px 16px; font-size:0.85rem; cursor:pointer; font-weight:500; transition:background 0.15s;"
+                    [style.background]="selectedSalesPeriod === p.value ? '#ECFDF5' : 'white'"
+                    [style.color]="selectedSalesPeriod === p.value ? '#065F46' : 'var(--text-main)'">
                     {{ p.label }}
                   </div>
                 </div>
