@@ -1262,7 +1262,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     const vsWeek = weekAgo && weekAgo.revenue > 0 ? ((d.revenue - weekAgo.revenue) / weekAgo.revenue) * 100 : 0;
     const aov = d.units > 0 ? d.revenue / d.units : 0;
     // Build category breakdown from recent_imports for this day
-    const dayStr = d.day instanceof Date ? d.day.toISOString().split('T')[0] : String(d.day).split('T')[0];
+    const dayStr = String(d.day).split('T')[0].replace(' ', '-');
     const catMap = new Map<string, number>();
     if (this.salesReport?.recent_imports) {
       for (const row of this.salesReport.recent_imports) {
