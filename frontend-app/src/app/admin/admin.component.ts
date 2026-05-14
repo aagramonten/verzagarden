@@ -193,15 +193,40 @@ declare const lucide: any;
           </div>
 
           <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
-            <div class="card chart-box">
-              <div class="chart-head"><span class="chart-title">Ventas vs Ganancias (14 días)</span></div>
-              <div style="height: 250px; display:flex; align-items:flex-end; gap:8px; overflow-x:auto;">
-                 <div *ngFor="let d of salesReport?.chart_data" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;flex:1;min-width:40px;height:100%;">
-                    <div [style.height.px]="getBarPxRevenue(d.revenue)" style="width:100%;background:rgba(16,185,129,0.2);border-radius:6px 6px 0 0; position:relative;">
-                      <div [style.height.px]="getBarPxUnits(d.units)" style="position:absolute; bottom:0; width:100%; background:#10B981; border-radius:6px 6px 0 0;"></div>
-                    </div>
-                    <div style="font-size:0.65rem;color:var(--text-muted);">{{ formatChartDay(d.day) }}</div>
-                 </div>
+            <div class="card chart-box" style="position:relative;">
+              <div class="chart-head"><span class="chart-title">Ventas (14 días)</span></div>
+              <div style="position:relative;" (mouseleave)="chartTooltip = null">
+                <svg [attr.viewBox]="'0 0 600 200'" width="100%" height="200" style="overflow:visible;">
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#10B981" stop-opacity="0.3"/>
+                      <stop offset="100%" stop-color="#10B981" stop-opacity="0.02"/>
+                    </linearGradient>
+                  </defs>
+                  <path [attr.d]="getAreaPath()" fill="url(#areaGrad)"/>
+                  <path [attr.d]="getLinePath()" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+                  <circle *ngFor="let pt of getChartPoints(); let i = index"
+                    [attr.cx]="pt.x" [attr.cy]="pt.y" r="16" fill="transparent"
+                    style="cursor:pointer;"
+                    (mouseenter)="chartTooltip = {idx: i, x: pt.x, y: pt.y, d: salesReport!.chart_data[i]}">
+                  </circle>
+                  <circle *ngFor="let pt of getChartPoints()"
+                    [attr.cx]="pt.x" [attr.cy]="pt.y" r="4"
+                    fill="white" stroke="#10B981" stroke-width="2"/>
+                  <text *ngFor="let pt of getChartPoints(); let i = index"
+                    [attr.x]="pt.x" y="198" text-anchor="middle"
+                    style="font-size:9px;fill:#9CA3AF;">
+                    {{ formatChartDay(salesReport!.chart_data[i].day) }}
+                  </text>
+                </svg>
+                <div *ngIf="chartTooltip"
+                  style="position:absolute; background:white; border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:0.8rem; pointer-events:none; box-shadow:0 4px 12px rgba(0,0,0,0.1); min-width:150px; z-index:10;"
+                  [style.left.px]="chartTooltip.x > 400 ? chartTooltip.x - 170 : chartTooltip.x + 10"
+                  [style.top.px]="chartTooltip.y - 10">
+                  <div style="font-weight:700; color:var(--text-main); margin-bottom:4px;">{{ formatChartDay(chartTooltip.d.day) }}</div>
+                  <div style="color:#10B981; font-weight:600;">Ventas: \${{ chartTooltip.d.revenue | number:'1.0-0' }}</div>
+                  <div style="color:#6B7280;">Unidades: {{ chartTooltip.d.units }}</div>
+                </div>
               </div>
             </div>
             <div class="card chart-box">
@@ -1127,7 +1152,8 @@ export class AdminComponent implements OnInit, AfterViewInit {
   getLinePath(): string {
     const pts = this.getChartPoints();
     if (!pts.length) return '';
-    if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+    // Con un solo punto dibujamos una línea horizontal
+    if (pts.length === 1) return `M 30 ${pts[0].y} L 570 ${pts[0].y}`;
     let d = `M ${pts[0].x} ${pts[0].y}`;
     for (let i = 1; i < pts.length; i++) {
       const cp1x = (pts[i - 1].x + pts[i].x) / 2;
@@ -1139,6 +1165,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   getAreaPath(): string {
     const pts = this.getChartPoints();
     if (!pts.length) return '';
+    if (pts.length === 1) return `M 30 ${pts[0].y} L 570 ${pts[0].y} L 570 175 L 30 175 Z`;
     const line = this.getLinePath();
     return `${line} L ${pts[pts.length - 1].x} 175 L ${pts[0].x} 175 Z`;
   }
