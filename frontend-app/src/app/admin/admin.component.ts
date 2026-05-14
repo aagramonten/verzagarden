@@ -283,14 +283,7 @@ declare const lucide: any;
                   <span *ngIf="getTrend() === 0" style="color:var(--text-muted);">⚪ Sin cambio vs quincena pasada</span>
                 </div>
               </div>
-              <!-- Promedio por compra -->
-              <div class="card" style="padding:16px 20px;">
-                <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Promedio por compra</div>
-                <div style="font-size:1.5rem; font-weight:800; color:var(--text-main);">
-                  \${{ getAvgTicket() | number:'1.0-0' }}
-                  <span style="font-size:0.8rem; font-weight:400; color:var(--text-muted);"> por pedido</span>
-                </div>
-              </div>
+
               <!-- Lo más vendido -->
               <div class="card" style="padding:16px 20px;">
                 <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Lo más vendido</div>
@@ -1252,12 +1245,6 @@ export class AdminComponent implements OnInit, AfterViewInit {
     const older  = data.slice(0, half).reduce((s: number, d: any) => s + d.revenue, 0);
     if (older === 0) return 0;
     return Math.round(((recent - older) / older) * 100);
-  }
-
-  getAvgTicket(): number {
-    const s = this.salesReport?.summary;
-    if (!s || !s.total_transactions || s.total_transactions === 0) return 0;
-    return s.total_revenue / s.total_transactions;
   }
 
   getTopProduct(): string {
