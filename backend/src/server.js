@@ -706,7 +706,7 @@ app.get('/api/clients/:slug/sales-report', async (req, res) => {
       WHERE h.client_id = ? ${dateFilter}
       GROUP BY h.matched_plant_id, p.name, p.category, p.image_url
       ORDER BY units_sold DESC
-      LIMIT 8
+      LIMIT 10
     `, [clientId]);
 
     const [chartData] = await pool.query(`

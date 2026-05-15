@@ -159,6 +159,7 @@ declare const lucide: any;
           </div>
         </header>
 
+        <!-- DASHBOARD -->
         <div *ngIf="activeTab==='dashboard'">
           <div class="metrics-grid">
             <div class="card" (click)="setTab('ventas')" style="cursor:pointer;">
@@ -191,6 +192,7 @@ declare const lucide: any;
             </div>
           </div>
 
+          <!-- FILA 1: Gráfica full-width -->
           <div class="card" style="margin-bottom:20px; position:relative;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
               <div>
@@ -245,6 +247,7 @@ declare const lucide: any;
                 </text>
               </svg>
 
+              <!-- Tooltip minimalista -->
               <div *ngIf="chartTooltip"
                 style="position:absolute; background:white; border:1px solid var(--border); border-radius:12px; padding:14px 16px; pointer-events:none; box-shadow:0 6px 20px rgba(0,0,0,0.10); min-width:200px; z-index:20;"
                 [style.left.px]="chartTooltip.x > 450 ? chartTooltip.x - 220 : chartTooltip.x + 14"
@@ -266,17 +269,37 @@ declare const lucide: any;
             </div>
           </div>
 
+          <!-- FILA 2: Resumen izquierda + Dona derecha -->
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:30px;">
 
-            <div style="display:flex; flex-direction:column; gap:12px;">
-              <div class="card" style="padding:16px 20px;">
-                <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Lo más vendido</div>
-                <div style="font-size:1rem; font-weight:700; color:var(--text-main);">
-                  {{ getTopProduct() }}
+            <!-- Columna izquierda: Top 10 más vendidas -->
+            <div class="card" style="padding:0; overflow:hidden;">
+              <div style="padding:16px 20px; border-bottom:1px solid var(--border);">
+                <div style="font-size:1rem; font-weight:700; color:var(--text-main);">Top 10 más vendidas</div>
+              </div>
+              <div *ngIf="salesReport?.top_plants?.length">
+                <div *ngFor="let p of salesReport!.top_plants; let i = index"
+                  style="display:flex; align-items:center; gap:12px; padding:10px 20px; border-bottom:1px solid #F3F4F6;">
+                  <div style="width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; flex-shrink:0;"
+                    [style.background]="i < 3 ? '#ECFDF5' : '#F9FAFB'"
+                    [style.color]="i < 3 ? '#065F46' : 'var(--text-muted)'">
+                    {{ i + 1 }}
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:0.85rem; font-weight:600; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ p.name }}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">{{ p.units_sold }} uds.</div>
+                  </div>
+                  <div style="text-align:right; flex-shrink:0;">
+                    <div style="font-size:0.85rem; font-weight:700; color:#10B981;">${{ p.revenue | number:'1.0-0' }}</div>
+                  </div>
                 </div>
+              </div>
+              <div *ngIf="!salesReport?.top_plants?.length" style="padding:20px; text-align:center; color:var(--text-muted); font-size:0.85rem;">
+                Sin datos de ventas
               </div>
             </div>
 
+            <!-- Columna derecha: Dona -->
             <div class="card">
               <div style="font-size:1rem; font-weight:700; color:var(--text-main); margin-bottom:16px;">Distribución por Categoría</div>
               <div style="display:flex; justify-content:center; margin-top:8px;">
@@ -302,6 +325,7 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- INVENTARIO -->
         <div *ngIf="activeTab==='inventario'">
           <div *ngIf="showForm" class="card" style="margin-bottom:24px;">
             <h3 style="margin:0 0 20px; font-size:1.2rem;">{{ editingId ? 'Editar Producto' : 'Crear Nuevo Producto' }}</h3>
@@ -380,6 +404,7 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- STOCK -->
         <div *ngIf="activeTab==='stock'">
           <div class="metrics-grid">
              <div class="card" style="border-left: 5px solid #EF4444;">
@@ -476,6 +501,7 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- VENTAS -->
         <div *ngIf="activeTab==='ventas'">
           <div style="display:flex; gap:8px; margin-bottom:24px;">
             <button *ngFor="let p of salesPeriods" class="period-pill" [class.active]="selectedSalesPeriod===p.value" (click)="changeSalesPeriod(p.value)">{{ p.label }}</button>
@@ -513,6 +539,7 @@ declare const lucide: any;
               <thead><tr><th>Fecha</th><th>Productos</th><th>Unidades</th><th>Total</th><th>Ganancia</th><th></th></tr></thead>
               <tbody>
                 <ng-container *ngFor="let group of getGroupedTransactions()">
+                  <!-- Fila resumen por fecha -->
                   <tr (click)="toggleDateGroup(group.date)" style="cursor:pointer; background:#F9FAFB;">
                     <td style="font-weight:700; color:var(--text-main);">{{ group.date }}</td>
                     <td style="color:var(--text-muted);">{{ group.items.length }} productos</td>
@@ -523,6 +550,7 @@ declare const lucide: any;
                       <i [attr.data-lucide]="expandedDates.has(group.date) ? 'chevron-up' : 'chevron-down'" style="width:16px;height:16px;color:var(--text-muted);"></i>
                     </td>
                   </tr>
+                  <!-- Filas detalle expandibles -->
                   <ng-container *ngIf="expandedDates.has(group.date)">
                     <tr *ngFor="let item of group.items" style="background:#FAFFFE;">
                       <td style="color:var(--text-muted); padding-left:32px;">
@@ -542,6 +570,7 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- POS -->
         <div *ngIf="activeTab==='pos'">
           <div class="card" style="text-align:center; padding:60px 20px;">
             <i data-lucide="upload-cloud" style="width:64px; height:64px; color:#10B981; margin-bottom:20px;"></i>
@@ -585,6 +614,7 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- USUARIOS -->
         <div *ngIf="activeTab==='usuarios'">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <p style="font-size:0.9rem; color:var(--text-muted);">Gestiona los accesos de tu equipo. Cada rol tiene permisos distintos.</p>
@@ -593,6 +623,7 @@ declare const lucide: any;
             </button>
           </div>
 
+          <!-- Formulario crear/editar usuario -->
           <div *ngIf="showUserForm" class="card" style="margin-bottom:24px; border-left:4px solid #10B981;">
             <h3 style="margin:0 0 20px; font-size:1.1rem;">{{ editingUserId ? 'Editar usuario' : 'Nuevo usuario' }}</h3>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:16px;">
@@ -627,6 +658,7 @@ declare const lucide: any;
             </div>
           </div>
 
+          <!-- Tabla de usuarios -->
           <div class="table-container">
             <table>
               <thead>
@@ -671,6 +703,7 @@ declare const lucide: any;
             </table>
           </div>
 
+          <!-- Leyenda de roles -->
           <div class="card" style="margin-top:24px; background:#F9FAFB;">
             <h3 style="margin:0 0 16px; font-size:1rem;">Permisos por rol</h3>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:16px; font-size:0.85rem;">
@@ -720,6 +753,7 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- CATEGORÍAS -->
         <div *ngIf="activeTab==='categorias'">
           <div style="margin-bottom:20px;">
             <p style="font-size:0.9rem; color:var(--text-muted);">Edita el nombre, descripción e ideal de cada categoría. Los cambios se reflejan de inmediato en tu tienda pública.</p>
@@ -814,11 +848,13 @@ declare const lucide: any;
           </div>
         </div>
 
+        <!-- AJUSTES -->
         <div *ngIf="activeTab==='ajustes'">
           <div class="card" style="max-width: 600px;">
             <h3 style="margin:0 0 20px; display:flex; align-items:center; gap:8px;"><i data-lucide="message-circle" style="color:#10B981;"></i> Mensaje Predefinido de WhatsApp</h3>
             <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px;">Usa las variables para que el sistema las reemplace automáticamente por la información del producto.</p>
             
+            <!-- ✅ FIX: se usan entidades HTML para evitar error ICU de Angular con llaves { } -->
             <div style="display:flex; gap:8px; margin-bottom:16px;">
               <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar(VAR_PLANTA)">&#123;planta&#125;</button>
               <button class="btn-outline" style="padding:6px 12px; font-size:0.8rem;" (click)="insertVar(VAR_PRECIO)">&#123;precio&#125;</button>
@@ -1205,19 +1241,6 @@ export class AdminComponent implements OnInit, AfterViewInit {
       ticks.push({ y, value: v });
     }
     return ticks;
-  }
-
-  getTopProduct(): string {
-    const top = this.salesReport?.top_plants?.[0];
-    if (!top) return '—';
-    const emojis: Record<string, string> = {
-      'Palmas': '🌴', 'Árboles': '🌳', 'Arbustos': '🌿', 'Suculentas': '🌵',
-      'Trepadoras': '🍃', 'Flores de estación': '🌸', 'Plantas de interior': '🪴',
-      'Herramientas': '🪚', 'Fertilizantes y Abonos': '🧪', 'Tierra y Sustratos': '🪣',
-      'Tiestos y Macetas': '🏺',
-    };
-    const emoji = emojis[top.category] || '🌱';
-    return emoji + ' ' + top.name + ' (' + top.units_sold + ' uds.)';
   }
 
   selectChartPeriod(p: any) {
