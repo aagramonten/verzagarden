@@ -290,7 +290,7 @@ declare const lucide: any;
                     <div style="font-size:0.7rem; color:var(--text-muted);">{{ p.units_sold }} uds.</div>
                   </div>
                   <div style="text-align:right; flex-shrink:0;">
-                    <div style="font-size:0.85rem; font-weight:700; color:#10B981;">${{ p.revenue | number:'1.0-0' }}</div>
+                    <div style="font-size:0.85rem; font-weight:700; color:#10B981;">\${{ p.revenue | number:'1.0-0' }}</div>
                   </div>
                 </div>
               </div>
